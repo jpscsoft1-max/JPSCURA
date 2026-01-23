@@ -1,0 +1,520 @@
+﻿using ClosedXML.Excel;
+using System;
+using System.Drawing;
+using System.Linq;
+using System.Windows.Forms;
+
+namespace JPSCURA
+{
+    public partial class Home : Form
+    {
+        // ================= STATE =================
+        private Form activeForm = null;
+        private Button activeTopButton = null;
+
+
+        // ================= COLORS =================
+        private Color menuNormalColor = Color.Transparent;
+        private Color menuHoverColor = Color.FromArgb(90, 130, 255);   // hover (clear visible)
+        private Color menuActiveColor = Color.FromArgb(25, 45, 150);  // active (dark)
+
+        private Color menuTextNormal = Color.WhiteSmoke;
+        private Color menuTextActive = Color.White;
+        
+        // ================= INIT =================
+        public Home()
+        {
+            InitializeComponent();
+
+            this.Load += Home_Load;
+            this.Resize += (s, e) => CenterLogo();
+            this.FormClosing += Home_FormClosing;
+            this.DoubleBuffered = true;
+            panelContent.DoubleBuffered(true);
+            pnlLoading.DoubleBuffered(true);
+
+        }
+
+
+
+
+
+
+        public async Task RunWithLoadingAsync(Func<Task> work, int minDelayMs=2000)
+
+        {
+            // 1️⃣ SHOW LOADER IMMEDIATELY
+            pnlLoading.Visible = true;
+            pnlLoading.BringToFront();
+            DisableAllButtons();
+
+            // force one UI paint
+            await Task.Yield();
+
+            // 2️⃣ MINIMUM LOADER TIME
+            await Task.Delay(minDelayMs); // you can change to 5000 if needed
+
+            // 3️⃣ RUN UI WORK (ON UI THREAD)
+            if (work != null)
+                await work();
+
+            // 4️⃣ HIDE LOADER
+            pnlLoading.Visible = false;
+            EnableAllButtons();
+        }
+
+
+        private void FreezeUI()
+        {
+            this.SuspendLayout();
+            panelContent.SuspendLayout();
+        }
+
+        private void UnfreezeUI()
+        {
+            panelContent.ResumeLayout(true);
+            this.ResumeLayout(true);
+        }
+
+
+
+        private void DisableAllButtons()
+        {
+            foreach (Control c in panelTopMenu.Controls)
+            {
+                if (c is Button btn)
+                    btn.Enabled = false;
+            }
+
+            panelSubMenu.Enabled = false;
+            //panelContent.Enabled = false;
+        }
+
+        private void EnableAllButtons()
+        {
+            foreach (Control c in panelTopMenu.Controls)
+            {
+                if (c is Button btn)
+                    btn.Enabled = true;
+            }
+
+            panelSubMenu.Enabled = true;
+            panelContent.Enabled = true;
+        }
+
+        private void CenterLoaderBox()
+        {
+            pnlLoaderBox.Left =
+                (pnlLoading.ClientSize.Width - pnlLoaderBox.Width) / 2;
+
+            pnlLoaderBox.Top =
+                (pnlLoading.ClientSize.Height - pnlLoaderBox.Height) / 2;
+        }
+
+
+
+        private void Home_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            try
+            {
+                if (activeForm != null)
+                {
+                    activeForm.Close();
+                    activeForm.Dispose();
+                }
+            }
+            catch { }
+
+            Application.Exit();
+            Environment.Exit(0); // 🔥 ensures process is killed
+        }
+
+        //private void Home_Load(object sender, EventArgs e)
+        //{
+        //    // 🔥 ORIGINAL ORDER SAVE (ONLY ONCE)
+
+        //    HookTopMenuEvents();
+        //    SetActiveTopMenu(btnHome);
+        //    panelSubMenu.Visible = false; // 🔥 HIDE PANEL ON STARTUP
+        //    ShowHome();
+
+        //    // 🔒 Access control In LAST
+        //    this.BeginInvoke(new Action(() =>
+        //    {
+        //        ApplyButtonAccess();
+        //        // MessageBox.Show("FINAL ROLE = " + Session.Role); 
+        //    }));
+        //    SetLoggedInUserInfo();
+
+        //}
+        private async void Home_Load(object sender, EventArgs e)
+{
+    HookTopMenuEvents();
+    SetActiveTopMenu(btnHome);
+    panelSubMenu.Visible = false;
+    ShowHome();
+
+    ApplyButtonAccess();
+    SetLoggedInUserInfo();
+
+    await Task.Delay(50);   // wait one paint cycle
+    this.Opacity = 1;       // show smoothly
+}
+
+
+
+
+        // ================= MENU HOVER + ACTIVE =================
+        private void HookTopMenuEvents()
+        {
+            Button[] topButtons =
+            {
+                btnHome, btnDepartment, btnWorkorder, btnPurchasing,
+                btnSales1, btnInventory, btnFinance,
+                btnEmployees, btnCompanyinfo
+            };
+
+            foreach (Button btn in topButtons)
+            {
+                btn.MouseEnter += TopMenu_MouseEnter;
+                btn.MouseLeave += TopMenu_MouseLeave;
+            }
+        }
+
+        //Access using roles//
+
+        private void ApplyButtonAccess()
+        {
+            // ================= STORE =================
+            if (Session.Role == "STORE")
+            {
+                // 🔒 Hide all top buttons
+                foreach (Control c in panelTopMenu.Controls)
+                {
+                    if (c is Button btn)
+                        btn.Visible = false;
+                }
+
+                // 🔓 Show only Home + Inventory
+                btnHome.Visible = true;
+                btnInventory.Visible = true;
+
+                // 🔥 FORCE POSITION (THIS NEVER FAILS)
+                btnHome.Location = new Point(10, 0);
+                btnInventory.Location = new Point(
+                    btnHome.Right + 10,
+                    btnHome.Top
+                );
+
+                return;
+            }
+
+
+        }
+
+        private void SetLoggedInUserInfo()
+        {
+            // Safety check
+            if (string.IsNullOrWhiteSpace(Session.RealName))
+                return;
+
+            btnUserInfo.Text = "👤 " + Session.RealName;
+            btnUserInfo.TextAlign = ContentAlignment.MiddleCenter;
+            btnUserInfo.ImageAlign = ContentAlignment.MiddleLeft;
+
+            // Optional polish
+            btnUserInfo.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+        }
+        private void SetActiveTopMenu(Button btn)
+        {
+            if (activeTopButton != null)
+            {
+                activeTopButton.BackColor = menuNormalColor;
+                activeTopButton.ForeColor = menuTextNormal;
+                activeTopButton.Font = new Font(activeTopButton.Font, FontStyle.Regular);
+            }
+
+            activeTopButton = btn;
+            activeTopButton.BackColor = menuActiveColor;
+            activeTopButton.ForeColor = menuTextActive;
+            activeTopButton.Font = new Font(activeTopButton.Font, FontStyle.Bold);
+        }
+
+        private void TopMenu_MouseEnter(object sender, EventArgs e)
+        {
+            Button btn = sender as Button;
+            if (btn != activeTopButton)
+            {
+                btn.BackColor = menuHoverColor;
+                btn.ForeColor = Color.White;
+            }
+        }
+
+        private void TopMenu_MouseLeave(object sender, EventArgs e)
+        {
+            Button btn = sender as Button;
+            if (btn != activeTopButton)
+            {
+                btn.BackColor = menuNormalColor;
+                btn.ForeColor = menuTextNormal;
+            }
+        }
+
+        // ================= HOME =================
+        private void ShowHome()
+        {
+            if (activeForm != null)
+            {
+                activeForm.Close();
+                activeForm = null;
+            }
+
+            RemoveOnlyChildForms();
+
+            picJPSCURA.Visible = true;
+            picJPSCURA.BringToFront();
+            CenterLogo();
+        }
+
+        private void RemoveOnlyChildForms()
+        {
+            for (int i = panelContent.Controls.Count - 1; i >= 0; i--)
+            {
+                Control c = panelContent.Controls[i];
+                if (c is Form)
+                {
+                    c.Dispose();
+                    panelContent.Controls.Remove(c);
+                }
+            }
+        }
+
+        // OPEN FORM 
+        private async Task OpenFormInPanelAsync(Form childForm)
+        {
+            picJPSCURA.Visible = false;
+            RemoveOnlyChildForms();
+
+            childForm.TopLevel = false;
+            childForm.FormBorderStyle = FormBorderStyle.None;
+            childForm.Dock = DockStyle.Fill;
+
+            panelContent.Controls.Add(childForm);
+            childForm.Show();
+
+            await Task.Yield();
+        }
+
+
+
+
+
+
+
+
+
+
+        // ================= CENTER LOGO =================
+        private void CenterLogo()
+        {
+            if (!picJPSCURA.Visible) return;
+
+            picJPSCURA.Left = (panelContent.Width - picJPSCURA.Width) / 2;
+            picJPSCURA.Top = (panelContent.Height - picJPSCURA.Height) / 2;
+        }
+
+        // ================= TOP MENU CLICKS =================
+        private void btnHome_Click(object sender, EventArgs e)
+        {
+            SetActiveTopMenu(btnHome);
+            panelSubMenu.Controls.Clear();
+            panelSubMenu.Visible = false; // 🔥 HIDE PANEL ON HOME
+            ShowHome();
+        }
+
+        private void btnDepartment_Click(object sender, EventArgs e)
+        {
+            SetActiveTopMenu(btnDepartment);
+            panelSubMenu.Controls.Clear();
+            panelDeptsubmenu.Visible = true;
+            panelSubMenu.Visible = true; // 🔥 SHOW PANEL
+            panelSubMenu.Controls.Add(panelDeptsubmenu);
+            ShowHome();
+        }
+
+        private void btnWorkorder_Click(object sender, EventArgs e)
+        {
+            SetActiveTopMenu(btnWorkorder);
+            panelSubMenu.Controls.Clear();
+            panelWorkOrderSubMenu.Visible = true;
+            panelSubMenu.Visible = true; // 🔥 SHOW PANEL
+            panelSubMenu.Controls.Add(panelWorkOrderSubMenu);
+            ShowHome();
+        }
+
+        private void btnPurchasing_Click(object sender, EventArgs e)
+        {
+            SetActiveTopMenu(btnPurchasing);
+            panelSubMenu.Controls.Clear();
+            panelPurchasingSubMenu.Visible = true;
+            panelSubMenu.Visible = true; // 🔥 SHOW PANEL
+            panelSubMenu.Controls.Add(panelPurchasingSubMenu);
+            ShowHome();
+        }
+
+        private void btnSales1_Click(object sender, EventArgs e)
+        {
+            SetActiveTopMenu(btnSales1);
+            panelSubMenu.Controls.Clear();
+            panelSalesSubMenu.Visible = true;
+            panelSubMenu.Visible = true; // 🔥 SHOW PANEL
+            panelSubMenu.Controls.Add(panelSalesSubMenu);
+            ShowHome();
+        }
+
+        private void btnInventory_Click(object sender, EventArgs e)
+        {
+            SetActiveTopMenu(btnInventory);
+            panelSubMenu.Controls.Clear();
+            panelInventorySubMenu.Visible = true;
+            panelSubMenu.Visible = true; // 🔥 SHOW PANEL
+            panelSubMenu.Controls.Add(panelInventorySubMenu);
+            ShowHome();
+        }
+
+        private void btnFinance_Click(object sender, EventArgs e)
+        {
+            SetActiveTopMenu(btnFinance);
+            panelSubMenu.Controls.Clear();
+            panelFinanceSubMenu.Visible = true;
+            panelSubMenu.Visible = true; // 🔥 SHOW PANEL
+            panelSubMenu.Controls.Add(panelFinanceSubMenu);
+            ShowHome();
+        }
+        private void btnEmployees_Click(object sender, EventArgs e)
+        {
+            SetActiveTopMenu(btnEmployees);
+            panelSubMenu.Controls.Clear();
+            panelEMPSubMenu.Visible = true;
+            panelSubMenu.Visible = true; // 🔥 SHOW PANEL
+            panelSubMenu.Controls.Add(panelEMPSubMenu);
+            ShowHome();
+        }
+
+        // ================= SUB MENU FORMS =================
+        private async void btnAddorder_Click(object sender, EventArgs e)
+        {
+           await OpenFormInPanelAsync(new AddOrderForm());
+            //await ShowLoadingAsync();
+            //HideLoading();
+        }
+
+        private async void btnAddorderIcon_Click(object sender, EventArgs e)
+        {
+            await OpenFormInPanelAsync(new AddOrderForm());
+            //await ShowLoadingAsync();
+            //HideLoading();
+        }
+
+        private async void btnVendors_Click(object sender, EventArgs e)
+        {
+            await OpenFormInPanelAsync(new Vendors());
+            //await ShowLoadingAsync();
+            //HideLoading();
+        }
+
+        private async void btnVendoricon_Click(object sender, EventArgs e)
+        {
+            await OpenFormInPanelAsync(new Vendors());
+            //await ShowLoadingAsync();
+            //HideLoading();
+        }
+
+        private async void btnCustomers_Click(object sender, EventArgs e)
+        {
+            await OpenFormInPanelAsync(new Customer());
+            //await ShowLoadingAsync();
+            //HideLoading();
+        }
+
+        private async void btnCustomericon_Click(object sender, EventArgs e)
+        {
+            await OpenFormInPanelAsync(new Customer());
+            //await ShowLoadingAsync();
+            //HideLoading();
+        }
+
+        private async void btnAddMaterial_Click(object sender, EventArgs e)
+        {
+            await RunWithLoadingAsync(async () =>
+            {
+                // 🔥 DB + FORM LOAD happens HERE
+                await OpenFormInPanelAsync(new Material());
+            });
+        }
+
+        private async void btnAddMaterialIcon_Click(object sender, EventArgs e)
+        {
+            await RunWithLoadingAsync(async () =>
+            {
+                // 🔥 DB + FORM LOAD happens HERE
+                await OpenFormInPanelAsync(new Material());
+            });
+        }
+
+
+
+        private void btnLogindetails_Click(object sender, EventArgs e)
+        {
+            panelSubMenu.Controls.Clear();
+            panelSubMenu.Visible = false; // 🔥 HIDE PANEL
+            SetActiveTopMenu(btnLogindetails);
+            ShowHome(); // 🔥 CLEAR CONTENT
+        }
+
+        private void btnCompanyinfo_Click(object sender, EventArgs e)
+        {
+            panelSubMenu.Controls.Clear();
+            panelSubMenu.Visible = false; // 🔥 HIDE PANEL
+            SetActiveTopMenu(btnCompanyinfo);
+            ShowHome(); // 🔥 CLEAR CONTENT
+        }
+
+        private async void btnAllMaterials_Click(object sender, EventArgs e)
+        {
+            await RunWithLoadingAsync(async () =>
+            {
+                // 🔥 DB + FORM LOAD happens HERE
+                await OpenFormInPanelAsync(new AllMaterial());
+            });
+        }
+
+        private async void btnAllMaterialIcon_Click(object sender, EventArgs e)
+        {
+            await RunWithLoadingAsync(async () =>
+            {
+                // 🔥 DB + FORM LOAD happens HERE
+                await OpenFormInPanelAsync(new AllMaterial());
+            });
+        }
+
+        private async void btnAddEmp_Click(object sender, EventArgs e)
+        {
+            await OpenFormInPanelAsync(new AddEmp());
+            //await ShowLoadingAsync();
+            //HideLoading();
+        }
+
+        private async void picEmp_Click(object sender, EventArgs e)
+        {
+            await OpenFormInPanelAsync(new AddEmp());
+            //await ShowLoadingAsync();
+            //HideLoading();
+        }
+
+        private void pnlLoading_Resize(object sender, EventArgs e)
+        {
+            CenterLoaderBox();
+        }
+    }
+}
