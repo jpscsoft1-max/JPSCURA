@@ -31,6 +31,10 @@
             panelContentEMP = new Panel();
             tableLayoutPanelEMP = new TableLayoutPanel();
             panelLeft = new Panel();
+            lblRole = new Label();
+            cmbRole = new ComboBox();
+            cmbDepartment = new ComboBox();
+            lblDepartment = new Label();
             txtaddress = new TextBox();
             lblAddress = new Label();
             txtEMP = new TextBox();
@@ -40,14 +44,16 @@
             txtAadhar = new TextBox();
             lblemail = new Label();
             lblEmpContact = new Label();
-            textBox5 = new TextBox();
+            txtEmail = new TextBox();
             txtContact = new TextBox();
             lblAadharCard = new Label();
             panelRight = new Panel();
+            lblBankAcc = new Label();
             txtEMPCode = new TextBox();
             label1 = new Label();
             txtAltContact = new TextBox();
-            cmbBloodGrp = new ComboBox();
+            txtBankAcc = new TextBox();
+            cmbBloodGroup = new ComboBox();
             lblEMPALTContact = new Label();
             lblBloodgrp = new Label();
             panelContentEMP.SuspendLayout();
@@ -88,6 +94,10 @@
             // 
             // panelLeft
             // 
+            panelLeft.Controls.Add(lblRole);
+            panelLeft.Controls.Add(cmbRole);
+            panelLeft.Controls.Add(cmbDepartment);
+            panelLeft.Controls.Add(lblDepartment);
             panelLeft.Controls.Add(txtaddress);
             panelLeft.Controls.Add(lblAddress);
             panelLeft.Controls.Add(txtEMP);
@@ -98,6 +108,54 @@
             panelLeft.Name = "panelLeft";
             panelLeft.Size = new Size(403, 616);
             panelLeft.TabIndex = 0;
+            // 
+            // lblRole
+            // 
+            lblRole.AutoSize = true;
+            lblRole.Font = new Font("Arial", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            lblRole.ForeColor = Color.White;
+            lblRole.Location = new Point(8, 136);
+            lblRole.Margin = new Padding(2, 0, 2, 0);
+            lblRole.Name = "lblRole";
+            lblRole.Size = new Size(48, 18);
+            lblRole.TabIndex = 15;
+            lblRole.Text = "Role :";
+            lblRole.TextAlign = ContentAlignment.MiddleLeft;
+            // 
+            // cmbRole
+            // 
+            cmbRole.Cursor = Cursors.Hand;
+            cmbRole.DropDownStyle = ComboBoxStyle.DropDownList;
+            cmbRole.FormattingEnabled = true;
+            cmbRole.Location = new Point(155, 136);
+            cmbRole.Margin = new Padding(3, 2, 3, 2);
+            cmbRole.Name = "cmbRole";
+            cmbRole.Size = new Size(245, 23);
+            cmbRole.TabIndex = 14;
+            // 
+            // cmbDepartment
+            // 
+            cmbDepartment.Cursor = Cursors.Hand;
+            cmbDepartment.DropDownStyle = ComboBoxStyle.DropDownList;
+            cmbDepartment.FormattingEnabled = true;
+            cmbDepartment.Location = new Point(155, 102);
+            cmbDepartment.Margin = new Padding(3, 2, 3, 2);
+            cmbDepartment.Name = "cmbDepartment";
+            cmbDepartment.Size = new Size(245, 23);
+            cmbDepartment.TabIndex = 13;
+            // 
+            // lblDepartment
+            // 
+            lblDepartment.AutoSize = true;
+            lblDepartment.Font = new Font("Arial", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            lblDepartment.ForeColor = Color.White;
+            lblDepartment.Location = new Point(8, 102);
+            lblDepartment.Margin = new Padding(2, 0, 2, 0);
+            lblDepartment.Name = "lblDepartment";
+            lblDepartment.Size = new Size(98, 18);
+            lblDepartment.TabIndex = 11;
+            lblDepartment.Text = "Department :";
+            lblDepartment.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // txtaddress
             // 
@@ -150,7 +208,7 @@
             panelCenter.Controls.Add(txtAadhar);
             panelCenter.Controls.Add(lblemail);
             panelCenter.Controls.Add(lblEmpContact);
-            panelCenter.Controls.Add(textBox5);
+            panelCenter.Controls.Add(txtEmail);
             panelCenter.Controls.Add(txtContact);
             panelCenter.Controls.Add(lblAadharCard);
             panelCenter.Location = new Point(412, 2);
@@ -169,13 +227,14 @@
             btnAddEmp.FlatAppearance.BorderSize = 2;
             btnAddEmp.Font = new Font("Arial", 10.8F, FontStyle.Bold, GraphicsUnit.Point, 0);
             btnAddEmp.ForeColor = SystemColors.ActiveCaptionText;
-            btnAddEmp.Location = new Point(167, 164);
+            btnAddEmp.Location = new Point(167, 141);
             btnAddEmp.Margin = new Padding(3, 2, 3, 2);
             btnAddEmp.Name = "btnAddEmp";
             btnAddEmp.Size = new Size(151, 38);
             btnAddEmp.TabIndex = 9;
             btnAddEmp.Text = "Add Employee";
             btnAddEmp.UseVisualStyleBackColor = false;
+            btnAddEmp.Click += btnAddEmployee_Click;
             // 
             // txtAadhar
             // 
@@ -215,15 +274,15 @@
             lblEmpContact.Text = "Contact No  :";
             lblEmpContact.TextAlign = ContentAlignment.MiddleLeft;
             // 
-            // textBox5
+            // txtEmail
             // 
-            textBox5.Anchor = AnchorStyles.Top;
-            textBox5.Location = new Point(167, 102);
-            textBox5.Margin = new Padding(3, 2, 3, 2);
-            textBox5.Name = "textBox5";
-            textBox5.PlaceholderText = "   Enter Email";
-            textBox5.Size = new Size(245, 23);
-            textBox5.TabIndex = 10;
+            txtEmail.Anchor = AnchorStyles.Top;
+            txtEmail.Location = new Point(167, 102);
+            txtEmail.Margin = new Padding(3, 2, 3, 2);
+            txtEmail.Name = "txtEmail";
+            txtEmail.PlaceholderText = "   Enter Email";
+            txtEmail.Size = new Size(245, 23);
+            txtEmail.TabIndex = 10;
             // 
             // txtContact
             // 
@@ -251,10 +310,12 @@
             // 
             // panelRight
             // 
+            panelRight.Controls.Add(lblBankAcc);
             panelRight.Controls.Add(txtEMPCode);
             panelRight.Controls.Add(label1);
             panelRight.Controls.Add(txtAltContact);
-            panelRight.Controls.Add(cmbBloodGrp);
+            panelRight.Controls.Add(txtBankAcc);
+            panelRight.Controls.Add(cmbBloodGroup);
             panelRight.Controls.Add(lblEMPALTContact);
             panelRight.Controls.Add(lblBloodgrp);
             panelRight.Dock = DockStyle.Fill;
@@ -263,6 +324,20 @@
             panelRight.Name = "panelRight";
             panelRight.Size = new Size(404, 616);
             panelRight.TabIndex = 2;
+            // 
+            // lblBankAcc
+            // 
+            lblBankAcc.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            lblBankAcc.AutoSize = true;
+            lblBankAcc.Font = new Font("Arial", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            lblBankAcc.ForeColor = Color.White;
+            lblBankAcc.Location = new Point(11, 141);
+            lblBankAcc.Margin = new Padding(2, 0, 2, 0);
+            lblBankAcc.Name = "lblBankAcc";
+            lblBankAcc.Size = new Size(110, 18);
+            lblBankAcc.TabIndex = 14;
+            lblBankAcc.Text = "Bank Acc No  :";
+            lblBankAcc.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // txtEMPCode
             // 
@@ -298,15 +373,27 @@
             txtAltContact.Size = new Size(245, 23);
             txtAltContact.TabIndex = 8;
             // 
-            // cmbBloodGrp
+            // txtBankAcc
             // 
-            cmbBloodGrp.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            cmbBloodGrp.FormattingEnabled = true;
-            cmbBloodGrp.Location = new Point(159, 67);
-            cmbBloodGrp.Margin = new Padding(3, 2, 3, 2);
-            cmbBloodGrp.Name = "cmbBloodGrp";
-            cmbBloodGrp.Size = new Size(245, 23);
-            cmbBloodGrp.TabIndex = 11;
+            txtBankAcc.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            txtBankAcc.Location = new Point(159, 136);
+            txtBankAcc.Margin = new Padding(3, 2, 3, 2);
+            txtBankAcc.Name = "txtBankAcc";
+            txtBankAcc.PlaceholderText = "   Enter Bank Accont No";
+            txtBankAcc.Size = new Size(245, 23);
+            txtBankAcc.TabIndex = 12;
+            // 
+            // cmbBloodGroup
+            // 
+            cmbBloodGroup.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            cmbBloodGroup.Cursor = Cursors.Hand;
+            cmbBloodGroup.DropDownStyle = ComboBoxStyle.DropDownList;
+            cmbBloodGroup.FormattingEnabled = true;
+            cmbBloodGroup.Location = new Point(159, 67);
+            cmbBloodGroup.Margin = new Padding(3, 2, 3, 2);
+            cmbBloodGroup.Name = "cmbBloodGroup";
+            cmbBloodGroup.Size = new Size(245, 23);
+            cmbBloodGroup.TabIndex = 11;
             // 
             // lblEMPALTContact
             // 
@@ -346,6 +433,7 @@
             Margin = new Padding(3, 2, 3, 2);
             Name = "AddEmp";
             Text = "AddEmp";
+            Load += AddEmp_Load;
             panelContentEMP.ResumeLayout(false);
             tableLayoutPanelEMP.ResumeLayout(false);
             panelLeft.ResumeLayout(false);
@@ -377,10 +465,16 @@
         private TextBox textBox6;
         private Label lblBloodgrp;
         private Label lblemail;
-        private TextBox textBox5;
-        private ComboBox cmbBloodGrp;
+        private TextBox txtEmail;
+        private ComboBox cmbBloodGroup;
         private Button btnAddEmp;
         private TextBox txtEMPCode;
         private Label label1;
+        private TextBox txtBankAcc;
+        private Label lblDepartment;
+        private ComboBox cmbDepartment;
+        private Label lblRole;
+        private ComboBox cmbRole;
+        private Label lblBankAcc;
     }
 }

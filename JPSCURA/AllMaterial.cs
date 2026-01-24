@@ -17,6 +17,49 @@ namespace JPSCURA
         private int selectedMaterialId = 0;
         private const int SEARCH_GAP = 4; // space between search boxes
         private HashSet<int> selectedMaterialIds = new HashSet<int>();
+        private Dictionary<int, int> materialOriginalIndex = new();
+        private bool _isBulkClearing = false;
+
+        private int GetOrCreateId(
+        SqlConnection con,
+        string selectSql,
+        string insertSql,
+        string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                throw new Exception("Master value cannot be empty");
+
+            using SqlCommand sel = new SqlCommand(selectSql, con);
+            sel.Parameters.AddWithValue("@val", value.Trim());
+
+            object res = sel.ExecuteScalar();
+            if (res != null)
+                return Convert.ToInt32(res);
+
+            using SqlCommand ins = new SqlCommand(insertSql, con);
+            ins.Parameters.AddWithValue("@val", value.Trim());
+            return Convert.ToInt32(ins.ExecuteScalar());
+        }
+
+
+        private FormWindowState _lastState;
+
+        protected override void OnResize(EventArgs e)
+        {
+            base.OnResize(e);
+
+            if (WindowState == FormWindowState.Minimized)
+                _lastState = WindowState;
+
+            if (_lastState == FormWindowState.Minimized &&
+                WindowState == FormWindowState.Normal)
+            {
+                this.SuspendLayout();
+                this.ResumeLayout(true);
+            }
+        }
+
+
 
 
 
@@ -31,7 +74,9 @@ namespace JPSCURA
 
             // ===== MAIN TABLE SELECTION =====
             DgvMainTable.MultiSelect = true;
-            DgvMainTable.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            DgvMainTable.SelectionMode = DataGridViewSelectionMode.CellSelect;
+            DgvMainTable.MultiSelect = false;
+
             DgvMainTable.ClearSelection();
 
             // ===== 2nd TABLE SELECTION =====
@@ -52,7 +97,20 @@ namespace JPSCURA
 
 
             LoadMainGrid();
+            EnableDoubleBuffering(this);
         }
+        private void EnableDoubleBuffering(Control control)
+        {
+            typeof(Control)
+                .GetProperty("DoubleBuffered",
+                    System.Reflection.BindingFlags.NonPublic |
+                    System.Reflection.BindingFlags.Instance)
+                ?.SetValue(control, true, null);
+
+            foreach (Control child in control.Controls)
+                EnableDoubleBuffering(child);
+        }
+
         private void ApplyMultiSearch(object sender, EventArgs e)
         {
             string material = txtSearchMaterial.Text.Trim();
@@ -166,135 +224,123 @@ namespace JPSCURA
 
 
 
-
-
-
-
         // ================= MAIN GRID =================
         private void LoadMainGrid()
         {
-            DgvMainTable.Rows.Clear();
-            DgvMainTable.Columns.Clear();
-            DgvMainTable.AutoGenerateColumns = false;
-            btnBack.Visible = false;
-            panelSearch.Visible = true;
-            panel2ndtableTopContent.Visible = false;
+            // 🔥 FLICKER + LAG FIX
+            this.SuspendLayout();
+            DgvMainTable.SuspendLayout();
 
-            // ===== UI STYLE =====
-            //DgvMainTable.BackgroundColor = Color.White;
-            //DgvMainTable.BorderStyle = BorderStyle.None;
-            //DgvMainTable.EnableHeadersVisualStyles = false;
+            try
+            {
+                // ===== RESET GRID =====
+                DgvMainTable.Rows.Clear();
+                DgvMainTable.Columns.Clear();
+                DgvMainTable.AutoGenerateColumns = false;
 
-            DgvMainTable.ColumnHeadersDefaultCellStyle.Font =
-                new Font("Segoe UI", 10, FontStyle.Bold);
-            DgvMainTable.ColumnHeadersDefaultCellStyle.BackColor = Color.WhiteSmoke;
-            DgvMainTable.ColumnHeadersDefaultCellStyle.ForeColor = Color.Black;
+                btnBack.Visible = false;
+                panelSearch.Visible = true;
+                panel2ndtableTopContent.Visible = false;
 
-            DgvMainTable.DefaultCellStyle.Font =
-                new Font("Segoe UI", 9, FontStyle.Regular);
+                // ===== BASIC STYLE =====
+                DgvMainTable.BackgroundColor = Color.White;
+                DgvMainTable.GridColor = Color.White;
+                DgvMainTable.RowHeadersVisible = false;
+                DgvMainTable.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+                DgvMainTable.EnableHeadersVisualStyles = false;
 
-            DgvMainTable.RowHeadersVisible = false;
-            DgvMainTable.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            // ===== GRID COLORS =====
-            DgvMainTable.BackgroundColor = Color.White;
-            DgvMainTable.GridColor = Color.White;
+                DgvMainTable.ColumnHeadersDefaultCellStyle.Font =
+                    new Font("Segoe UI", 10, FontStyle.Bold);
+                DgvMainTable.ColumnHeadersDefaultCellStyle.BackColor = Color.WhiteSmoke;
+                DgvMainTable.ColumnHeadersDefaultCellStyle.ForeColor = Color.Black;
 
-            // Normal rows
-            DgvMainTable.DefaultCellStyle.BackColor = Color.White;
-            DgvMainTable.DefaultCellStyle.ForeColor = Color.Black;
+                DgvMainTable.DefaultCellStyle.Font =
+                    new Font("Segoe UI", 9, FontStyle.Regular);
+                DgvMainTable.DefaultCellStyle.BackColor = Color.White;
+                DgvMainTable.DefaultCellStyle.ForeColor = Color.Black;
+                DgvMainTable.DefaultCellStyle.SelectionBackColor = Color.White;
+                DgvMainTable.DefaultCellStyle.SelectionForeColor = Color.Black;
 
-            // Selection colors
-            DgvMainTable.DefaultCellStyle.SelectionBackColor = Color.White;
-            DgvMainTable.DefaultCellStyle.SelectionForeColor = Color.Black;
+                // ===== DISABLE RESIZE =====
+                DgvMainTable.AllowUserToResizeColumns = false;
+                DgvMainTable.AllowUserToResizeRows = false;
+                DgvMainTable.RowHeadersWidthSizeMode =
+                    DataGridViewRowHeadersWidthSizeMode.DisableResizing;
 
-            // Header style
-            DgvMainTable.ColumnHeadersDefaultCellStyle.BackColor = Color.White;
-            DgvMainTable.ColumnHeadersDefaultCellStyle.ForeColor = Color.Black;
-            DgvMainTable.ColumnHeadersDefaultCellStyle.SelectionBackColor = Color.White;
-            DgvMainTable.ColumnHeadersDefaultCellStyle.SelectionForeColor = Color.Black;
+                // ===== CHECKBOX COLUMN =====
+                DataGridViewCheckBoxColumn chk = new DataGridViewCheckBoxColumn
+                {
+                    Name = "SelectRow",
+                    HeaderText = "",
+                    Width = 30,
+                    FillWeight = 1,
+                    FalseValue = false,
+                    TrueValue = true
+                };
+                DgvMainTable.Columns.Add(chk);
 
-            // Remove blue highlight border
-            DgvMainTable.EnableHeadersVisualStyles = false;
-            DataGridViewCheckBoxColumn chk = new DataGridViewCheckBoxColumn();
-            chk.Name = "SelectRow";
-            chk.HeaderText = "";
-            chk.Width = 30;
-            chk.FillWeight = 1;
-            chk.FalseValue = false;
-            chk.TrueValue = true;
-            chk.IndeterminateValue = false;
+                // ===== DATA COLUMNS =====
+                DgvMainTable.Columns.Add("Material_ID", "ID");
+                DgvMainTable.Columns["Material_ID"].Visible = false;
 
-            DgvMainTable.Columns.Insert(0, chk);
+                DgvMainTable.Columns.Add("SrNo", "Sr No");
+                DgvMainTable.Columns.Add("Material", "Material Name");
+                DgvMainTable.Columns.Add("Type", "Types Of Material");
+                DgvMainTable.Columns.Add("Location", "Location");
+                DgvMainTable.Columns.Add("Category", "Category");
+                DgvMainTable.Columns.Add("SubCategory", "Sub Category");
+                DgvMainTable.Columns.Add("Package", "Package");
+                DgvMainTable.Columns.Add("Balance", "Balance");
+                DgvMainTable.Columns.Add("TotalValue", "Total Value");
+                DgvMainTable.Columns.Add("MinThreshold", "MinThreshold");
+                DgvMainTable.Columns.Add("MaxThreshold", "MaxThreshold");
 
+                DgvMainTable.Columns["MinThreshold"].Visible = false;
+                DgvMainTable.Columns["MaxThreshold"].Visible = false;
 
+                ApplyGridLines(DgvMainTable);
 
-            // ===== COLUMNS =====
-            DgvMainTable.Columns.Add("Material_ID", "ID");
-            DgvMainTable.Columns["Material_ID"].Visible = false;
+                // ===== COLUMN WIDTH =====
+                DgvMainTable.Columns["SrNo"].FillWeight = 2;
+                DgvMainTable.Columns["Material"].FillWeight = 15;
+                DgvMainTable.Columns["Type"].FillWeight = 5;
+                DgvMainTable.Columns["Location"].FillWeight = 5;
+                DgvMainTable.Columns["Category"].FillWeight = 5;
+                DgvMainTable.Columns["SubCategory"].FillWeight = 5;
+                DgvMainTable.Columns["Package"].FillWeight = 5;
+                DgvMainTable.Columns["Balance"].FillWeight = 5;
+                DgvMainTable.Columns["TotalValue"].FillWeight = 5;
 
-            DgvMainTable.Columns.Add("SrNo", "Sr No");
-            DgvMainTable.Columns.Add("Material", "Material Name");
-            DgvMainTable.Columns.Add("Type", "Types Of Material");
-
-            DgvMainTable.Columns.Add("Location", "Location");
-            DgvMainTable.Columns.Add("Category", "Category");
-            DgvMainTable.Columns.Add("SubCategory", "Sub Category");
-            DgvMainTable.Columns.Add("Package", "Package");
-            DgvMainTable.Columns.Add("Balance", "Balance");
-            DgvMainTable.Columns.Add("TotalValue", "Total Value");
-            DgvMainTable.Columns.Add("MinThreshold", "MinThreshold");
-            DgvMainTable.Columns.Add("MaxThreshold", "MaxThreshold");
-
-            DgvMainTable.Columns["MinThreshold"].Visible = false;
-            DgvMainTable.Columns["MaxThreshold"].Visible = false;
-
-            ApplyGridLines(DgvMainTable);
-
-            // ===== COLUMN SIZE CONTROL (FULL SCREEN MAINTAINED) =====
-            DgvMainTable.Columns["SrNo"].FillWeight = 2;          // very small
-            DgvMainTable.Columns["Material"].FillWeight = 15;    // big (main focus)
-            //DgvMainTable.Columns["Material"].FillWeight = 20;
-            DgvMainTable.Columns["Type"].FillWeight = 5;
-
-            DgvMainTable.Columns["Location"].FillWeight = 5;
-            DgvMainTable.Columns["Category"].FillWeight = 5;
-            DgvMainTable.Columns["SubCategory"].FillWeight = 5;
-            DgvMainTable.Columns["Package"].FillWeight = 5;
-            DgvMainTable.Columns["Balance"].FillWeight = 5;
-            DgvMainTable.Columns["TotalValue"].FillWeight = 5;
-
-
-            using SqlConnection con = new SqlConnection(DBconection.GetConnectionString());
-            SqlCommand cmd = new SqlCommand(@"
+                // ===== DB LOAD =====
+                using SqlConnection con = new SqlConnection(DBconection.GetConnectionString());
+                using SqlCommand cmd = new SqlCommand(@"
 SELECT 
     m.Material_ID,
     m.Material_Name,
-    t.Type_Name AS Material_Type,
+    ISNULL(t.Type_Name,'') AS Material_Type,
     m.Location,
-    c.Category_Name,
-    s.Subcategory_Name,
-    p.Package_Name,
-  m.MinThreshold,          -- ✅ ADD
-  m.MaxThreshold,
+    ISNULL(c.Category_Name,'') AS Category_Name,
+    ISNULL(s.Subcategory_Name,'') AS Subcategory_Name,
+    ISNULL(p.Package_Name,'') AS Package_Name,
+    ISNULL(m.MinThreshold,0) AS MinThreshold,
+    ISNULL(m.MaxThreshold,0) AS MaxThreshold,
 
-    -- ✅ Balance with safety
     CASE 
         WHEN SUM(ISNULL(u.Receipt,0) - ISNULL(u.Issued,0)) < 0 
         THEN 0
         ELSE SUM(ISNULL(u.Receipt,0) - ISNULL(u.Issued,0))
     END AS Balance,
 
-    -- ✅ Total Value
     SUM(ISNULL(u.Total_Value,0)) AS TotalValue
 
 FROM INVENTORY_MASTER..Material_Table m
-JOIN INVENTORY_MASTER..Category_Master c 
+LEFT JOIN INVENTORY_MASTER..Category_Master c 
     ON m.Category_ID = c.Category_ID
-JOIN INVENTORY_MASTER..Subcategory_Master s 
+LEFT JOIN INVENTORY_MASTER..Subcategory_Master s 
     ON m.Subcategory_ID = s.Subcategory_ID
-JOIN INVENTORY_MASTER..Package_Master p 
+LEFT JOIN INVENTORY_MASTER..Package_Master p 
     ON m.Package_ID = p.Package_ID
-JOIN INVENTORY_MASTER..Type_Master t 
+LEFT JOIN INVENTORY_MASTER..Type_Master t 
     ON m.Type_ID = t.Type_ID
 LEFT JOIN INVENTORY_MASTER..Usage_Table u 
     ON m.Material_ID = u.Material_ID
@@ -307,38 +353,57 @@ GROUP BY
     c.Category_Name,
     s.Subcategory_Name,
     p.Package_Name,
-m.MinThreshold,          -- ✅ ADD
-  m.MaxThreshold
+    m.MinThreshold,
+    m.MaxThreshold
 
-ORDER BY m.Material_Name", con);
+ORDER BY m.Material_Name
+", con);
 
-            con.Open();
-            SqlDataReader dr = cmd.ExecuteReader();
+                con.Open();
+                using SqlDataReader dr = cmd.ExecuteReader();
 
-            int sr = 1;
-            while (dr.Read())
-            {
-                DgvMainTable.Rows.Add(
-                    false,
-                    dr["Material_ID"],
-                    sr++,
-                    dr["Material_Name"],
-                    dr["Material_Type"],
-                    dr["Location"],
-                    dr["Category_Name"],
-                    dr["Subcategory_Name"],
-                    dr["Package_Name"],
-                    dr["Balance"],
-                    dr["Totalvalue"],
-                    dr["MinThreshold"],
-                    dr["MaxThreshold"]
-                );
-                //ApplyGridStyle(DgvMainTable);
-                //EnableHover(DgvMainTable);
+                int sr = 1;
+                while (dr.Read())
+                {
+                    DgvMainTable.Rows.Add(
+                        false,
+                        dr["Material_ID"],
+                        sr++,
+                        dr["Material_Name"],
+                        dr["Material_Type"],
+                        dr["Location"],
+                        dr["Category_Name"],
+                        dr["Subcategory_Name"],
+                        dr["Package_Name"],
+                        dr["Balance"],
+                        dr["TotalValue"],
+                        dr["MinThreshold"],
+                        dr["MaxThreshold"]
+                    );
+                }
+
+                // ===== STORE ORIGINAL ORDER =====
+                materialOriginalIndex.Clear();
+                for (int i = 0; i < DgvMainTable.Rows.Count; i++)
+                {
+                    if (DgvMainTable.Rows[i].IsNewRow) continue;
+
+                    int materialId = Convert.ToInt32(
+                        DgvMainTable.Rows[i].Cells["Material_ID"].Value);
+
+                    materialOriginalIndex[materialId] = i;
+                }
+
+                SyncSearchBoxesWithGrid();
             }
-            SyncSearchBoxesWithGrid();
-
+            finally
+            {
+                // 🔥 RESUME UI
+                DgvMainTable.ResumeLayout(true);
+                this.ResumeLayout(true);
+            }
         }
+
 
         // ================= DOUBLE CLICK =================
         private void DgvMainTable_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
@@ -411,6 +476,17 @@ ORDER BY m.Material_Name", con);
             dgv2ndTable.EnableHeadersVisualStyles = false;
             dgv2ndTable.RowHeadersVisible = false;
             dgv2ndTable.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dgv2ndTable.AllowUserToResizeColumns = false;
+            dgv2ndTable.AllowUserToResizeRows = false;
+
+            dgv2ndTable.RowHeadersWidthSizeMode =
+                DataGridViewRowHeadersWidthSizeMode.DisableResizing;
+
+            foreach (DataGridViewColumn col in dgv2ndTable.Columns)
+            {
+                col.Resizable = DataGridViewTriState.False;
+            }
+
 
             // ===== COLUMNS =====
             dgv2ndTable.Columns.Add("Usage_ID", "ID");
@@ -869,12 +945,22 @@ WHERE Usage_ID = @id", con);
                 wb.SaveAs(filePath);
             }
 
-            MessageBox.Show(
-                "Excel exported successfully ✔",
-                "Export",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Information
-            );
+            var result = MessageBox.Show(
+       "Excel exported successfully ✔\n\nDo you want to open the file?",
+       "Export",
+       MessageBoxButtons.YesNo,
+       MessageBoxIcon.Information
+   );
+
+            if (result == DialogResult.Yes)
+            {
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo()
+                {
+                    FileName = filePath,
+                    UseShellExecute = true
+                });
+            }
+
         }
 
         private void ExportGridViewToSheet(IXLWorksheet ws, DataGridView dgv)
@@ -963,6 +1049,8 @@ WHERE Usage_ID = @id", con);
         private void DgvMainTable_CellClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex < 0) return;
+            if (DgvMainTable.Columns[e.ColumnIndex].Name != "SelectRow")
+                return;
 
             var cell = DgvMainTable.Rows[e.RowIndex].Cells["SelectRow"];
 
@@ -988,6 +1076,7 @@ WHERE Usage_ID = @id", con);
 
         private void DgvMainTable_CellValueChanged(object sender, DataGridViewCellEventArgs e)
         {
+            if (_isBulkClearing) return;
             if (e.RowIndex < 0) return;
             if (DgvMainTable.Columns[e.ColumnIndex].Name != "SelectRow") return;
 
@@ -1002,6 +1091,50 @@ WHERE Usage_ID = @id", con);
             else
                 selectedMaterialIds.Remove(materialId);
 
+            ReorderRows();
+
+        }
+        private void ReorderRows()
+        {
+            var checkedRows = new List<DataGridViewRow>();
+            var uncheckedRows = new List<DataGridViewRow>();
+
+            foreach (DataGridViewRow row in DgvMainTable.Rows)
+            {
+                if (row.IsNewRow) continue;
+
+                bool isChecked = Convert.ToBoolean(row.Cells["SelectRow"].Value);
+
+                if (isChecked)
+                    checkedRows.Add(row);
+                else
+                    uncheckedRows.Add(row);
+            }
+
+            // 🔹 Checked rows → original order preserved
+            checkedRows = checkedRows
+                .OrderBy(r =>
+                    materialOriginalIndex[
+                        Convert.ToInt32(r.Cells["Material_ID"].Value)])
+                .ToList();
+
+            // 🔹 Unchecked rows → original order preserved
+            uncheckedRows = uncheckedRows
+                .OrderBy(r =>
+                    materialOriginalIndex[
+                        Convert.ToInt32(r.Cells["Material_ID"].Value)])
+                .ToList();
+
+            DgvMainTable.SuspendLayout();
+            DgvMainTable.Rows.Clear();
+
+            foreach (var r in checkedRows)
+                DgvMainTable.Rows.Add(r);
+
+            foreach (var r in uncheckedRows)
+                DgvMainTable.Rows.Add(r);
+
+            DgvMainTable.ResumeLayout();
         }
 
         private void DgvMainTable_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
@@ -1015,39 +1148,296 @@ WHERE Usage_ID = @id", con);
             int min = Convert.ToInt32(row.Cells["MinThreshold"].Value);
             int max = Convert.ToInt32(row.Cells["MaxThreshold"].Value);
 
+            Color bg;
+
             // 🟢 ENOUGH STOCK
             if (balance > max)
             {
-                row.Cells["Balance"].Style.BackColor = Color.LightGreen;
-                row.Cells["Balance"].ToolTipText =
-                    "Enough stock, no need to order";
+                bg = Color.LightGreen;
+                row.Cells["Balance"].ToolTipText = "Enough stock, no need to order";
             }
             // 🔴 LOW STOCK
             else if (balance < min)
             {
-                row.Cells["Balance"].Style.BackColor = Color.LightCoral;
-                row.Cells["Balance"].ToolTipText =
-                    "Low stock, need to order";
+                bg = Color.LightCoral;
+                row.Cells["Balance"].ToolTipText = "Low stock, need to order";
             }
-            // 🟡 30% REMAINING WARNING
+            // 🟡 WARNING
             else
             {
                 int warningLevel = min + (int)((max - min) * 0.3);
 
                 if (balance <= warningLevel)
                 {
-                    row.Cells["Balance"].Style.BackColor = Color.Khaki;
-                    row.Cells["Balance"].ToolTipText =
-                        "Stock is getting low";
+                    bg = Color.Khaki;
+                    row.Cells["Balance"].ToolTipText = "Stock is getting low";
                 }
                 else
                 {
-                    row.Cells["Balance"].Style.BackColor = Color.White;
+                    bg = Color.White;
                     row.Cells["Balance"].ToolTipText = "";
                 }
             }
+
+            // ✅ APPLY COLOR
+            row.Cells["Balance"].Style.BackColor = bg;
+
+            // 🔥 MOST IMPORTANT LINE
+            row.Cells["Balance"].Style.SelectionBackColor = bg;
+            row.Cells["Balance"].Style.SelectionForeColor = Color.Black;
+
         }
+        private void RestoreOriginalOrder()
+        {
+            var rows = DgvMainTable.Rows
+                .Cast<DataGridViewRow>()
+                .Where(r => !r.IsNewRow)
+                .OrderBy(r =>
+                    materialOriginalIndex[
+                        Convert.ToInt32(r.Cells["Material_ID"].Value)])
+                .ToList();
+
+            DgvMainTable.SuspendLayout();
+            DgvMainTable.Rows.Clear();
+
+            foreach (var row in rows)
+                DgvMainTable.Rows.Add(row);
+
+            DgvMainTable.ResumeLayout();
+        }
+        public void ClearAllMaterialSelection()
+        {
+            _isBulkClearing = true;
+            selectedMaterialIds.Clear();
+
+            foreach (DataGridViewRow row in DgvMainTable.Rows)
+            {
+                if (row.IsNewRow) continue;
+                row.Cells["SelectRow"].Value = false;
+            }
+
+            RestoreOriginalOrder();
+            DgvMainTable.ResumeLayout();
+            _isBulkClearing = false;
+        }
+
+        private void DgvMainTable_CellMouseDown(object sender, DataGridViewCellMouseEventArgs e)
+        {
+            if (e.RowIndex < 0) return;
+
+            // agar checkbox column nahi hai → selection block
+            if (DgvMainTable.Columns[e.ColumnIndex].Name != "SelectRow")
+            {
+                DgvMainTable.ClearSelection();
+            }
+        }
+
+        private void btnImport_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog ofd = new OpenFileDialog
+            {
+                Filter = "Excel Files (*.xlsx)|*.xlsx"
+            };
+
+            if (ofd.ShowDialog() == DialogResult.OK)
+                ImportFromExcel_AllInOne(ofd.FileName);
+        }
+        private void ImportFromExcel_AllInOne(string filePath)
+        {
+            try
+            {
+                using var wb = new XLWorkbook(filePath);
+                var ws = wb.Worksheet(1);
+
+                using SqlConnection con = new SqlConnection(DBconection.GetConnectionString());
+                con.Open();
+
+                int row = 2;
+
+                while (!ws.Cell(row, 1).IsEmpty())
+                {
+                    // ================= READ EXCEL =================
+                    string materialName = ws.Cell(row, 1).GetString().Trim();
+                    string type = ws.Cell(row, 2).GetString().Trim();
+                    string location = ws.Cell(row, 3).GetString().Trim();
+                    string category = ws.Cell(row, 4).GetString().Trim();
+                    string subCategory = ws.Cell(row, 5).GetString().Trim();
+                    string package = ws.Cell(row, 6).GetString().Trim();
+
+                    DateTime usageDate;
+                    if (!DateTime.TryParse(ws.Cell(row, 7).GetString(), out usageDate))
+                        usageDate = DateTime.Now;
+
+                    string voucher = ws.Cell(row, 8).GetString().Trim();
+                    string particular = ws.Cell(row, 9).GetString().Trim();
+
+                    decimal receipt = 0, issued = 0, rate = 0;
+                    int min = 0, max = 0;
+
+                    decimal.TryParse(ws.Cell(row, 10).GetString(), out receipt);
+                    decimal.TryParse(ws.Cell(row, 11).GetString(), out issued);
+                    decimal.TryParse(ws.Cell(row, 12).GetString(), out rate);
+                    int.TryParse(ws.Cell(row, 13).GetString(), out min);
+                    int.TryParse(ws.Cell(row, 14).GetString(), out max);
+
+                    // ================= MASTER AUTO CREATE =================
+                    int typeId = GetOrCreateId(
+                        con,
+                        "SELECT Type_ID FROM INVENTORY_MASTER..Type_Master WHERE Type_Name=@val",
+                        "INSERT INTO INVENTORY_MASTER..Type_Master (Type_Name) OUTPUT INSERTED.Type_ID VALUES (@val)",
+                        type);
+
+                    int catId = GetOrCreateId(
+                        con,
+                        "SELECT Category_ID FROM INVENTORY_MASTER..Category_Master WHERE Category_Name=@val",
+                        "INSERT INTO INVENTORY_MASTER..Category_Master (Category_Name) OUTPUT INSERTED.Category_ID VALUES (@val)",
+                        category);
+
+                    // 🔥 SUBCATEGORY WITH CATEGORY_ID (IMPORTANT)
+                    int subId;
+                    using (SqlCommand chk = new SqlCommand(
+                        @"SELECT Subcategory_ID 
+                  FROM INVENTORY_MASTER..Subcategory_Master
+                  WHERE Subcategory_Name=@name AND Category_ID=@catId", con))
+                    {
+                        chk.Parameters.AddWithValue("@name", subCategory);
+                        chk.Parameters.AddWithValue("@catId", catId);
+
+                        object res = chk.ExecuteScalar();
+                        if (res != null)
+                        {
+                            subId = Convert.ToInt32(res);
+                        }
+                        else
+                        {
+                            using SqlCommand ins = new SqlCommand(
+                                @"INSERT INTO INVENTORY_MASTER..Subcategory_Master
+                          (Subcategory_Name, Category_ID)
+                          OUTPUT INSERTED.Subcategory_ID
+                          VALUES (@name, @catId)", con);
+
+                            ins.Parameters.AddWithValue("@name", subCategory);
+                            ins.Parameters.AddWithValue("@catId", catId);
+
+                            subId = Convert.ToInt32(ins.ExecuteScalar());
+                        }
+                    }
+
+                    int pkgId;
+
+                    // 🔍 check package under same subcategory
+                    using (SqlCommand chkPkg = new SqlCommand(
+                        @"SELECT Package_ID
+      FROM INVENTORY_MASTER..Package_Master
+      WHERE Package_Name=@name AND Subcategory_ID=@subId", con))
+                    {
+                        chkPkg.Parameters.AddWithValue("@name", package);
+                        chkPkg.Parameters.AddWithValue("@subId", subId);
+
+                        object res = chkPkg.ExecuteScalar();
+
+                        if (res != null)
+                        {
+                            pkgId = Convert.ToInt32(res);
+                        }
+                        else
+                        {
+                            using SqlCommand insPkg = new SqlCommand(
+                                @"INSERT INTO INVENTORY_MASTER..Package_Master
+              (Package_Name, Subcategory_ID)
+              OUTPUT INSERTED.Package_ID
+              VALUES (@name, @subId)", con);
+
+                            insPkg.Parameters.AddWithValue("@name", package);
+                            insPkg.Parameters.AddWithValue("@subId", subId);
+
+                            pkgId = Convert.ToInt32(insPkg.ExecuteScalar());
+                        }
+                    }
+
+
+                    // ================= MATERIAL INSERT =================
+                    int materialId;
+                    using (SqlCommand chkMat = new SqlCommand(
+                        "SELECT Material_ID FROM INVENTORY_MASTER..Material_Table WHERE Material_Name=@name", con))
+                    {
+                        chkMat.Parameters.AddWithValue("@name", materialName);
+                        object res = chkMat.ExecuteScalar();
+
+                        if (res != null)
+                        {
+                            materialId = Convert.ToInt32(res);
+                        }
+                        else
+                        {
+                            using SqlCommand insMat = new SqlCommand(@"
+INSERT INTO INVENTORY_MASTER..Material_Table
+(Material_Name, Type_ID, Location, Category_ID, Subcategory_ID, Package_ID, MinThreshold, MaxThreshold)
+OUTPUT INSERTED.Material_ID
+VALUES
+(@name,@type,@loc,@cat,@sub,@pkg,@min,@max)", con);
+
+                            insMat.Parameters.AddWithValue("@name", materialName);
+                            insMat.Parameters.AddWithValue("@type", typeId);
+                            insMat.Parameters.AddWithValue("@loc", location);
+                            insMat.Parameters.AddWithValue("@cat", catId);
+                            insMat.Parameters.AddWithValue("@sub", subId);
+                            insMat.Parameters.AddWithValue("@pkg", pkgId);
+                            insMat.Parameters.AddWithValue("@min", min);
+                            insMat.Parameters.AddWithValue("@max", max);
+
+                            materialId = Convert.ToInt32(insMat.ExecuteScalar());
+                        }
+                    }
+
+                    // ================= USAGE INSERT =================
+                    decimal balance = receipt - issued;
+                    if (balance < 0) balance = 0;
+
+                    decimal totalValue = balance * rate;
+
+                    using SqlCommand insUsage = new SqlCommand(@"
+INSERT INTO INVENTORY_MASTER..Usage_Table
+(Material_ID, Usage_Date, V_NO_And_B_NO, Particular,
+ Receipt, Issued, Rate_Per_Qty, Balance, Total_Value)
+VALUES
+(@mid,@date,@vno,@part,
+ @rec,@iss,@rate,@bal,@total)", con);
+
+                    insUsage.Parameters.AddWithValue("@mid", materialId);
+                    insUsage.Parameters.AddWithValue("@date", usageDate);
+                    insUsage.Parameters.AddWithValue("@vno", voucher);
+                    insUsage.Parameters.AddWithValue("@part", particular);
+                    insUsage.Parameters.AddWithValue("@rec", receipt);
+                    insUsage.Parameters.AddWithValue("@iss", issued);
+                    insUsage.Parameters.AddWithValue("@rate", rate);
+                    insUsage.Parameters.AddWithValue("@bal", balance);
+                    insUsage.Parameters.AddWithValue("@total", totalValue);
+
+                    insUsage.ExecuteNonQuery();
+
+
+                    // ================= FIFO =================
+                    ApplyFIFO(materialId);
+
+                    row++;
+                }
+
+                LoadMainGrid();
+                MessageBox.Show("Import completed successfully ✔", "Import");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Import Error",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+
+
+
     }
 }
+
 
 

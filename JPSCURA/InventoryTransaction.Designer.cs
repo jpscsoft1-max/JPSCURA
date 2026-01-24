@@ -122,6 +122,7 @@
             // 
             // cmbSelect
             // 
+            cmbSelect.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbSelect.FormattingEnabled = true;
             cmbSelect.Items.AddRange(new object[] { "Reciept", "Issued" });
             cmbSelect.Location = new Point(114, 104);

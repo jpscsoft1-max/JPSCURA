@@ -37,6 +37,9 @@
             panelInventorySubMenu = new Panel();
             panelFinanceSubMenu = new Panel();
             panelEMPSubMenu = new Panel();
+            panelSubMenuUser = new Panel();
+            btnLogout = new Button();
+            btnEditInfo = new Button();
             btnAllEmp = new Button();
             btnAddEmp = new Button();
             PicAllEmp = new PictureBox();
@@ -57,6 +60,7 @@
             btnBankReceiptVoucher = new Button();
             btnTDS = new Button();
             btnLedger = new Button();
+            btnClear = new Button();
             picRawMaterialIcons = new PictureBox();
             btnAddMaterialIcon = new Button();
             btnAddMaterial = new Button();
@@ -138,6 +142,7 @@
             panelInventorySubMenu.SuspendLayout();
             panelFinanceSubMenu.SuspendLayout();
             panelEMPSubMenu.SuspendLayout();
+            panelSubMenuUser.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)PicAllEmp).BeginInit();
             ((System.ComponentModel.ISupportInitialize)picEmp).BeginInit();
             ((System.ComponentModel.ISupportInitialize)picRawMaterialIcons).BeginInit();
@@ -247,6 +252,7 @@
             // 
             panelInventorySubMenu.BackColor = Color.Transparent;
             panelInventorySubMenu.Controls.Add(panelFinanceSubMenu);
+            panelInventorySubMenu.Controls.Add(btnClear);
             panelInventorySubMenu.Controls.Add(picRawMaterialIcons);
             panelInventorySubMenu.Controls.Add(btnAddMaterialIcon);
             panelInventorySubMenu.Controls.Add(btnAddMaterial);
@@ -283,7 +289,6 @@
             panelFinanceSubMenu.Controls.Add(btnBankReceiptVoucher);
             panelFinanceSubMenu.Controls.Add(btnTDS);
             panelFinanceSubMenu.Controls.Add(btnLedger);
-            panelFinanceSubMenu.Cursor = Cursors.Hand;
             panelFinanceSubMenu.Dock = DockStyle.Top;
             panelFinanceSubMenu.Location = new Point(0, 0);
             panelFinanceSubMenu.Name = "panelFinanceSubMenu";
@@ -293,6 +298,7 @@
             // 
             // panelEMPSubMenu
             // 
+            panelEMPSubMenu.Controls.Add(panelSubMenuUser);
             panelEMPSubMenu.Controls.Add(btnAllEmp);
             panelEMPSubMenu.Controls.Add(btnAddEmp);
             panelEMPSubMenu.Controls.Add(PicAllEmp);
@@ -303,9 +309,58 @@
             panelEMPSubMenu.Size = new Size(1370, 80);
             panelEMPSubMenu.TabIndex = 23;
             // 
+            // panelSubMenuUser
+            // 
+            panelSubMenuUser.Controls.Add(btnLogout);
+            panelSubMenuUser.Controls.Add(btnEditInfo);
+            panelSubMenuUser.Dock = DockStyle.Top;
+            panelSubMenuUser.Location = new Point(0, 0);
+            panelSubMenuUser.Name = "panelSubMenuUser";
+            panelSubMenuUser.Size = new Size(1370, 80);
+            panelSubMenuUser.TabIndex = 4;
+            // 
+            // btnLogout
+            // 
+            btnLogout.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnLogout.AutoSize = true;
+            btnLogout.Cursor = Cursors.Hand;
+            btnLogout.FlatAppearance.BorderSize = 0;
+            btnLogout.FlatStyle = FlatStyle.Flat;
+            btnLogout.Font = new Font("Arial", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            btnLogout.ForeColor = Color.Red;
+            btnLogout.Image = (Image)resources.GetObject("btnLogout.Image");
+            btnLogout.ImageAlign = ContentAlignment.TopCenter;
+            btnLogout.Location = new Point(1206, 10);
+            btnLogout.Name = "btnLogout";
+            btnLogout.Size = new Size(152, 61);
+            btnLogout.TabIndex = 1;
+            btnLogout.Text = "Logout";
+            btnLogout.TextAlign = ContentAlignment.BottomCenter;
+            btnLogout.UseVisualStyleBackColor = true;
+            btnLogout.Click += btnLogout_Click;
+            // 
+            // btnEditInfo
+            // 
+            btnEditInfo.AutoSize = true;
+            btnEditInfo.Cursor = Cursors.Hand;
+            btnEditInfo.FlatAppearance.BorderSize = 0;
+            btnEditInfo.FlatStyle = FlatStyle.Flat;
+            btnEditInfo.Font = new Font("Arial", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            btnEditInfo.Image = (Image)resources.GetObject("btnEditInfo.Image");
+            btnEditInfo.ImageAlign = ContentAlignment.TopCenter;
+            btnEditInfo.Location = new Point(15, 10);
+            btnEditInfo.Name = "btnEditInfo";
+            btnEditInfo.Size = new Size(152, 61);
+            btnEditInfo.TabIndex = 0;
+            btnEditInfo.Text = "Edit Info";
+            btnEditInfo.TextAlign = ContentAlignment.BottomCenter;
+            btnEditInfo.UseVisualStyleBackColor = true;
+            btnEditInfo.Click += btnEditInfo_Click;
+            // 
             // btnAllEmp
             // 
             btnAllEmp.AutoSize = true;
+            btnAllEmp.Cursor = Cursors.Hand;
             btnAllEmp.FlatAppearance.BorderSize = 0;
             btnAllEmp.FlatStyle = FlatStyle.Flat;
             btnAllEmp.Font = new Font("Arial", 10.8F, FontStyle.Bold, GraphicsUnit.Point, 0);
@@ -316,10 +371,12 @@
             btnAllEmp.Text = "All Employee";
             btnAllEmp.TextAlign = ContentAlignment.BottomCenter;
             btnAllEmp.UseVisualStyleBackColor = true;
+            btnAllEmp.Click += btnAllEmp_Click;
             // 
             // btnAddEmp
             // 
             btnAddEmp.AutoSize = true;
+            btnAddEmp.Cursor = Cursors.Hand;
             btnAddEmp.FlatAppearance.BorderSize = 0;
             btnAddEmp.FlatStyle = FlatStyle.Flat;
             btnAddEmp.Font = new Font("Arial", 10.8F, FontStyle.Bold, GraphicsUnit.Point, 0);
@@ -584,6 +641,24 @@
             btnLedger.TabIndex = 4;
             btnLedger.Text = "Ledger";
             btnLedger.UseVisualStyleBackColor = true;
+            // 
+            // btnClear
+            // 
+            btnClear.AutoSize = true;
+            btnClear.Cursor = Cursors.Hand;
+            btnClear.FlatAppearance.BorderSize = 0;
+            btnClear.FlatStyle = FlatStyle.Flat;
+            btnClear.Font = new Font("Arial", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            btnClear.Image = (Image)resources.GetObject("btnClear.Image");
+            btnClear.ImageAlign = ContentAlignment.TopCenter;
+            btnClear.Location = new Point(1034, 12);
+            btnClear.Name = "btnClear";
+            btnClear.Size = new Size(134, 58);
+            btnClear.TabIndex = 22;
+            btnClear.Text = "Clear Selection";
+            btnClear.TextAlign = ContentAlignment.BottomCenter;
+            btnClear.UseVisualStyleBackColor = true;
+            btnClear.Click += btnClear_Click;
             // 
             // picRawMaterialIcons
             // 
@@ -1545,10 +1620,11 @@
             // btnUserInfo
             // 
             btnUserInfo.BackColor = Color.RoyalBlue;
+            btnUserInfo.Cursor = Cursors.Hand;
             btnUserInfo.Dock = DockStyle.Fill;
             btnUserInfo.FlatAppearance.BorderSize = 0;
             btnUserInfo.FlatStyle = FlatStyle.Flat;
-            btnUserInfo.Font = new Font("Segoe UI", 11.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            btnUserInfo.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
             btnUserInfo.ForeColor = Color.White;
             btnUserInfo.Location = new Point(0, 0);
             btnUserInfo.Name = "btnUserInfo";
@@ -1556,6 +1632,7 @@
             btnUserInfo.TabIndex = 0;
             btnUserInfo.Text = "User Info";
             btnUserInfo.UseVisualStyleBackColor = false;
+            btnUserInfo.Click += btnUserInfo_Click;
             // 
             // btnSales1
             // 
@@ -1754,6 +1831,8 @@
             panelFinanceSubMenu.ResumeLayout(false);
             panelEMPSubMenu.ResumeLayout(false);
             panelEMPSubMenu.PerformLayout();
+            panelSubMenuUser.ResumeLayout(false);
+            panelSubMenuUser.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)PicAllEmp).EndInit();
             ((System.ComponentModel.ISupportInitialize)picEmp).EndInit();
             ((System.ComponentModel.ISupportInitialize)picRawMaterialIcons).EndInit();
@@ -1871,5 +1950,9 @@
         private Panel pnlLoaderBox;
         private Label lblLoading;
         private PictureBox picLoader;
+        private Button btnClear;
+        private Panel panelSubMenuUser;
+        private Button btnLogout;
+        private Button btnEditInfo;
     }
 }
