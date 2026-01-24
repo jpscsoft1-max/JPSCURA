@@ -3,6 +3,7 @@ using DocumentFormat.OpenXml.Bibliography;
 using DocumentFormat.OpenXml.Office2013.Drawing.ChartStyle;
 using DocumentFormat.OpenXml.Vml;
 using Microsoft.Data.SqlClient;
+using Microsoft.VisualBasic.Logging;
 using System;
 using System.Diagnostics;
 using System.Drawing;
@@ -16,6 +17,8 @@ namespace JPSCURA
         // ================= STATE =================
         private Form activeForm = null;
         private Button activeTopButton = null;
+        private bool isLogout = false;
+
 
 
         // ================= COLORS =================
@@ -69,17 +72,7 @@ namespace JPSCURA
         }
 
 
-        private void FreezeUI()
-        {
-            this.SuspendLayout();
-            panelContent.SuspendLayout();
-        }
 
-        private void UnfreezeUI()
-        {
-            panelContent.ResumeLayout(true);
-            this.ResumeLayout(true);
-        }
 
 
 
@@ -130,8 +123,12 @@ namespace JPSCURA
             }
             catch { }
 
-            Application.Exit();
-            Environment.Exit(0); // 🔥 ensures process is killed
+            // 🔴 IF user clicked ❌ (not logout)
+            if (!isLogout)
+            {
+                Application.Exit();
+                Environment.Exit(0); // 🔥 hard kill process
+            }
         }
 
         private async void Home_Load(object sender, EventArgs e)
@@ -143,6 +140,11 @@ namespace JPSCURA
 
             ApplyMainModuleAccess();
             SetLoggedInUserInfo();
+
+            ApplyButtonAccess();
+            SetLoggedInUserInfo();
+            btnClear.Visible = false;
+
 
             await Task.Delay(50);   // wait one paint cycle
             this.Opacity = 1;       // show smoothly
@@ -357,7 +359,7 @@ namespace JPSCURA
             btnUserInfo.ImageAlign = ContentAlignment.MiddleLeft;
 
             // Optional polish
-            btnUserInfo.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            btnUserInfo.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
         }
 
         private void SetActiveTopMenu(Button btn)
@@ -429,7 +431,7 @@ namespace JPSCURA
         {
             picJPSCURA.Visible = false;
             RemoveOnlyChildForms();
-
+            activeForm = childForm;
             childForm.TopLevel = false;
             childForm.FormBorderStyle = FormBorderStyle.None;
             childForm.Dock = DockStyle.Fill;
@@ -529,6 +531,7 @@ namespace JPSCURA
 
             // 🔥 Apply submodule access
             ApplySubModuleAccess("Inventory", panelInventorySubMenu);
+            btnClear.Visible = false;
             ShowHome();
         }
 
@@ -536,6 +539,8 @@ namespace JPSCURA
         {
             SetActiveTopMenu(btnFinance);
             panelSubMenu.Controls.Clear();
+            panelEMPSubMenu.Visible = false;
+
             panelFinanceSubMenu.Visible = true;
             panelSubMenu.Visible = true;
             panelSubMenu.Controls.Add(panelFinanceSubMenu);
@@ -549,6 +554,7 @@ namespace JPSCURA
         {
             SetActiveTopMenu(btnEmployees);
             panelSubMenu.Controls.Clear();
+            panelSubMenuUser.Visible = false;
             panelEMPSubMenu.Visible = true;
             panelSubMenu.Visible = true;
             panelSubMenu.Controls.Add(panelEMPSubMenu);
@@ -562,6 +568,8 @@ namespace JPSCURA
         private async void btnAddorder_Click(object sender, EventArgs e)
         {
             await OpenFormInPanelAsync(new AddOrderForm());
+            //await ShowLoadingAsync();
+            //HideLoading();
         }
 
         private async void btnAddorderIcon_Click(object sender, EventArgs e)
@@ -594,6 +602,7 @@ namespace JPSCURA
             await RunWithLoadingAsync(async () =>
             {
                 await OpenFormInPanelAsync(new Material());
+                btnClear.Visible = false;
             });
         }
 
@@ -602,18 +611,32 @@ namespace JPSCURA
             await RunWithLoadingAsync(async () =>
             {
                 await OpenFormInPanelAsync(new Material());
+                btnClear.Visible = false;
             });
         }
 
 
 
-        private void btnLogindetails_Click(object sender, EventArgs e)
+        private async void btnLogindetails_Click(object sender, EventArgs e)
         {
             panelSubMenu.Controls.Clear();
             panelSubMenu.Visible = false;
             SetActiveTopMenu(btnLogindetails);
             ShowHome();
         }
+            SetActiveTopMenu(btnLogindetails);
+            panelSubMenu.Controls.Clear();
+            panelSubMenuUser.Visible = false;
+            panelEMPSubMenu.Visible = false;
+            panelSubMenu.Visible = false; // 🔥 SHOW PANEL
+            //panelSubMenu.Controls.Add(panelEMPSubMenu);
+            ShowHome();
+            await RunWithLoadingAsync(async () =>
+            {
+                // 🔥 DB + FORM LOAD happens HERE
+                await OpenFormInPanelAsync(new GLD());
+            });
+            }
 
         private void btnCompanyinfo_Click(object sender, EventArgs e)
         {
@@ -628,6 +651,8 @@ namespace JPSCURA
             await RunWithLoadingAsync(async () =>
             {
                 await OpenFormInPanelAsync(new AllMaterial());
+                btnClear.Visible = true;
+
             });
         }
 
@@ -636,17 +661,29 @@ namespace JPSCURA
             await RunWithLoadingAsync(async () =>
             {
                 await OpenFormInPanelAsync(new AllMaterial());
+                btnClear.Visible = true;
+
             });
         }
 
         private async void btnAddEmp_Click(object sender, EventArgs e)
         {
             await OpenFormInPanelAsync(new AddEmp());
+            await RunWithLoadingAsync(async () =>
+            {
+                await OpenFormInPanelAsync(new AddEmp());
+
+            });
         }
 
         private async void picEmp_Click(object sender, EventArgs e)
         {
             await OpenFormInPanelAsync(new AddEmp());
+            await RunWithLoadingAsync(async () =>
+            {
+                await OpenFormInPanelAsync(new AddEmp());
+
+            });
         }
 
         private void pnlLoading_Resize(object sender, EventArgs e)
@@ -658,5 +695,59 @@ namespace JPSCURA
         {
 
         }
+        private void btnClear_Click(object sender, EventArgs e)
+        {
+            if (activeForm is AllMaterial allMaterial)
+            {
+                allMaterial.ClearAllMaterialSelection();
+            }
+        }
+
+        private async void btnAllEmp_Click(object sender, EventArgs e)
+        {
+            await RunWithLoadingAsync(async () =>
+            {
+                await OpenFormInPanelAsync(new AllEmployee());
+
+            });
+        }
+
+        private void btnUserInfo_Click(object sender, EventArgs e)
+        {
+            SetActiveTopMenu(btnUserInfo);
+            panelSubMenu.Controls.Clear();
+            panelSubMenuUser.Visible = true;
+            panelSubMenu.Visible = true; // 🔥 SHOW PANEL
+            panelSubMenu.Controls.Add(panelSubMenuUser);
+            ShowHome();
+        }
+
+        private async void btnEditInfo_Click(object sender, EventArgs e)
+        {
+
+            await OpenFormInPanelAsync(new EditInfo());
+        }
+
+        private void btnLogout_Click(object sender, EventArgs e)
+        {
+            isLogout = true; // 👈 VERY IMPORTANT
+
+            // clear session
+            Session.UserId = 0;
+            Session.RealName = "";
+            Session.Role = "";
+
+            LoginForm login = new LoginForm();
+
+            login.FormClosed += (s, args) =>
+            {
+                Application.Exit(); // exit when login closes
+            };
+
+            login.Show();
+            this.Close(); // close Home
+        }
+
+
     }
 }
