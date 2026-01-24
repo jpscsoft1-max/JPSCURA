@@ -45,6 +45,7 @@
             ColPackage = new DataGridViewTextBoxColumn();
             ColumnBalance = new DataGridViewTextBoxColumn();
             panelSearch = new Panel();
+            btnImport = new Button();
             btnExport = new Button();
             txtSearchType = new TextBox();
             txtSearchPackage = new TextBox();
@@ -152,6 +153,7 @@
             DgvMainTable.CellClick += DgvMainTable_CellClick;
             DgvMainTable.CellDoubleClick += DgvMainTable_CellDoubleClick;
             DgvMainTable.CellFormatting += DgvMainTable_CellFormatting;
+            DgvMainTable.CellMouseDown += DgvMainTable_CellMouseDown;
             DgvMainTable.CellValueChanged += DgvMainTable_CellValueChanged;
             DgvMainTable.ColumnWidthChanged += DgvMainTable_ColumnWidthChanged;
             DgvMainTable.CurrentCellDirtyStateChanged += DgvMainTable_CurrentCellDirtyStateChanged;
@@ -225,6 +227,7 @@
             // 
             panelSearch.BackColor = Color.RoyalBlue;
             panelSearch.Controls.Add(panel2ndtableTopContent);
+            panelSearch.Controls.Add(btnImport);
             panelSearch.Controls.Add(btnExport);
             panelSearch.Controls.Add(txtSearchType);
             panelSearch.Controls.Add(txtSearchPackage);
@@ -237,6 +240,26 @@
             panelSearch.Name = "panelSearch";
             panelSearch.Size = new Size(1354, 50);
             panelSearch.TabIndex = 2;
+            // 
+            // btnImport
+            // 
+            btnImport.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnImport.AutoSize = true;
+            btnImport.Cursor = Cursors.Hand;
+            btnImport.FlatAppearance.BorderSize = 0;
+            btnImport.FlatStyle = FlatStyle.Flat;
+            btnImport.Font = new Font("Arial", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            btnImport.ForeColor = Color.White;
+            btnImport.Image = (Image)resources.GetObject("btnImport.Image");
+            btnImport.ImageAlign = ContentAlignment.MiddleLeft;
+            btnImport.Location = new Point(1145, 0);
+            btnImport.Name = "btnImport";
+            btnImport.Size = new Size(97, 50);
+            btnImport.TabIndex = 24;
+            btnImport.Text = "Import";
+            btnImport.TextAlign = ContentAlignment.MiddleRight;
+            btnImport.UseVisualStyleBackColor = true;
+            btnImport.Click += btnImport_Click;
             // 
             // btnExport
             // 
@@ -474,5 +497,6 @@
         private TextBox txtSearchLocation;
         private TextBox txtSearchMaterial;
         private Button btnExport;
+        private Button btnImport;
     }
 }

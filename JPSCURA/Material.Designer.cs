@@ -306,7 +306,7 @@
             // 
             // btnClear
             // 
-            btnClear.Anchor = AnchorStyles.None;
+            btnClear.Anchor = AnchorStyles.Top;
             btnClear.AutoSize = true;
             btnClear.BackColor = Color.Bisque;
             btnClear.Cursor = Cursors.Hand;
@@ -316,7 +316,7 @@
             btnClear.FlatStyle = FlatStyle.Flat;
             btnClear.Font = new Font("Arial", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
             btnClear.ForeColor = Color.Black;
-            btnClear.Location = new Point(314, 318);
+            btnClear.Location = new Point(303, 205);
             btnClear.Margin = new Padding(2);
             btnClear.Name = "btnClear";
             btnClear.Size = new Size(113, 30);
@@ -405,7 +405,7 @@
             // 
             // btnAddMaterial
             // 
-            btnAddMaterial.Anchor = AnchorStyles.None;
+            btnAddMaterial.Anchor = AnchorStyles.Top;
             btnAddMaterial.AutoSize = true;
             btnAddMaterial.BackColor = Color.CadetBlue;
             btnAddMaterial.Cursor = Cursors.Hand;
@@ -417,7 +417,7 @@
             btnAddMaterial.ForeColor = Color.SeaShell;
             btnAddMaterial.Image = (Image)resources.GetObject("btnAddMaterial.Image");
             btnAddMaterial.ImageAlign = ContentAlignment.MiddleLeft;
-            btnAddMaterial.Location = new Point(170, 317);
+            btnAddMaterial.Location = new Point(159, 204);
             btnAddMaterial.Margin = new Padding(2);
             btnAddMaterial.Name = "btnAddMaterial";
             btnAddMaterial.Size = new Size(140, 31);

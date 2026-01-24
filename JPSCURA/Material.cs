@@ -344,6 +344,8 @@ VALUES
             txtParticular.Clear();
             txtLocation.Clear();
             txtRate.Clear();
+            txtMaxThreshold.Clear();
+            txtMinThreshold.Clear();
 
             cmbMaterialCategory.SelectedIndex = 0;
             cmbMaterialSubCategory.DataSource = null;
