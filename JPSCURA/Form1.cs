@@ -1,6 +1,11 @@
 ﻿using ClosedXML.Excel;
+using DocumentFormat.OpenXml.Bibliography;
+using DocumentFormat.OpenXml.Office2013.Drawing.ChartStyle;
+using DocumentFormat.OpenXml.Vml;
+using Microsoft.Data.SqlClient;
 using Microsoft.VisualBasic.Logging;
 using System;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
@@ -126,30 +131,15 @@ namespace JPSCURA
             }
         }
 
-        //private void Home_Load(object sender, EventArgs e)
-        //{
-        //    // 🔥 ORIGINAL ORDER SAVE (ONLY ONCE)
-
-        //    HookTopMenuEvents();
-        //    SetActiveTopMenu(btnHome);
-        //    panelSubMenu.Visible = false; // 🔥 HIDE PANEL ON STARTUP
-        //    ShowHome();
-
-        //    // 🔒 Access control In LAST
-        //    this.BeginInvoke(new Action(() =>
-        //    {
-        //        ApplyButtonAccess();
-        //        // MessageBox.Show("FINAL ROLE = " + Session.Role); 
-        //    }));
-        //    SetLoggedInUserInfo();
-
-        //}
         private async void Home_Load(object sender, EventArgs e)
         {
             HookTopMenuEvents();
             SetActiveTopMenu(btnHome);
             panelSubMenu.Visible = false;
             ShowHome();
+
+            ApplyMainModuleAccess();
+            SetLoggedInUserInfo();
 
             ApplyButtonAccess();
             SetLoggedInUserInfo();
@@ -182,34 +172,181 @@ namespace JPSCURA
 
         //Access using roles//
 
-        private void ApplyButtonAccess()
+        private void ApplyMainModuleAccess()
         {
-            // ================= STORE =================
-            if (Session.Role == "STORE")
+            // 1. Hide all top buttons
+            foreach (Control c in panelTopMenu.Controls)
             {
-                // 🔒 Hide all top buttons
-                foreach (Control c in panelTopMenu.Controls)
+                if (c is Button btn)
+                    btn.Visible = false;
+            }
+
+            // 2. DB se allowed modules lao
+            using (SqlConnection con = new SqlConnection(DBconection.GetConnectionString()))
+            using (SqlCommand cmd = new SqlCommand(@"
+        SELECT M.ModuleName
+        FROM EMPLOYEE_MASTER..Modules M
+        JOIN EMPLOYEE_MASTER..RoleModulePermissions RMP
+            ON M.ModuleId = RMP.ModuleId
+        WHERE RMP.RoleId = @RoleId
+          AND M.IsActive = 1
+        ORDER BY M.ModuleOrder
+    ", con))
+            {
+                cmd.Parameters.AddWithValue("@RoleId", Session.RoleId);
+                con.Open();
+
+                using (SqlDataReader dr = cmd.ExecuteReader())
+                {
+                    while (dr.Read())
+                    {
+                        string name = dr["ModuleName"].ToString();
+
+                        if (name == "Home") btnHome.Visible = true;
+                        else if (name == "Department") btnDepartment.Visible = true;
+                        else if (name == "Workorder") btnWorkorder.Visible = true;
+                        else if (name == "Purchasing") btnPurchasing.Visible = true;
+                        else if (name == "Sales") btnSales1.Visible = true;
+                        else if (name == "Inventory") btnInventory.Visible = true;
+                        else if (name == "Finance") btnFinance.Visible = true;
+                        else if (name == "Employees") btnEmployees.Visible = true;
+                        else if (name == "GLD") btnLogindetails.Visible = true;
+                        else if (name == "Company Info") btnCompanyinfo.Visible = true;
+                    }
+                }
+            }
+
+            ReArrangeTopMenuButtons();
+        }
+
+        private void ReArrangeTopMenuButtons()
+        {
+            // 🔥 CORRECT ORDER (same as DB ModuleOrder should be)
+            string[] correctOrder =
+            {
+        "btnHome",
+        "btnDepartment",
+        "btnWorkorder",
+        "btnPurchasing",
+        "btnSales1",
+        "btnInventory",
+        "btnFinance",
+        "btnEmployees",
+        "btnLogindetails",
+        "btnCompanyinfo"
+    };
+
+            int startX = 10;
+            int gap = 4;
+            int y = btnHome.Top;
+
+            // Loop through defined order
+            foreach (string btnName in correctOrder)
+            {
+                var controls = panelTopMenu.Controls.Find(btnName, false);
+
+                if (controls.Length > 0 && controls[0] is Button btn && btn.Visible)
+                {
+                    btn.Location = new Point(startX, y);
+                    startX += btn.Width + gap;
+                }
+            }
+        }
+
+        // 🔥 GENERIC SUB MODULE ACCESS (WITH DEBUG)
+        private void ApplySubModuleAccess(string moduleName, Panel subMenuPanel)
+        {
+            try
+            {
+                // 1️⃣ Hide all buttons
+                foreach (Control c in subMenuPanel.Controls)
                 {
                     if (c is Button btn)
                         btn.Visible = false;
                 }
 
-                // 🔓 Show only Home + Inventory
-                btnHome.Visible = true;
-                btnInventory.Visible = true;
+                // 🔥 Store ordered buttons
+                List<Button> orderedButtons = new List<Button>();
 
-                // 🔥 FORCE POSITION (THIS NEVER FAILS)
-                btnHome.Location = new Point(10, 0);
-                btnInventory.Location = new Point(
-                    btnHome.Right + 10,
-                    btnHome.Top
-                );
+                // 2️⃣ DB se allowed submodules WITH ORDER
+                using (SqlConnection con = new SqlConnection(DBconection.GetConnectionString()))
+                using (SqlCommand cmd = new SqlCommand(@"
+            SELECT SM.SubModuleName
+            FROM EMPLOYEE_MASTER..SubModules SM
+            INNER JOIN EMPLOYEE_MASTER..RoleSubModulePermissions RSP
+                ON SM.SubModuleId = RSP.SubModuleId
+            INNER JOIN EMPLOYEE_MASTER..Modules M
+                ON SM.ModuleId = M.ModuleId
+            WHERE RSP.RoleId = @RoleId
+              AND M.ModuleName = @ModuleName
+              AND SM.IsActive = 1
+            ORDER BY SM.SubModuleOrder
+        ", con))
+                {
+                    cmd.Parameters.AddWithValue("@RoleId", Session.RoleId);
+                    cmd.Parameters.AddWithValue("@ModuleName", moduleName);
+                    con.Open();
 
-                return;
+                    using (SqlDataReader dr = cmd.ExecuteReader())
+                    {
+                        while (dr.Read())
+                        {
+                            string allowedSub = dr["SubModuleName"].ToString();
+
+                            foreach (Control c in subMenuPanel.Controls)
+                            {
+                                if (c is Button btn && btn.Tag?.ToString() == allowedSub)
+                                {
+                                    btn.Visible = true;
+                                    orderedButtons.Add(btn);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                //  RE-ARRANGE IN ORDER
+                ReArrangeSubMenuButtons(subMenuPanel, orderedButtons);
             }
-
-
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error: {ex.Message}", "Error",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
+
+        private void ReArrangeSubMenuButtons(Panel subMenuPanel, List<Button> orderedButtons)
+        {
+            if (orderedButtons.Count == 0) return;
+
+            int startX = 10;
+            int startY = 10;
+            int gap = 5;
+
+            // Detect horizontal vs vertical layout
+            bool isHorizontal = subMenuPanel.Width > subMenuPanel.Height;
+
+            if (isHorizontal)
+            {
+                // Horizontal arrangement
+                foreach (Button btn in orderedButtons)
+                {
+                    btn.Location = new Point(startX, startY);
+                    startX += btn.Width + gap;
+                }
+            }
+            else
+            {
+                // Vertical arrangement
+                foreach (Button btn in orderedButtons)
+                {
+                    btn.Location = new Point(startX, startY);
+                    startY += btn.Height + gap;
+                }
+            }
+        }
+
 
         private void SetLoggedInUserInfo()
         {
@@ -224,6 +361,7 @@ namespace JPSCURA
             // Optional polish
             btnUserInfo.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
         }
+
         private void SetActiveTopMenu(Button btn)
         {
             if (activeTopButton != null)
@@ -327,7 +465,7 @@ namespace JPSCURA
         {
             SetActiveTopMenu(btnHome);
             panelSubMenu.Controls.Clear();
-            panelSubMenu.Visible = false; // 🔥 HIDE PANEL ON HOME
+            panelSubMenu.Visible = false;
             ShowHome();
         }
 
@@ -336,8 +474,11 @@ namespace JPSCURA
             SetActiveTopMenu(btnDepartment);
             panelSubMenu.Controls.Clear();
             panelDeptsubmenu.Visible = true;
-            panelSubMenu.Visible = true; // 🔥 SHOW PANEL
+            panelSubMenu.Visible = true;
             panelSubMenu.Controls.Add(panelDeptsubmenu);
+
+            // 🔥 Apply submodule access
+            ApplySubModuleAccess("Department", panelDeptsubmenu);
             ShowHome();
         }
 
@@ -346,8 +487,11 @@ namespace JPSCURA
             SetActiveTopMenu(btnWorkorder);
             panelSubMenu.Controls.Clear();
             panelWorkOrderSubMenu.Visible = true;
-            panelSubMenu.Visible = true; // 🔥 SHOW PANEL
+            panelSubMenu.Visible = true;
             panelSubMenu.Controls.Add(panelWorkOrderSubMenu);
+
+            // 🔥 Apply submodule access
+            ApplySubModuleAccess("Workorder", panelWorkOrderSubMenu);
             ShowHome();
         }
 
@@ -356,8 +500,11 @@ namespace JPSCURA
             SetActiveTopMenu(btnPurchasing);
             panelSubMenu.Controls.Clear();
             panelPurchasingSubMenu.Visible = true;
-            panelSubMenu.Visible = true; // 🔥 SHOW PANEL
+            panelSubMenu.Visible = true;
             panelSubMenu.Controls.Add(panelPurchasingSubMenu);
+
+            // 🔥 Apply submodule access
+            ApplySubModuleAccess("Purchasing", panelPurchasingSubMenu);
             ShowHome();
         }
 
@@ -366,8 +513,11 @@ namespace JPSCURA
             SetActiveTopMenu(btnSales1);
             panelSubMenu.Controls.Clear();
             panelSalesSubMenu.Visible = true;
-            panelSubMenu.Visible = true; // 🔥 SHOW PANEL
+            panelSubMenu.Visible = true;
             panelSubMenu.Controls.Add(panelSalesSubMenu);
+
+            // 🔥 Apply submodule access
+            ApplySubModuleAccess("Sales", panelSalesSubMenu);
             ShowHome();
         }
 
@@ -376,8 +526,11 @@ namespace JPSCURA
             SetActiveTopMenu(btnInventory);
             panelSubMenu.Controls.Clear();
             panelInventorySubMenu.Visible = true;
-            panelSubMenu.Visible = true; // 🔥 SHOW PANEL
+            panelSubMenu.Visible = true;
             panelSubMenu.Controls.Add(panelInventorySubMenu);
+
+            // 🔥 Apply submodule access
+            ApplySubModuleAccess("Inventory", panelInventorySubMenu);
             btnClear.Visible = false;
             ShowHome();
         }
@@ -389,18 +542,25 @@ namespace JPSCURA
             panelEMPSubMenu.Visible = false;
 
             panelFinanceSubMenu.Visible = true;
-            panelSubMenu.Visible = true; // 🔥 SHOW PANEL
+            panelSubMenu.Visible = true;
             panelSubMenu.Controls.Add(panelFinanceSubMenu);
+
+            // 🔥 Apply submodule access
+            ApplySubModuleAccess("Finance", panelFinanceSubMenu);
             ShowHome();
         }
+
         private void btnEmployees_Click(object sender, EventArgs e)
         {
             SetActiveTopMenu(btnEmployees);
             panelSubMenu.Controls.Clear();
             panelSubMenuUser.Visible = false;
             panelEMPSubMenu.Visible = true;
-            panelSubMenu.Visible = true; // 🔥 SHOW PANEL
+            panelSubMenu.Visible = true;
             panelSubMenu.Controls.Add(panelEMPSubMenu);
+
+            // 🔥 Apply submodule access
+            ApplySubModuleAccess("Employees", panelEMPSubMenu);
             ShowHome();
         }
 
@@ -415,43 +575,32 @@ namespace JPSCURA
         private async void btnAddorderIcon_Click(object sender, EventArgs e)
         {
             await OpenFormInPanelAsync(new AddOrderForm());
-            //await ShowLoadingAsync();
-            //HideLoading();
         }
 
         private async void btnVendors_Click(object sender, EventArgs e)
         {
             await OpenFormInPanelAsync(new Vendors());
-            //await ShowLoadingAsync();
-            //HideLoading();
         }
 
         private async void btnVendoricon_Click(object sender, EventArgs e)
         {
             await OpenFormInPanelAsync(new Vendors());
-            //await ShowLoadingAsync();
-            //HideLoading();
         }
 
         private async void btnCustomers_Click(object sender, EventArgs e)
         {
             await OpenFormInPanelAsync(new Customer());
-            //await ShowLoadingAsync();
-            //HideLoading();
         }
 
         private async void btnCustomericon_Click(object sender, EventArgs e)
         {
             await OpenFormInPanelAsync(new Customer());
-            //await ShowLoadingAsync();
-            //HideLoading();
         }
 
         private async void btnAddMaterial_Click(object sender, EventArgs e)
         {
             await RunWithLoadingAsync(async () =>
             {
-                // 🔥 DB + FORM LOAD happens HERE
                 await OpenFormInPanelAsync(new Material());
                 btnClear.Visible = false;
             });
@@ -461,7 +610,6 @@ namespace JPSCURA
         {
             await RunWithLoadingAsync(async () =>
             {
-                // 🔥 DB + FORM LOAD happens HERE
                 await OpenFormInPanelAsync(new Material());
                 btnClear.Visible = false;
             });
@@ -471,6 +619,11 @@ namespace JPSCURA
 
         private async void btnLogindetails_Click(object sender, EventArgs e)
         {
+            panelSubMenu.Controls.Clear();
+            panelSubMenu.Visible = false;
+            SetActiveTopMenu(btnLogindetails);
+            ShowHome();
+        }
             SetActiveTopMenu(btnLogindetails);
             panelSubMenu.Controls.Clear();
             panelSubMenuUser.Visible = false;
@@ -488,16 +641,15 @@ namespace JPSCURA
         private void btnCompanyinfo_Click(object sender, EventArgs e)
         {
             panelSubMenu.Controls.Clear();
-            panelSubMenu.Visible = false; // 🔥 HIDE PANEL
+            panelSubMenu.Visible = false;
             SetActiveTopMenu(btnCompanyinfo);
-            ShowHome(); // 🔥 CLEAR CONTENT
+            ShowHome();
         }
 
         private async void btnAllMaterials_Click(object sender, EventArgs e)
         {
             await RunWithLoadingAsync(async () =>
             {
-                // 🔥 DB + FORM LOAD happens HERE
                 await OpenFormInPanelAsync(new AllMaterial());
                 btnClear.Visible = true;
 
@@ -508,7 +660,6 @@ namespace JPSCURA
         {
             await RunWithLoadingAsync(async () =>
             {
-                // 🔥 DB + FORM LOAD happens HERE
                 await OpenFormInPanelAsync(new AllMaterial());
                 btnClear.Visible = true;
 
@@ -517,6 +668,7 @@ namespace JPSCURA
 
         private async void btnAddEmp_Click(object sender, EventArgs e)
         {
+            await OpenFormInPanelAsync(new AddEmp());
             await RunWithLoadingAsync(async () =>
             {
                 await OpenFormInPanelAsync(new AddEmp());
@@ -526,6 +678,7 @@ namespace JPSCURA
 
         private async void picEmp_Click(object sender, EventArgs e)
         {
+            await OpenFormInPanelAsync(new AddEmp());
             await RunWithLoadingAsync(async () =>
             {
                 await OpenFormInPanelAsync(new AddEmp());
@@ -538,6 +691,10 @@ namespace JPSCURA
             CenterLoaderBox();
         }
 
+        private void btnBankPayVoucher_Click(object sender, EventArgs e)
+        {
+
+        }
         private void btnClear_Click(object sender, EventArgs e)
         {
             if (activeForm is AllMaterial allMaterial)

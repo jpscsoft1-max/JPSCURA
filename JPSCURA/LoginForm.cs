@@ -16,19 +16,7 @@ namespace JPSCURA
             StartPosition = FormStartPosition.CenterScreen;
             KeyPreview = true;   // Enter key support
         }
-        protected override void OnPaint(PaintEventArgs e)
-        {
-            base.OnPaint(e);
 
-            using (LinearGradientBrush brush = new LinearGradientBrush(
-                this.ClientRectangle,
-                Color.FromArgb(110, 160, 240),   // TOP color
-                Color.FromArgb(70, 120, 210),    // BOTTOM color
-                LinearGradientMode.Vertical))
-            {
-                e.Graphics.FillRectangle(brush, this.ClientRectangle);
-            }
-        }
 
 
         private void LoginForm_Load(object sender, EventArgs e)
@@ -64,15 +52,22 @@ namespace JPSCURA
             {
                 using (SqlConnection con =
                     new SqlConnection(DBconection.GetConnectionString()))
-                using (SqlCommand cmd = new SqlCommand(@"
-                   SELECT 
+                {
+                    con.Open();
+
+                    // 🔹 STEP 1: Check username + password
+                    using (SqlCommand cmd = new SqlCommand(@"
+                SELECT 
     U.UserId,
     U.RealName,
     U.Username,
+    U.RoleId,              
+    U.IsActive,
     R.RoleName,
     D.DepartmentName,
     E.Emp_id,
-    E.Emp_Name
+    E.Emp_Name,
+    E.IsActive AS EmpIsActive
 FROM EMPLOYEE_MASTER..Users U
 INNER JOIN EMPLOYEE_MASTER..Roles R
     ON U.RoleId = R.RoleId
@@ -81,31 +76,54 @@ INNER JOIN EMPLOYEE_MASTER..Departments D
 INNER JOIN EMPLOYEE_MASTER..Employees E
     ON U.Emp_id = E.Emp_id
 WHERE U.Username = @u
-  AND U.Password = @p;
-                ", con))
-                {
-                    cmd.Parameters.AddWithValue("@u", username);
-                    cmd.Parameters.AddWithValue("@p", password);
-
-                    con.Open();
-                    using (SqlDataReader dr = cmd.ExecuteReader())
+  AND U.Password = @p
+", con))
                     {
-                        if (!dr.Read())
-                        {
-                            MessageBox.Show(
-                                "Invalid username or password",
-                                "Login Failed",
-                                MessageBoxButtons.OK,
-                                MessageBoxIcon.Error);
-                            return;
-                        }
+                        cmd.Parameters.AddWithValue("@u", username);
+                        cmd.Parameters.AddWithValue("@p", password);
 
-                        // 🔐 SESSION SET
-                        Session.UserId = Convert.ToInt32(dr["UserId"]);
-                        Session.RealName = dr["RealName"].ToString();
-                        Session.Username = dr["Username"].ToString();
-                        Session.Role = dr["RoleName"].ToString().Trim().ToUpper();
-                        Session.Department = dr["DepartmentName"].ToString().Trim();
+                        using (SqlDataReader dr = cmd.ExecuteReader())
+                        {
+                            if (!dr.Read())
+                            {
+                                MessageBox.Show(
+                                    "Invalid username or password",
+                                    "Login Failed",
+                                    MessageBoxButtons.OK,
+                                    MessageBoxIcon.Error);
+                                return;
+                            }
+
+                            // 🔒 STEP 2: User active check
+                            if (!Convert.ToBoolean(dr["IsActive"]))
+                            {
+                                MessageBox.Show(
+                                    "Your account is temporarily disabled. Please contact the administrator.",
+                                    "Access Denied",
+                                    MessageBoxButtons.OK,
+                                    MessageBoxIcon.Warning);
+                                return;
+                            }
+
+                            // 🔒 STEP 3: Employee active check
+                            if (!Convert.ToBoolean(dr["EmpIsActive"]))
+                            {
+                                MessageBox.Show(
+                                    "Employee record is inactive. Login is not allowed.",
+                                    "Access Denied",
+                                    MessageBoxButtons.OK,
+                                    MessageBoxIcon.Warning);
+                                return;
+                            }
+
+                            Session.UserId = Convert.ToInt32(dr["UserId"]);
+                            Session.RoleId = Convert.ToInt32(dr["RoleId"]);
+                            Session.RealName = dr["RealName"].ToString();
+                            Session.Username = dr["Username"].ToString();
+                            Session.Role = dr["RoleName"].ToString().Trim().ToUpper();
+                            Session.Department = dr["DepartmentName"].ToString().Trim();
+
+                        }
                     }
                 }
 
@@ -123,6 +141,7 @@ WHERE U.Username = @u
                     MessageBoxIcon.Error);
             }
         }
+
 
         // ================= ENTER KEY =================
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
@@ -150,14 +169,13 @@ WHERE U.Username = @u
                 : Image.FromFile("eye_close.png");
         }
 
-        // ================= ROUNDED PANEL + BORDER =================
         private void pnlLogin_Paint(object sender, PaintEventArgs e)
         {
             Panel pnl = sender as Panel;
             int radius = 18;
             int borderThickness = 2;
 
-            Color borderColor = Color.FromArgb(200, 200, 200);
+            Color borderColor = Color.FromArgb(59, 43, 151);
 
             e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
             e.Graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;

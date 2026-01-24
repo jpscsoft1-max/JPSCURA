@@ -29,54 +29,73 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(LoginForm));
-            txtPassword = new TextBox();
-            txtUsername = new TextBox();
-            label2 = new Label();
-            picEye = new PictureBox();
-            btnLogin = new Button();
-            label1 = new Label();
+            panel1 = new Panel();
             pnlLogin = new Panel();
             label3 = new Label();
-            ((System.ComponentModel.ISupportInitialize)picEye).BeginInit();
+            label1 = new Label();
+            btnLogin = new Button();
+            picEye = new PictureBox();
+            label2 = new Label();
+            txtUsername = new TextBox();
+            txtPassword = new TextBox();
+            panel1.SuspendLayout();
             pnlLogin.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)picEye).BeginInit();
             SuspendLayout();
             // 
-            // txtPassword
+            // panel1
             // 
-            txtPassword.Location = new Point(20, 123);
-            txtPassword.Name = "txtPassword";
-            txtPassword.PasswordChar = '*';
-            txtPassword.Size = new Size(291, 23);
-            txtPassword.TabIndex = 3;
+            panel1.BackColor = Color.FromArgb(100, 225, 225, 225);
+            panel1.Controls.Add(pnlLogin);
+            panel1.Dock = DockStyle.Fill;
+            panel1.Location = new Point(0, 0);
+            panel1.Name = "panel1";
+            panel1.Size = new Size(429, 408);
+            panel1.TabIndex = 0;
             // 
-            // txtUsername
+            // pnlLogin
             // 
-            txtUsername.Location = new Point(20, 79);
-            txtUsername.Name = "txtUsername";
-            txtUsername.Size = new Size(291, 23);
-            txtUsername.TabIndex = 1;
+            pnlLogin.BackColor = Color.FromArgb(190, 225, 225, 225);
+            pnlLogin.Controls.Add(label3);
+            pnlLogin.Controls.Add(label1);
+            pnlLogin.Controls.Add(btnLogin);
+            pnlLogin.Controls.Add(picEye);
+            pnlLogin.Controls.Add(label2);
+            pnlLogin.Controls.Add(txtUsername);
+            pnlLogin.Controls.Add(txtPassword);
+            pnlLogin.Location = new Point(70, 91);
+            pnlLogin.Name = "pnlLogin";
+            pnlLogin.Size = new Size(289, 222);
+            pnlLogin.TabIndex = 7;
+            pnlLogin.Paint += pnlLogin_Paint;
             // 
-            // label2
+            // label3
             // 
-            label2.AutoSize = true;
-            label2.Location = new Point(20, 105);
-            label2.Name = "label2";
-            label2.Size = new Size(57, 15);
-            label2.TabIndex = 2;
-            label2.Text = "Password";
+            label3.BackColor = Color.Transparent;
+            label3.FlatStyle = FlatStyle.Flat;
+            label3.Font = new Font("Impact", 21F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            label3.ForeColor = Color.FromArgb(59, 43, 151);
+            label3.Image = (Image)resources.GetObject("label3.Image");
+            label3.ImageAlign = ContentAlignment.MiddleLeft;
+            label3.Location = new Point(72, 17);
+            label3.Name = "label3";
+            label3.Size = new Size(143, 40);
+            label3.TabIndex = 7;
+            label3.Text = "JPSCURA";
+            label3.TextAlign = ContentAlignment.MiddleRight;
+            label3.UseCompatibleTextRendering = true;
             // 
-            // picEye
+            // label1
             // 
-            picEye.BackColor = Color.White;
-            picEye.Cursor = Cursors.Hand;
-            picEye.Image = (Image)resources.GetObject("picEye.Image");
-            picEye.Location = new Point(291, 127);
-            picEye.Name = "picEye";
-            picEye.Size = new Size(15, 15);
-            picEye.SizeMode = PictureBoxSizeMode.StretchImage;
-            picEye.TabIndex = 5;
-            picEye.TabStop = false;
-            picEye.Click += picEye_Click;
+            label1.AutoSize = true;
+            label1.BackColor = Color.FromArgb(0, 0, 0, 0);
+            label1.Font = new Font("Tahoma", 8.5F, FontStyle.Bold);
+            label1.ForeColor = Color.FromArgb(59, 43, 151);
+            label1.Location = new Point(19, 76);
+            label1.Name = "label1";
+            label1.Size = new Size(66, 14);
+            label1.TabIndex = 0;
+            label1.Text = "Username";
             // 
             // btnLogin
             // 
@@ -85,62 +104,62 @@
             btnLogin.FlatAppearance.BorderSize = 0;
             btnLogin.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
             btnLogin.ForeColor = SystemColors.Highlight;
-            btnLogin.Location = new Point(126, 165);
+            btnLogin.Location = new Point(103, 184);
             btnLogin.Name = "btnLogin";
             btnLogin.Size = new Size(75, 23);
             btnLogin.TabIndex = 4;
             btnLogin.Text = "Login";
             btnLogin.UseVisualStyleBackColor = false;
-            btnLogin.Click += btnLogin_Click;
             // 
-            // label1
+            // picEye
             // 
-            label1.AutoSize = true;
-            label1.Location = new Point(20, 61);
-            label1.Name = "label1";
-            label1.Size = new Size(60, 15);
-            label1.TabIndex = 0;
-            label1.Text = "Username";
+            picEye.BackColor = Color.White;
+            picEye.Cursor = Cursors.Hand;
+            picEye.Image = (Image)resources.GetObject("picEye.Image");
+            picEye.Location = new Point(248, 150);
+            picEye.Name = "picEye";
+            picEye.Size = new Size(15, 15);
+            picEye.SizeMode = PictureBoxSizeMode.StretchImage;
+            picEye.TabIndex = 5;
+            picEye.TabStop = false;
             // 
-            // pnlLogin
+            // label2
             // 
-            pnlLogin.BackColor = SystemColors.MenuBar;
-            pnlLogin.Controls.Add(label3);
-            pnlLogin.Controls.Add(label1);
-            pnlLogin.Controls.Add(btnLogin);
-            pnlLogin.Controls.Add(picEye);
-            pnlLogin.Controls.Add(label2);
-            pnlLogin.Controls.Add(txtUsername);
-            pnlLogin.Controls.Add(txtPassword);
-            pnlLogin.Location = new Point(103, 51);
-            pnlLogin.Name = "pnlLogin";
-            pnlLogin.Size = new Size(330, 200);
-            pnlLogin.TabIndex = 6;
-            pnlLogin.Paint += pnlLogin_Paint;
+            label2.AutoSize = true;
+            label2.BackColor = Color.FromArgb(0, 0, 0, 0);
+            label2.Font = new Font("Tahoma", 8.5F, FontStyle.Bold);
+            label2.ForeColor = Color.FromArgb(59, 43, 151);
+            label2.Location = new Point(18, 128);
+            label2.Name = "label2";
+            label2.Size = new Size(66, 14);
+            label2.TabIndex = 2;
+            label2.Text = "Password";
             // 
-            // label3
+            // txtUsername
             // 
-            label3.AutoSize = true;
-            label3.FlatStyle = FlatStyle.Flat;
-            label3.Font = new Font("Impact", 20.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            label3.ForeColor = Color.SteelBlue;
-            label3.Location = new Point(107, 14);
-            label3.Name = "label3";
-            label3.Size = new Size(116, 40);
-            label3.TabIndex = 7;
-            label3.Text = "WELCOME";
-            label3.TextAlign = ContentAlignment.MiddleCenter;
-            label3.UseCompatibleTextRendering = true;
+            txtUsername.BackColor = Color.White;
+            txtUsername.Location = new Point(21, 95);
+            txtUsername.Name = "txtUsername";
+            txtUsername.Size = new Size(245, 23);
+            txtUsername.TabIndex = 1;
+            // 
+            // txtPassword
+            // 
+            txtPassword.Location = new Point(21, 146);
+            txtPassword.Name = "txtPassword";
+            txtPassword.PasswordChar = '*';
+            txtPassword.Size = new Size(245, 23);
+            txtPassword.TabIndex = 3;
             // 
             // LoginForm
             // 
-            AcceptButton = btnLogin;
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            BackColor = Color.CornflowerBlue;
+            BackColor = Color.Honeydew;
+            BackgroundImage = (Image)resources.GetObject("$this.BackgroundImage");
             BackgroundImageLayout = ImageLayout.None;
-            ClientSize = new Size(541, 298);
-            Controls.Add(pnlLogin);
+            ClientSize = new Size(429, 408);
+            Controls.Add(panel1);
             ForeColor = SystemColors.ActiveCaptionText;
             FormBorderStyle = FormBorderStyle.FixedSingle;
             Icon = (Icon)resources.GetObject("$this.Icon");
@@ -150,21 +169,23 @@
             StartPosition = FormStartPosition.CenterScreen;
             Text = "JPSCURA";
             Load += LoginForm_Load;
-            ((System.ComponentModel.ISupportInitialize)picEye).EndInit();
+            panel1.ResumeLayout(false);
             pnlLogin.ResumeLayout(false);
             pnlLogin.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)picEye).EndInit();
             ResumeLayout(false);
         }
 
         #endregion
 
-        private TextBox txtPassword;
-        private TextBox txtUsername;
-        private Label label2;
-        private PictureBox picEye;
-        private Button btnLogin;
-        private Label label1;
+        private Panel panel1;
         private Panel pnlLogin;
         private Label label3;
+        private Label label1;
+        private Button btnLogin;
+        private PictureBox picEye;
+        private Label label2;
+        private TextBox txtUsername;
+        private TextBox txtPassword;
     }
 }
