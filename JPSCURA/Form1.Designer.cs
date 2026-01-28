@@ -35,14 +35,15 @@
             panelPurchasingSubMenu = new Panel();
             panelSalesSubMenu = new Panel();
             panelInventorySubMenu = new Panel();
+            btnClear = new Button();
             panelFinanceSubMenu = new Panel();
+            btnGST = new Button();
             panelEMPSubMenu = new Panel();
+            btnAllEmp = new Button();
+            btnAddEmp = new Button();
             panelSubMenuUser = new Panel();
             btnLogout = new Button();
             btnEditInfo = new Button();
-            btnAllEmp = new Button();
-            btnAddEmp = new Button();
-            btnGST = new Button();
             btnBankPayVoucher = new Button();
             btnCashPayVoucher = new Button();
             btnTCS = new Button();
@@ -50,9 +51,6 @@
             btnBankReceiptVoucher = new Button();
             btnTDS = new Button();
             btnLedger = new Button();
-            btnClear = new Button();
-            picRawMaterialIcons = new PictureBox();
-            btnAddMaterialIcon = new Button();
             btnAddMaterial = new Button();
             btnAllMaterials = new Button();
             btnRawMaterials = new Button();
@@ -80,12 +78,6 @@
             btnSales = new Button();
             btnStore = new Button();
             btnAdmin = new Button();
-            panelContent = new Panel();
-            pnlLoading = new Panel();
-            pnlLoaderBox = new Panel();
-            picLoader = new PictureBox();
-            lblLoading = new Label();
-            picJPSCURA = new PictureBox();
             panelTopMenu = new Panel();
             panelUserInfo = new Panel();
             btnUserInfo = new Button();
@@ -99,6 +91,20 @@
             btnEmployees = new Button();
             btnFinance = new Button();
             btnHome = new Button();
+            pnlhometitlebar = new Panel();
+            btnhideminimize = new Button();
+            btnminimax = new Button();
+            btnhomeclose = new Button();
+            lblappname = new Label();
+            pcthomelogo = new PictureBox();
+            pnlmenuitem = new Panel();
+            onlsub = new Panel();
+            panelContent = new Panel();
+            pnlLoading = new Panel();
+            pnlLoaderBox = new Panel();
+            picLoader = new PictureBox();
+            lblLoading = new Label();
+            picJPSCURA = new PictureBox();
             panelSubMenu.SuspendLayout();
             panelDeptsubmenu.SuspendLayout();
             panelWorkOrderSubMenu.SuspendLayout();
@@ -108,23 +114,24 @@
             panelFinanceSubMenu.SuspendLayout();
             panelEMPSubMenu.SuspendLayout();
             panelSubMenuUser.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)PicAllEmp).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)picEmp).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)picRawMaterialIcons).BeginInit();
+            panelTopMenu.SuspendLayout();
+            panelUserInfo.SuspendLayout();
+            pnlhometitlebar.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)pcthomelogo).BeginInit();
+            pnlmenuitem.SuspendLayout();
+            onlsub.SuspendLayout();
             panelContent.SuspendLayout();
             pnlLoading.SuspendLayout();
             pnlLoaderBox.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)picLoader).BeginInit();
             ((System.ComponentModel.ISupportInitialize)picJPSCURA).BeginInit();
-            panelTopMenu.SuspendLayout();
-            panelUserInfo.SuspendLayout();
             SuspendLayout();
             // 
             // panelSubMenu
             // 
             panelSubMenu.Controls.Add(panelDeptsubmenu);
             panelSubMenu.Dock = DockStyle.Top;
-            panelSubMenu.Location = new Point(0, 35);
+            panelSubMenu.Location = new Point(0, 0);
             panelSubMenu.Name = "panelSubMenu";
             panelSubMenu.Size = new Size(1370, 80);
             panelSubMenu.TabIndex = 1;
@@ -138,6 +145,7 @@
             panelDeptsubmenu.Controls.Add(btnSales);
             panelDeptsubmenu.Controls.Add(btnStore);
             panelDeptsubmenu.Controls.Add(btnAdmin);
+            panelDeptsubmenu.Dock = DockStyle.Top;
             panelDeptsubmenu.Location = new Point(0, 0);
             panelDeptsubmenu.Name = "panelDeptsubmenu";
             panelDeptsubmenu.Size = new Size(1370, 80);
@@ -193,10 +201,8 @@
             // panelInventorySubMenu
             // 
             panelInventorySubMenu.BackColor = Color.Transparent;
-            panelInventorySubMenu.Controls.Add(panelFinanceSubMenu);
             panelInventorySubMenu.Controls.Add(btnClear);
-            panelInventorySubMenu.Controls.Add(picRawMaterialIcons);
-            panelInventorySubMenu.Controls.Add(btnAddMaterialIcon);
+            panelInventorySubMenu.Controls.Add(panelFinanceSubMenu);
             panelInventorySubMenu.Controls.Add(btnAddMaterial);
             panelInventorySubMenu.Controls.Add(btnAllMaterials);
             panelInventorySubMenu.Controls.Add(btnRawMaterials);
@@ -209,10 +215,28 @@
             panelInventorySubMenu.TabIndex = 5;
             panelInventorySubMenu.Visible = false;
             // 
+            // btnClear
+            // 
+            btnClear.AutoSize = true;
+            btnClear.Cursor = Cursors.Hand;
+            btnClear.FlatAppearance.BorderSize = 0;
+            btnClear.FlatStyle = FlatStyle.Flat;
+            btnClear.Font = new Font("Arial", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            btnClear.Image = Properties.Resources.clear_button;
+            btnClear.ImageAlign = ContentAlignment.TopCenter;
+            btnClear.Location = new Point(1034, 12);
+            btnClear.Name = "btnClear";
+            btnClear.Size = new Size(134, 58);
+            btnClear.TabIndex = 22;
+            btnClear.Text = "Clear Selection";
+            btnClear.TextAlign = ContentAlignment.BottomCenter;
+            btnClear.UseVisualStyleBackColor = true;
+            btnClear.Click += btnClear_Click;
+            // 
             // panelFinanceSubMenu
             // 
-            panelFinanceSubMenu.Controls.Add(panelEMPSubMenu);
             panelFinanceSubMenu.Controls.Add(btnGST);
+            panelFinanceSubMenu.Controls.Add(panelEMPSubMenu);
             panelFinanceSubMenu.Controls.Add(btnBankPayVoucher);
             panelFinanceSubMenu.Controls.Add(btnCashPayVoucher);
             panelFinanceSubMenu.Controls.Add(btnTCS);
@@ -227,16 +251,70 @@
             panelFinanceSubMenu.TabIndex = 4;
             panelFinanceSubMenu.Visible = false;
             // 
+            // btnGST
+            // 
+            btnGST.FlatAppearance.BorderSize = 0;
+            btnGST.FlatStyle = FlatStyle.Flat;
+            btnGST.Font = new Font("Segoe UI", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            btnGST.Image = Properties.Resources.GST;
+            btnGST.ImageAlign = ContentAlignment.TopCenter;
+            btnGST.Location = new Point(1167, 9);
+            btnGST.Name = "btnGST";
+            btnGST.Size = new Size(150, 61);
+            btnGST.TabIndex = 7;
+            btnGST.Tag = "GST";
+            btnGST.Text = "GST";
+            btnGST.TextAlign = ContentAlignment.BottomCenter;
+            btnGST.UseVisualStyleBackColor = true;
+            // 
             // panelEMPSubMenu
             // 
-            panelEMPSubMenu.Controls.Add(panelSubMenuUser);
             panelEMPSubMenu.Controls.Add(btnAllEmp);
             panelEMPSubMenu.Controls.Add(btnAddEmp);
+            panelEMPSubMenu.Controls.Add(panelSubMenuUser);
             panelEMPSubMenu.Dock = DockStyle.Top;
             panelEMPSubMenu.Location = new Point(0, 0);
             panelEMPSubMenu.Name = "panelEMPSubMenu";
             panelEMPSubMenu.Size = new Size(1370, 80);
             panelEMPSubMenu.TabIndex = 23;
+            // 
+            // btnAllEmp
+            // 
+            btnAllEmp.AutoSize = true;
+            btnAllEmp.Cursor = Cursors.Hand;
+            btnAllEmp.FlatAppearance.BorderSize = 0;
+            btnAllEmp.FlatStyle = FlatStyle.Flat;
+            btnAllEmp.Font = new Font("Arial", 10.8F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            btnAllEmp.Image = Properties.Resources.All_Employee;
+            btnAllEmp.ImageAlign = ContentAlignment.TopCenter;
+            btnAllEmp.Location = new Point(176, 9);
+            btnAllEmp.Name = "btnAllEmp";
+            btnAllEmp.Size = new Size(152, 61);
+            btnAllEmp.TabIndex = 3;
+            btnAllEmp.Tag = "All Employee";
+            btnAllEmp.Text = "All Employee";
+            btnAllEmp.TextAlign = ContentAlignment.BottomCenter;
+            btnAllEmp.UseVisualStyleBackColor = true;
+            btnAllEmp.Click += btnAllEmp_Click;
+            // 
+            // btnAddEmp
+            // 
+            btnAddEmp.AutoSize = true;
+            btnAddEmp.Cursor = Cursors.Hand;
+            btnAddEmp.FlatAppearance.BorderSize = 0;
+            btnAddEmp.FlatStyle = FlatStyle.Flat;
+            btnAddEmp.Font = new Font("Arial", 10.8F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            btnAddEmp.Image = Properties.Resources.Add_Employee;
+            btnAddEmp.ImageAlign = ContentAlignment.TopCenter;
+            btnAddEmp.Location = new Point(15, 9);
+            btnAddEmp.Name = "btnAddEmp";
+            btnAddEmp.Size = new Size(152, 61);
+            btnAddEmp.TabIndex = 2;
+            btnAddEmp.Tag = "Add Employee";
+            btnAddEmp.Text = "Add Employee";
+            btnAddEmp.TextAlign = ContentAlignment.BottomCenter;
+            btnAddEmp.UseVisualStyleBackColor = true;
+            btnAddEmp.Click += btnAddEmp_Click;
             // 
             // panelSubMenuUser
             // 
@@ -257,9 +335,9 @@
             btnLogout.FlatStyle = FlatStyle.Flat;
             btnLogout.Font = new Font("Arial", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
             btnLogout.ForeColor = Color.Red;
-            btnLogout.Image = (Image)resources.GetObject("btnLogout.Image");
+            btnLogout.Image = Properties.Resources.logout__1_;
             btnLogout.ImageAlign = ContentAlignment.TopCenter;
-            btnLogout.Location = new Point(1206, 10);
+            btnLogout.Location = new Point(173, 10);
             btnLogout.Name = "btnLogout";
             btnLogout.Size = new Size(152, 61);
             btnLogout.TabIndex = 1;
@@ -275,7 +353,7 @@
             btnEditInfo.FlatAppearance.BorderSize = 0;
             btnEditInfo.FlatStyle = FlatStyle.Flat;
             btnEditInfo.Font = new Font("Arial", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnEditInfo.Image = (Image)resources.GetObject("btnEditInfo.Image");
+            btnEditInfo.Image = Properties.Resources.edit_info;
             btnEditInfo.ImageAlign = ContentAlignment.TopCenter;
             btnEditInfo.Location = new Point(15, 10);
             btnEditInfo.Name = "btnEditInfo";
@@ -286,66 +364,12 @@
             btnEditInfo.UseVisualStyleBackColor = true;
             btnEditInfo.Click += btnEditInfo_Click;
             // 
-            // btnAllEmp
-            // 
-            btnAllEmp.AutoSize = true;
-            btnAllEmp.Cursor = Cursors.Hand;
-            btnAllEmp.FlatAppearance.BorderSize = 0;
-            btnAllEmp.FlatStyle = FlatStyle.Flat;
-            btnAllEmp.Font = new Font("Arial", 10.8F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnAllEmp.Image = (Image)resources.GetObject("btnAllEmp.Image");
-            btnAllEmp.ImageAlign = ContentAlignment.TopCenter;
-            btnAllEmp.Location = new Point(176, 9);
-            btnAllEmp.Name = "btnAllEmp";
-            btnAllEmp.Size = new Size(152, 61);
-            btnAllEmp.TabIndex = 3;
-            btnAllEmp.Tag = "All Employee";
-            btnAllEmp.Text = "All Employee";
-            btnAllEmp.TextAlign = ContentAlignment.BottomCenter;
-            btnAllEmp.UseVisualStyleBackColor = true;
-            btnAllEmp.Click += btnAllEmp_Click;
-            // 
-            // btnAddEmp
-            // 
-            btnAddEmp.AutoSize = true;
-            btnAddEmp.Cursor = Cursors.Hand;
-            btnAddEmp.FlatAppearance.BorderSize = 0;
-            btnAddEmp.FlatStyle = FlatStyle.Flat;
-            btnAddEmp.Font = new Font("Arial", 10.8F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnAddEmp.Image = (Image)resources.GetObject("btnAddEmp.Image");
-            btnAddEmp.ImageAlign = ContentAlignment.TopCenter;
-            btnAddEmp.Location = new Point(15, 9);
-            btnAddEmp.Name = "btnAddEmp";
-            btnAddEmp.Size = new Size(152, 61);
-            btnAddEmp.TabIndex = 2;
-            btnAddEmp.Tag = "Add Employee";
-            btnAddEmp.Text = "Add Employee";
-            btnAddEmp.TextAlign = ContentAlignment.BottomCenter;
-            btnAddEmp.UseVisualStyleBackColor = true;
-            btnAddEmp.Click += btnAddEmp_Click;
-            // 
-            // btnGST
-            // 
-            btnGST.FlatAppearance.BorderSize = 0;
-            btnGST.FlatStyle = FlatStyle.Flat;
-            btnGST.Font = new Font("Segoe UI", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnGST.Image = (Image)resources.GetObject("btnGST.Image");
-            btnGST.ImageAlign = ContentAlignment.TopCenter;
-            btnGST.Location = new Point(1167, 9);
-            btnGST.Name = "btnGST";
-            btnGST.Size = new Size(150, 61);
-            btnGST.TabIndex = 7;
-            btnGST.Tag = "GST";
-            btnGST.Text = "GST";
-            btnGST.TextAlign = ContentAlignment.BottomCenter;
-            btnGST.UseVisualStyleBackColor = true;
-            // 
             // btnBankPayVoucher
             // 
             btnBankPayVoucher.FlatAppearance.BorderSize = 0;
             btnBankPayVoucher.FlatStyle = FlatStyle.Flat;
             btnBankPayVoucher.Font = new Font("Segoe UI", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnBankPayVoucher.Image = (Image)resources.GetObject("btnBankPayVoucher.Image");
+            btnBankPayVoucher.Image = Properties.Resources.BankPayVoucher;
             btnBankPayVoucher.ImageAlign = ContentAlignment.TopCenter;
             btnBankPayVoucher.Location = new Point(15, 10);
             btnBankPayVoucher.Name = "btnBankPayVoucher";
@@ -362,7 +386,7 @@
             btnCashPayVoucher.FlatAppearance.BorderSize = 0;
             btnCashPayVoucher.FlatStyle = FlatStyle.Flat;
             btnCashPayVoucher.Font = new Font("Segoe UI", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnCashPayVoucher.Image = (Image)resources.GetObject("btnCashPayVoucher.Image");
+            btnCashPayVoucher.Image = Properties.Resources.cash_pay_vpucher;
             btnCashPayVoucher.ImageAlign = ContentAlignment.TopCenter;
             btnCashPayVoucher.Location = new Point(353, 10);
             btnCashPayVoucher.Name = "btnCashPayVoucher";
@@ -378,7 +402,7 @@
             btnTCS.FlatAppearance.BorderSize = 0;
             btnTCS.FlatStyle = FlatStyle.Flat;
             btnTCS.Font = new Font("Segoe UI", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnTCS.Image = (Image)resources.GetObject("btnTCS.Image");
+            btnTCS.Image = Properties.Resources.TCS;
             btnTCS.ImageAlign = ContentAlignment.TopCenter;
             btnTCS.Location = new Point(1008, 10);
             btnTCS.Name = "btnTCS";
@@ -394,7 +418,7 @@
             btnCashReceiptVoucher.FlatAppearance.BorderSize = 0;
             btnCashReceiptVoucher.FlatStyle = FlatStyle.Flat;
             btnCashReceiptVoucher.Font = new Font("Segoe UI", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnCashReceiptVoucher.Image = (Image)resources.GetObject("btnCashReceiptVoucher.Image");
+            btnCashReceiptVoucher.Image = Properties.Resources.Bank_Or_Cash_Reciept_Voucher;
             btnCashReceiptVoucher.ImageAlign = ContentAlignment.TopCenter;
             btnCashReceiptVoucher.Location = new Point(514, 10);
             btnCashReceiptVoucher.Name = "btnCashReceiptVoucher";
@@ -410,7 +434,7 @@
             btnBankReceiptVoucher.FlatAppearance.BorderSize = 0;
             btnBankReceiptVoucher.FlatStyle = FlatStyle.Flat;
             btnBankReceiptVoucher.Font = new Font("Segoe UI", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnBankReceiptVoucher.Image = (Image)resources.GetObject("btnBankReceiptVoucher.Image");
+            btnBankReceiptVoucher.Image = Properties.Resources.Bank_Or_Cash_Reciept_Voucher;
             btnBankReceiptVoucher.ImageAlign = ContentAlignment.TopCenter;
             btnBankReceiptVoucher.Location = new Point(176, 10);
             btnBankReceiptVoucher.Name = "btnBankReceiptVoucher";
@@ -426,7 +450,7 @@
             btnTDS.FlatAppearance.BorderSize = 0;
             btnTDS.FlatStyle = FlatStyle.Flat;
             btnTDS.Font = new Font("Segoe UI", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnTDS.Image = (Image)resources.GetObject("btnTDS.Image");
+            btnTDS.Image = Properties.Resources.TDS;
             btnTDS.ImageAlign = ContentAlignment.TopCenter;
             btnTDS.Location = new Point(850, 10);
             btnTDS.Name = "btnTDS";
@@ -442,7 +466,7 @@
             btnLedger.FlatAppearance.BorderSize = 0;
             btnLedger.FlatStyle = FlatStyle.Flat;
             btnLedger.Font = new Font("Segoe UI", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnLedger.Image = (Image)resources.GetObject("btnLedger.Image");
+            btnLedger.Image = Properties.Resources.ledger;
             btnLedger.ImageAlign = ContentAlignment.TopCenter;
             btnLedger.Location = new Point(691, 10);
             btnLedger.Name = "btnLedger";
@@ -453,53 +477,6 @@
             btnLedger.TextAlign = ContentAlignment.BottomCenter;
             btnLedger.UseVisualStyleBackColor = true;
             // 
-            // btnClear
-            // 
-            btnClear.AutoSize = true;
-            btnClear.Cursor = Cursors.Hand;
-            btnClear.FlatAppearance.BorderSize = 0;
-            btnClear.FlatStyle = FlatStyle.Flat;
-            btnClear.Font = new Font("Arial", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnClear.Image = (Image)resources.GetObject("btnClear.Image");
-            btnClear.ImageAlign = ContentAlignment.TopCenter;
-            btnClear.Location = new Point(1034, 12);
-            btnClear.Name = "btnClear";
-            btnClear.Size = new Size(134, 58);
-            btnClear.TabIndex = 22;
-            btnClear.Text = "Clear Selection";
-            btnClear.TextAlign = ContentAlignment.BottomCenter;
-            btnClear.UseVisualStyleBackColor = true;
-            btnClear.Click += btnClear_Click;
-            // 
-            // picRawMaterialIcons
-            // 
-            picRawMaterialIcons.Image = (Image)resources.GetObject("picRawMaterialIcons.Image");
-            picRawMaterialIcons.Location = new Point(297, 6);
-            picRawMaterialIcons.Name = "picRawMaterialIcons";
-            picRawMaterialIcons.Size = new Size(37, 29);
-            picRawMaterialIcons.SizeMode = PictureBoxSizeMode.Zoom;
-            picRawMaterialIcons.TabIndex = 21;
-            picRawMaterialIcons.TabStop = false;
-            // 
-            // btnAddMaterialIcon
-            // 
-            btnAddMaterialIcon.BackColor = Color.Transparent;
-            btnAddMaterialIcon.BackgroundImage = (Image)resources.GetObject("btnAddMaterialIcon.BackgroundImage");
-            btnAddMaterialIcon.BackgroundImageLayout = ImageLayout.Zoom;
-            btnAddMaterialIcon.Cursor = Cursors.Hand;
-            btnAddMaterialIcon.FlatAppearance.BorderSize = 0;
-            btnAddMaterialIcon.FlatAppearance.MouseDownBackColor = Color.Transparent;
-            btnAddMaterialIcon.FlatAppearance.MouseOverBackColor = Color.Transparent;
-            btnAddMaterialIcon.FlatStyle = FlatStyle.Flat;
-            btnAddMaterialIcon.ImageAlign = ContentAlignment.BottomCenter;
-            btnAddMaterialIcon.Location = new Point(109, 10);
-            btnAddMaterialIcon.Name = "btnAddMaterialIcon";
-            btnAddMaterialIcon.Size = new Size(28, 25);
-            btnAddMaterialIcon.TabIndex = 20;
-            btnAddMaterialIcon.TextAlign = ContentAlignment.BottomCenter;
-            btnAddMaterialIcon.UseVisualStyleBackColor = false;
-            btnAddMaterialIcon.Click += btnAddMaterialIcon_Click;
-            // 
             // btnAddMaterial
             // 
             btnAddMaterial.AutoSize = true;
@@ -508,7 +485,7 @@
             btnAddMaterial.FlatAppearance.BorderSize = 0;
             btnAddMaterial.FlatStyle = FlatStyle.Flat;
             btnAddMaterial.Font = new Font("Segoe UI", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnAddMaterial.Image = (Image)resources.GetObject("btnAddMaterial.Image");
+            btnAddMaterial.Image = Properties.Resources.Add_Material;
             btnAddMaterial.ImageAlign = ContentAlignment.TopCenter;
             btnAddMaterial.Location = new Point(15, 10);
             btnAddMaterial.Margin = new Padding(15, 5, 15, 5);
@@ -529,7 +506,7 @@
             btnAllMaterials.FlatAppearance.BorderSize = 0;
             btnAllMaterials.FlatStyle = FlatStyle.Flat;
             btnAllMaterials.Font = new Font("Segoe UI", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnAllMaterials.Image = (Image)resources.GetObject("btnAllMaterials.Image");
+            btnAllMaterials.Image = Properties.Resources.All_order;
             btnAllMaterials.ImageAlign = ContentAlignment.TopCenter;
             btnAllMaterials.Location = new Point(672, 10);
             btnAllMaterials.Margin = new Padding(15, 5, 15, 5);
@@ -550,7 +527,7 @@
             btnRawMaterials.FlatAppearance.BorderSize = 0;
             btnRawMaterials.FlatStyle = FlatStyle.Flat;
             btnRawMaterials.Font = new Font("Segoe UI", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnRawMaterials.Image = (Image)resources.GetObject("btnRawMaterials.Image");
+            btnRawMaterials.Image = Properties.Resources.Raw_Material;
             btnRawMaterials.ImageAlign = ContentAlignment.TopCenter;
             btnRawMaterials.Location = new Point(175, 10);
             btnRawMaterials.Margin = new Padding(15, 5, 15, 5);
@@ -561,6 +538,7 @@
             btnRawMaterials.Text = "Raw Materials";
             btnRawMaterials.TextAlign = ContentAlignment.BottomCenter;
             btnRawMaterials.UseVisualStyleBackColor = false;
+            btnRawMaterials.Click += btnRawMaterials_Click;
             // 
             // btnSemiFinishedGoods
             // 
@@ -570,7 +548,7 @@
             btnSemiFinishedGoods.FlatAppearance.BorderSize = 0;
             btnSemiFinishedGoods.FlatStyle = FlatStyle.Flat;
             btnSemiFinishedGoods.Font = new Font("Segoe UI", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnSemiFinishedGoods.Image = (Image)resources.GetObject("btnSemiFinishedGoods.Image");
+            btnSemiFinishedGoods.Image = Properties.Resources.Semi_Finished_Goods;
             btnSemiFinishedGoods.ImageAlign = ContentAlignment.TopCenter;
             btnSemiFinishedGoods.Location = new Point(504, 10);
             btnSemiFinishedGoods.Margin = new Padding(15, 5, 15, 5);
@@ -590,7 +568,7 @@
             btnFinishedGoods.FlatAppearance.BorderSize = 0;
             btnFinishedGoods.FlatStyle = FlatStyle.Flat;
             btnFinishedGoods.Font = new Font("Segoe UI", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnFinishedGoods.Image = (Image)resources.GetObject("btnFinishedGoods.Image");
+            btnFinishedGoods.Image = Properties.Resources.goods;
             btnFinishedGoods.ImageAlign = ContentAlignment.TopCenter;
             btnFinishedGoods.Location = new Point(336, 10);
             btnFinishedGoods.Margin = new Padding(15, 5, 15, 5);
@@ -608,7 +586,7 @@
             btnSalesReturnOrder.FlatAppearance.BorderSize = 0;
             btnSalesReturnOrder.FlatStyle = FlatStyle.Flat;
             btnSalesReturnOrder.Font = new Font("Segoe UI", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnSalesReturnOrder.Image = (Image)resources.GetObject("btnSalesReturnOrder.Image");
+            btnSalesReturnOrder.Image = Properties.Resources.Purchase_Return_Order;
             btnSalesReturnOrder.ImageAlign = ContentAlignment.TopCenter;
             btnSalesReturnOrder.Location = new Point(667, 10);
             btnSalesReturnOrder.Margin = new Padding(15, 5, 15, 5);
@@ -626,7 +604,7 @@
             btnSalesOrders.FlatAppearance.BorderSize = 0;
             btnSalesOrders.FlatStyle = FlatStyle.Flat;
             btnSalesOrders.Font = new Font("Segoe UI", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnSalesOrders.Image = (Image)resources.GetObject("btnSalesOrders.Image");
+            btnSalesOrders.Image = Properties.Resources.Purchase_Order;
             btnSalesOrders.ImageAlign = ContentAlignment.TopCenter;
             btnSalesOrders.Location = new Point(338, 10);
             btnSalesOrders.Margin = new Padding(15, 5, 15, 5);
@@ -644,7 +622,7 @@
             btnSalesInvoice.FlatAppearance.BorderSize = 0;
             btnSalesInvoice.FlatStyle = FlatStyle.Flat;
             btnSalesInvoice.Font = new Font("Segoe UI", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnSalesInvoice.Image = (Image)resources.GetObject("btnSalesInvoice.Image");
+            btnSalesInvoice.Image = Properties.Resources.Purchase_Invoice;
             btnSalesInvoice.ImageAlign = ContentAlignment.TopCenter;
             btnSalesInvoice.Location = new Point(506, 10);
             btnSalesInvoice.Margin = new Padding(15, 5, 15, 5);
@@ -662,7 +640,7 @@
             btnCustomers.FlatAppearance.BorderSize = 0;
             btnCustomers.FlatStyle = FlatStyle.Flat;
             btnCustomers.Font = new Font("Segoe UI", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnCustomers.Image = (Image)resources.GetObject("btnCustomers.Image");
+            btnCustomers.Image = Properties.Resources.Customers;
             btnCustomers.ImageAlign = ContentAlignment.TopCenter;
             btnCustomers.Location = new Point(15, 10);
             btnCustomers.Margin = new Padding(15, 5, 15, 5);
@@ -681,7 +659,7 @@
             btnSalesQuotes.FlatAppearance.BorderSize = 0;
             btnSalesQuotes.FlatStyle = FlatStyle.Flat;
             btnSalesQuotes.Font = new Font("Segoe UI", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnSalesQuotes.Image = (Image)resources.GetObject("btnSalesQuotes.Image");
+            btnSalesQuotes.Image = Properties.Resources.Purchase_Quotes;
             btnSalesQuotes.ImageAlign = ContentAlignment.TopCenter;
             btnSalesQuotes.Location = new Point(176, 10);
             btnSalesQuotes.Margin = new Padding(15, 5, 15, 5);
@@ -699,7 +677,7 @@
             btnVendors.FlatAppearance.BorderSize = 0;
             btnVendors.FlatStyle = FlatStyle.Flat;
             btnVendors.Font = new Font("Segoe UI", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnVendors.Image = (Image)resources.GetObject("btnVendors.Image");
+            btnVendors.Image = Properties.Resources.Vendor;
             btnVendors.ImageAlign = ContentAlignment.TopCenter;
             btnVendors.Location = new Point(15, 10);
             btnVendors.Margin = new Padding(15, 5, 15, 5);
@@ -719,7 +697,7 @@
             btnPurchaseInvoice.FlatAppearance.BorderSize = 0;
             btnPurchaseInvoice.FlatStyle = FlatStyle.Flat;
             btnPurchaseInvoice.Font = new Font("Segoe UI", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnPurchaseInvoice.Image = (Image)resources.GetObject("btnPurchaseInvoice.Image");
+            btnPurchaseInvoice.Image = Properties.Resources.Purchase_Invoice;
             btnPurchaseInvoice.ImageAlign = ContentAlignment.TopCenter;
             btnPurchaseInvoice.Location = new Point(499, 10);
             btnPurchaseInvoice.Margin = new Padding(15, 5, 15, 5);
@@ -738,7 +716,7 @@
             btnPurchaseReturnOrder.FlatAppearance.BorderSize = 0;
             btnPurchaseReturnOrder.FlatStyle = FlatStyle.Flat;
             btnPurchaseReturnOrder.Font = new Font("Segoe UI", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnPurchaseReturnOrder.Image = (Image)resources.GetObject("btnPurchaseReturnOrder.Image");
+            btnPurchaseReturnOrder.Image = Properties.Resources.Purchase_Return_Order;
             btnPurchaseReturnOrder.ImageAlign = ContentAlignment.TopCenter;
             btnPurchaseReturnOrder.Location = new Point(660, 10);
             btnPurchaseReturnOrder.Margin = new Padding(15, 5, 15, 5);
@@ -757,7 +735,7 @@
             btnPurchaseQuotes.FlatAppearance.BorderSize = 0;
             btnPurchaseQuotes.FlatStyle = FlatStyle.Flat;
             btnPurchaseQuotes.Font = new Font("Segoe UI", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnPurchaseQuotes.Image = (Image)resources.GetObject("btnPurchaseQuotes.Image");
+            btnPurchaseQuotes.Image = Properties.Resources.Purchase_Quotes;
             btnPurchaseQuotes.ImageAlign = ContentAlignment.TopCenter;
             btnPurchaseQuotes.Location = new Point(177, 10);
             btnPurchaseQuotes.Margin = new Padding(15, 5, 15, 5);
@@ -776,7 +754,7 @@
             btnPurchaseOrder.FlatAppearance.BorderSize = 0;
             btnPurchaseOrder.FlatStyle = FlatStyle.Flat;
             btnPurchaseOrder.Font = new Font("Segoe UI", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnPurchaseOrder.Image = (Image)resources.GetObject("btnPurchaseOrder.Image");
+            btnPurchaseOrder.Image = Properties.Resources.Purchase_Order;
             btnPurchaseOrder.ImageAlign = ContentAlignment.TopCenter;
             btnPurchaseOrder.Location = new Point(338, 10);
             btnPurchaseOrder.Margin = new Padding(15, 5, 15, 5);
@@ -795,7 +773,7 @@
             btnFutureOrders.FlatAppearance.BorderSize = 0;
             btnFutureOrders.FlatStyle = FlatStyle.Flat;
             btnFutureOrders.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnFutureOrders.Image = (Image)resources.GetObject("btnFutureOrders.Image");
+            btnFutureOrders.Image = Properties.Resources.Future_Order;
             btnFutureOrders.ImageAlign = ContentAlignment.TopCenter;
             btnFutureOrders.Location = new Point(176, 10);
             btnFutureOrders.Margin = new Padding(15, 5, 15, 5);
@@ -814,7 +792,7 @@
             btnAddorder.FlatAppearance.BorderSize = 0;
             btnAddorder.FlatStyle = FlatStyle.Flat;
             btnAddorder.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnAddorder.Image = (Image)resources.GetObject("btnAddorder.Image");
+            btnAddorder.Image = Properties.Resources.Add_order;
             btnAddorder.ImageAlign = ContentAlignment.TopCenter;
             btnAddorder.Location = new Point(15, 10);
             btnAddorder.Margin = new Padding(15, 5, 15, 5);
@@ -834,7 +812,7 @@
             btnFinishedOrders.FlatAppearance.BorderSize = 0;
             btnFinishedOrders.FlatStyle = FlatStyle.Flat;
             btnFinishedOrders.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnFinishedOrders.Image = (Image)resources.GetObject("btnFinishedOrders.Image");
+            btnFinishedOrders.Image = Properties.Resources.Finished_Order_2;
             btnFinishedOrders.ImageAlign = ContentAlignment.TopCenter;
             btnFinishedOrders.Location = new Point(660, 10);
             btnFinishedOrders.Margin = new Padding(15, 5, 15, 5);
@@ -853,7 +831,7 @@
             btnPendingOrders.FlatAppearance.BorderSize = 0;
             btnPendingOrders.FlatStyle = FlatStyle.Flat;
             btnPendingOrders.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnPendingOrders.Image = (Image)resources.GetObject("btnPendingOrders.Image");
+            btnPendingOrders.Image = Properties.Resources.Pending_Order_1;
             btnPendingOrders.ImageAlign = ContentAlignment.TopCenter;
             btnPendingOrders.Location = new Point(337, 10);
             btnPendingOrders.Margin = new Padding(15, 5, 15, 5);
@@ -872,7 +850,7 @@
             btnAllOrders.FlatAppearance.BorderSize = 0;
             btnAllOrders.FlatStyle = FlatStyle.Flat;
             btnAllOrders.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnAllOrders.Image = (Image)resources.GetObject("btnAllOrders.Image");
+            btnAllOrders.Image = Properties.Resources.All_order;
             btnAllOrders.ImageAlign = ContentAlignment.TopCenter;
             btnAllOrders.Location = new Point(822, 10);
             btnAllOrders.Margin = new Padding(15, 5, 15, 5);
@@ -891,7 +869,7 @@
             btnOrdersInProcess.FlatAppearance.BorderSize = 0;
             btnOrdersInProcess.FlatStyle = FlatStyle.Flat;
             btnOrdersInProcess.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnOrdersInProcess.Image = (Image)resources.GetObject("btnOrdersInProcess.Image");
+            btnOrdersInProcess.Image = Properties.Resources.Order_In_Process;
             btnOrdersInProcess.ImageAlign = ContentAlignment.TopCenter;
             btnOrdersInProcess.Location = new Point(499, 10);
             btnOrdersInProcess.Margin = new Padding(15, 5, 15, 5);
@@ -910,7 +888,7 @@
             btnHR.FlatAppearance.BorderSize = 0;
             btnHR.FlatStyle = FlatStyle.Flat;
             btnHR.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnHR.Image = (Image)resources.GetObject("btnHR.Image");
+            btnHR.Image = Properties.Resources.hr;
             btnHR.ImageAlign = ContentAlignment.TopCenter;
             btnHR.Location = new Point(176, 10);
             btnHR.Margin = new Padding(15, 5, 15, 5);
@@ -929,7 +907,7 @@
             btnTechnical.FlatAppearance.BorderSize = 0;
             btnTechnical.FlatStyle = FlatStyle.Flat;
             btnTechnical.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnTechnical.Image = (Image)resources.GetObject("btnTechnical.Image");
+            btnTechnical.Image = Properties.Resources.Technical;
             btnTechnical.ImageAlign = ContentAlignment.TopCenter;
             btnTechnical.Location = new Point(337, 10);
             btnTechnical.Margin = new Padding(15, 5, 15, 5);
@@ -948,7 +926,7 @@
             btnProduction.FlatAppearance.BorderSize = 0;
             btnProduction.FlatStyle = FlatStyle.Flat;
             btnProduction.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnProduction.Image = (Image)resources.GetObject("btnProduction.Image");
+            btnProduction.Image = Properties.Resources.Production;
             btnProduction.ImageAlign = ContentAlignment.TopCenter;
             btnProduction.Location = new Point(499, 10);
             btnProduction.Margin = new Padding(15, 5, 15, 5);
@@ -967,7 +945,7 @@
             btnSales.FlatAppearance.BorderSize = 0;
             btnSales.FlatStyle = FlatStyle.Flat;
             btnSales.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnSales.Image = (Image)resources.GetObject("btnSales.Image");
+            btnSales.Image = Properties.Resources.Sales;
             btnSales.ImageAlign = ContentAlignment.TopCenter;
             btnSales.Location = new Point(660, 10);
             btnSales.Margin = new Padding(15, 5, 15, 5);
@@ -986,7 +964,7 @@
             btnStore.FlatAppearance.BorderSize = 0;
             btnStore.FlatStyle = FlatStyle.Flat;
             btnStore.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnStore.Image = (Image)resources.GetObject("btnStore.Image");
+            btnStore.Image = Properties.Resources.Store;
             btnStore.ImageAlign = ContentAlignment.TopCenter;
             btnStore.Location = new Point(822, 10);
             btnStore.Margin = new Padding(15, 5, 15, 5);
@@ -1005,7 +983,7 @@
             btnAdmin.FlatAppearance.BorderSize = 0;
             btnAdmin.FlatStyle = FlatStyle.Flat;
             btnAdmin.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnAdmin.Image = (Image)resources.GetObject("btnAdmin.Image");
+            btnAdmin.Image = Properties.Resources.Admin;
             btnAdmin.ImageAlign = ContentAlignment.TopCenter;
             btnAdmin.Location = new Point(15, 10);
             btnAdmin.Margin = new Padding(15, 5, 15, 5);
@@ -1016,73 +994,6 @@
             btnAdmin.Text = "Admin";
             btnAdmin.TextAlign = ContentAlignment.BottomCenter;
             btnAdmin.UseVisualStyleBackColor = true;
-            // 
-            // panelContent
-            // 
-            panelContent.BackColor = Color.RoyalBlue;
-            panelContent.Controls.Add(pnlLoading);
-            panelContent.Controls.Add(picJPSCURA);
-            panelContent.Dock = DockStyle.Fill;
-            panelContent.Location = new Point(0, 115);
-            panelContent.Margin = new Padding(15, 5, 15, 5);
-            panelContent.Name = "panelContent";
-            panelContent.Size = new Size(1370, 625);
-            panelContent.TabIndex = 2;
-            // 
-            // pnlLoading
-            // 
-            pnlLoading.BackColor = Color.FromArgb(120, 0, 0, 0);
-            pnlLoading.Controls.Add(pnlLoaderBox);
-            pnlLoading.Location = new Point(0, 0);
-            pnlLoading.Name = "pnlLoading";
-            pnlLoading.Size = new Size(1370, 625);
-            pnlLoading.TabIndex = 1;
-            pnlLoading.Visible = false;
-            pnlLoading.Resize += pnlLoading_Resize;
-            // 
-            // pnlLoaderBox
-            // 
-            pnlLoaderBox.Anchor = AnchorStyles.None;
-            pnlLoaderBox.BackColor = Color.Transparent;
-            pnlLoaderBox.Controls.Add(picLoader);
-            pnlLoaderBox.Controls.Add(lblLoading);
-            pnlLoaderBox.Location = new Point(635, 249);
-            pnlLoaderBox.Name = "pnlLoaderBox";
-            pnlLoaderBox.Size = new Size(300, 120);
-            pnlLoaderBox.TabIndex = 0;
-            // 
-            // picLoader
-            // 
-            picLoader.Anchor = AnchorStyles.None;
-            picLoader.Image = Properties.Resources.loadingSpinner;
-            picLoader.Location = new Point(0, 30);
-            picLoader.Name = "picLoader";
-            picLoader.Size = new Size(300, 64);
-            picLoader.SizeMode = PictureBoxSizeMode.Zoom;
-            picLoader.TabIndex = 1;
-            picLoader.TabStop = false;
-            // 
-            // lblLoading
-            // 
-            lblLoading.Anchor = AnchorStyles.None;
-            lblLoading.Font = new Font("Arial", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            lblLoading.ForeColor = Color.White;
-            lblLoading.Location = new Point(0, 0);
-            lblLoading.Name = "lblLoading";
-            lblLoading.Size = new Size(300, 30);
-            lblLoading.TabIndex = 0;
-            lblLoading.Text = "Loading, please wait...";
-            lblLoading.TextAlign = ContentAlignment.MiddleCenter;
-            // 
-            // picJPSCURA
-            // 
-            picJPSCURA.Image = (Image)resources.GetObject("picJPSCURA.Image");
-            picJPSCURA.Location = new Point(361, 213);
-            picJPSCURA.Name = "picJPSCURA";
-            picJPSCURA.Size = new Size(629, 228);
-            picJPSCURA.SizeMode = PictureBoxSizeMode.AutoSize;
-            picJPSCURA.TabIndex = 0;
-            picJPSCURA.TabStop = false;
             // 
             // panelTopMenu
             // 
@@ -1302,6 +1213,176 @@
             btnHome.UseVisualStyleBackColor = false;
             btnHome.Click += btnHome_Click;
             // 
+            // pnlhometitlebar
+            // 
+            pnlhometitlebar.BackColor = Color.White;
+            pnlhometitlebar.Controls.Add(btnhideminimize);
+            pnlhometitlebar.Controls.Add(btnminimax);
+            pnlhometitlebar.Controls.Add(btnhomeclose);
+            pnlhometitlebar.Controls.Add(lblappname);
+            pnlhometitlebar.Controls.Add(pcthomelogo);
+            pnlhometitlebar.Dock = DockStyle.Top;
+            pnlhometitlebar.Location = new Point(0, 0);
+            pnlhometitlebar.Name = "pnlhometitlebar";
+            pnlhometitlebar.Size = new Size(1370, 31);
+            pnlhometitlebar.TabIndex = 9;
+            // 
+            // btnhideminimize
+            // 
+            btnhideminimize.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnhideminimize.Cursor = Cursors.Hand;
+            btnhideminimize.FlatAppearance.BorderSize = 0;
+            btnhideminimize.FlatAppearance.MouseDownBackColor = Color.FromArgb(120, 225, 225, 225);
+            btnhideminimize.FlatAppearance.MouseOverBackColor = Color.FromArgb(120, 225, 225, 225);
+            btnhideminimize.FlatStyle = FlatStyle.Flat;
+            btnhideminimize.Image = Properties.Resources.minus1;
+            btnhideminimize.Location = new Point(1265, 0);
+            btnhideminimize.Name = "btnhideminimize";
+            btnhideminimize.Size = new Size(31, 31);
+            btnhideminimize.TabIndex = 4;
+            btnhideminimize.UseVisualStyleBackColor = true;
+            btnhideminimize.Click += btnhideminimize_Click;
+            // 
+            // btnminimax
+            // 
+            btnminimax.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnminimax.Cursor = Cursors.Hand;
+            btnminimax.FlatAppearance.BorderSize = 0;
+            btnminimax.FlatAppearance.MouseDownBackColor = Color.FromArgb(120, 225, 225, 225);
+            btnminimax.FlatAppearance.MouseOverBackColor = Color.FromArgb(120, 225, 225, 225);
+            btnminimax.FlatStyle = FlatStyle.Flat;
+            btnminimax.Image = Properties.Resources.maximize1;
+            btnminimax.Location = new Point(1302, 0);
+            btnminimax.Name = "btnminimax";
+            btnminimax.Size = new Size(31, 31);
+            btnminimax.TabIndex = 3;
+            btnminimax.UseVisualStyleBackColor = true;
+            btnminimax.Click += btnminimax_Click;
+            // 
+            // btnhomeclose
+            // 
+            btnhomeclose.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnhomeclose.Cursor = Cursors.Hand;
+            btnhomeclose.FlatAppearance.BorderSize = 0;
+            btnhomeclose.FlatAppearance.MouseDownBackColor = Color.FromArgb(230, 15, 35);
+            btnhomeclose.FlatAppearance.MouseOverBackColor = Color.FromArgb(230, 15, 35);
+            btnhomeclose.FlatStyle = FlatStyle.Flat;
+            btnhomeclose.Image = Properties.Resources.close3;
+            btnhomeclose.Location = new Point(1339, 0);
+            btnhomeclose.Name = "btnhomeclose";
+            btnhomeclose.Size = new Size(31, 31);
+            btnhomeclose.TabIndex = 2;
+            btnhomeclose.UseVisualStyleBackColor = true;
+            btnhomeclose.Click += btnhomeclose_Click;
+            // 
+            // lblappname
+            // 
+            lblappname.AutoSize = true;
+            lblappname.BackColor = Color.White;
+            lblappname.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            lblappname.ForeColor = Color.FromArgb(59, 43, 151);
+            lblappname.Location = new Point(26, 9);
+            lblappname.Name = "lblappname";
+            lblappname.Size = new Size(409, 15);
+            lblappname.TabIndex = 1;
+            lblappname.Text = "JPSCURA – An Indigenous Software Of JPSCUBE ENGINEERS[2025-2026]";
+            // 
+            // pcthomelogo
+            // 
+            pcthomelogo.BackColor = Color.Transparent;
+            pcthomelogo.Image = Properties.Resources.logo_32;
+            pcthomelogo.Location = new Point(4, 5);
+            pcthomelogo.Name = "pcthomelogo";
+            pcthomelogo.Size = new Size(22, 22);
+            pcthomelogo.SizeMode = PictureBoxSizeMode.Zoom;
+            pcthomelogo.TabIndex = 0;
+            pcthomelogo.TabStop = false;
+            // 
+            // pnlmenuitem
+            // 
+            pnlmenuitem.Controls.Add(panelTopMenu);
+            pnlmenuitem.Dock = DockStyle.Top;
+            pnlmenuitem.Location = new Point(0, 31);
+            pnlmenuitem.Name = "pnlmenuitem";
+            pnlmenuitem.Size = new Size(1370, 35);
+            pnlmenuitem.TabIndex = 10;
+            // 
+            // onlsub
+            // 
+            onlsub.Controls.Add(panelSubMenu);
+            onlsub.Dock = DockStyle.Top;
+            onlsub.Location = new Point(0, 66);
+            onlsub.Name = "onlsub";
+            onlsub.Size = new Size(1370, 80);
+            onlsub.TabIndex = 11;
+            // 
+            // panelContent
+            // 
+            panelContent.BackColor = Color.RoyalBlue;
+            panelContent.Controls.Add(pnlLoading);
+            panelContent.Controls.Add(picJPSCURA);
+            panelContent.Dock = DockStyle.Fill;
+            panelContent.Location = new Point(0, 146);
+            panelContent.Name = "panelContent";
+            panelContent.Size = new Size(1370, 594);
+            panelContent.TabIndex = 12;
+            // 
+            // pnlLoading
+            // 
+            pnlLoading.BackColor = Color.FromArgb(120, 0, 0, 0);
+            pnlLoading.Controls.Add(pnlLoaderBox);
+            pnlLoading.Dock = DockStyle.Fill;
+            pnlLoading.Location = new Point(0, 0);
+            pnlLoading.Name = "pnlLoading";
+            pnlLoading.Size = new Size(1370, 594);
+            pnlLoading.TabIndex = 1;
+            pnlLoading.Visible = false;
+            pnlLoading.Resize += pnlLoading_Resize;
+            // 
+            // pnlLoaderBox
+            // 
+            pnlLoaderBox.Anchor = AnchorStyles.None;
+            pnlLoaderBox.BackColor = Color.Transparent;
+            pnlLoaderBox.Controls.Add(picLoader);
+            pnlLoaderBox.Controls.Add(lblLoading);
+            pnlLoaderBox.Location = new Point(1220, 496);
+            pnlLoaderBox.Name = "pnlLoaderBox";
+            pnlLoaderBox.Size = new Size(300, 120);
+            pnlLoaderBox.TabIndex = 0;
+            // 
+            // picLoader
+            // 
+            picLoader.Anchor = AnchorStyles.None;
+            picLoader.Image = Properties.Resources.loadingSpinner;
+            picLoader.Location = new Point(50, 40);
+            picLoader.Name = "picLoader";
+            picLoader.Size = new Size(300, 64);
+            picLoader.SizeMode = PictureBoxSizeMode.Zoom;
+            picLoader.TabIndex = 1;
+            picLoader.TabStop = false;
+            // 
+            // lblLoading
+            // 
+            lblLoading.Anchor = AnchorStyles.None;
+            lblLoading.Font = new Font("Arial", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            lblLoading.ForeColor = Color.White;
+            lblLoading.Location = new Point(50, 10);
+            lblLoading.Name = "lblLoading";
+            lblLoading.Size = new Size(300, 30);
+            lblLoading.TabIndex = 0;
+            lblLoading.Text = "Loading, please wait...";
+            lblLoading.TextAlign = ContentAlignment.MiddleCenter;
+            // 
+            // picJPSCURA
+            // 
+            picJPSCURA.Image = (Image)resources.GetObject("picJPSCURA.Image");
+            picJPSCURA.Location = new Point(190, 141);
+            picJPSCURA.Name = "picJPSCURA";
+            picJPSCURA.Size = new Size(629, 228);
+            picJPSCURA.SizeMode = PictureBoxSizeMode.AutoSize;
+            picJPSCURA.TabIndex = 0;
+            picJPSCURA.TabStop = false;
+            // 
             // Home
             // 
             AutoScaleMode = AutoScaleMode.None;
@@ -1309,13 +1390,17 @@
             BackColor = Color.White;
             ClientSize = new Size(1370, 740);
             Controls.Add(panelContent);
-            Controls.Add(panelSubMenu);
-            Controls.Add(panelTopMenu);
+            Controls.Add(onlsub);
+            Controls.Add(pnlmenuitem);
+            Controls.Add(pnlhometitlebar);
+            FormBorderStyle = FormBorderStyle.None;
             Icon = (Icon)resources.GetObject("$this.Icon");
+            MaximizeBox = false;
+            MinimizeBox = false;
             Name = "Home";
             Opacity = 0D;
+            StartPosition = FormStartPosition.CenterScreen;
             Text = "JPSCURA – An Indigenous Software Of JPSCUBE ENGINEERS [2025–26]";
-            WindowState = FormWindowState.Maximized;
             panelSubMenu.ResumeLayout(false);
             panelDeptsubmenu.ResumeLayout(false);
             panelDeptsubmenu.PerformLayout();
@@ -1331,18 +1416,20 @@
             panelEMPSubMenu.PerformLayout();
             panelSubMenuUser.ResumeLayout(false);
             panelSubMenuUser.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)PicAllEmp).EndInit();
-            ((System.ComponentModel.ISupportInitialize)picEmp).EndInit();
-            ((System.ComponentModel.ISupportInitialize)picRawMaterialIcons).EndInit();
+            panelTopMenu.ResumeLayout(false);
+            panelTopMenu.PerformLayout();
+            panelUserInfo.ResumeLayout(false);
+            pnlhometitlebar.ResumeLayout(false);
+            pnlhometitlebar.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)pcthomelogo).EndInit();
+            pnlmenuitem.ResumeLayout(false);
+            onlsub.ResumeLayout(false);
             panelContent.ResumeLayout(false);
             panelContent.PerformLayout();
             pnlLoading.ResumeLayout(false);
             pnlLoaderBox.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)picLoader).EndInit();
             ((System.ComponentModel.ISupportInitialize)picJPSCURA).EndInit();
-            panelTopMenu.ResumeLayout(false);
-            panelTopMenu.PerformLayout();
-            panelUserInfo.ResumeLayout(false);
             ResumeLayout(false);
         }
 
@@ -1386,10 +1473,8 @@
         private Button btnTCS;
         private Button btnTDS;
         private Button btnLedger;
-        private Panel panelContent;
         private Panel panelPurchasingSubMenu;
         private Panel panelSalesSubMenu;
-        private PictureBox picJPSCURA;
         private Button btnAddMaterial;
         private Panel panelTopMenu;
         private Button btnSales1;
@@ -1407,13 +1492,23 @@
         private Button btnAddEmp;
         private Panel panelUserInfo;
         private Button btnUserInfo;
-        private Panel pnlLoading;
-        private Panel pnlLoaderBox;
-        private Label lblLoading;
-        private PictureBox picLoader;
         private Button btnClear;
         private Panel panelSubMenuUser;
         private Button btnLogout;
         private Button btnEditInfo;
+        private Panel pnlhometitlebar;
+        private Button btnhomeclose;
+        private Label lblappname;
+        private PictureBox pcthomelogo;
+        private Button btnhideminimize;
+        private Button btnminimax;
+        private Panel pnlmenuitem;
+        private Panel onlsub;
+        private Panel panelContent;
+        private Panel pnlLoading;
+        private Panel pnlLoaderBox;
+        private PictureBox picLoader;
+        private Label lblLoading;
+        private PictureBox picJPSCURA;
     }
 }

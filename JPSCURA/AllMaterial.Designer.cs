@@ -30,7 +30,6 @@
         {
             DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
             DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(AllMaterial));
             DataGridViewCellStyle dataGridViewCellStyle3 = new DataGridViewCellStyle();
             panel2ndtableTopContent = new Panel();
             btnAddNew = new Button();
@@ -250,7 +249,7 @@
             btnImport.FlatStyle = FlatStyle.Flat;
             btnImport.Font = new Font("Arial", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
             btnImport.ForeColor = Color.White;
-            btnImport.Image = (Image)resources.GetObject("btnImport.Image");
+            btnImport.Image = Properties.Resources.icons8_export_excel_25;
             btnImport.ImageAlign = ContentAlignment.MiddleLeft;
             btnImport.Location = new Point(1145, 0);
             btnImport.Name = "btnImport";
@@ -270,7 +269,7 @@
             btnExport.FlatStyle = FlatStyle.Flat;
             btnExport.Font = new Font("Arial", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
             btnExport.ForeColor = Color.White;
-            btnExport.Image = (Image)resources.GetObject("btnExport.Image");
+            btnExport.Image = Properties.Resources.icons8_export_excel_25;
             btnExport.ImageAlign = ContentAlignment.MiddleLeft;
             btnExport.Location = new Point(1257, 0);
             btnExport.Name = "btnExport";
