@@ -51,8 +51,6 @@
             btnTDS = new Button();
             btnLedger = new Button();
             btnClear = new Button();
-            picRawMaterialIcons = new PictureBox();
-            btnAddMaterialIcon = new Button();
             btnAddMaterial = new Button();
             btnAllMaterials = new Button();
             btnRawMaterials = new Button();
@@ -108,9 +106,6 @@
             panelFinanceSubMenu.SuspendLayout();
             panelEMPSubMenu.SuspendLayout();
             panelSubMenuUser.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)PicAllEmp).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)picEmp).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)picRawMaterialIcons).BeginInit();
             panelContent.SuspendLayout();
             pnlLoading.SuspendLayout();
             pnlLoaderBox.SuspendLayout();
@@ -195,8 +190,6 @@
             panelInventorySubMenu.BackColor = Color.Transparent;
             panelInventorySubMenu.Controls.Add(panelFinanceSubMenu);
             panelInventorySubMenu.Controls.Add(btnClear);
-            panelInventorySubMenu.Controls.Add(picRawMaterialIcons);
-            panelInventorySubMenu.Controls.Add(btnAddMaterialIcon);
             panelInventorySubMenu.Controls.Add(btnAddMaterial);
             panelInventorySubMenu.Controls.Add(btnAllMaterials);
             panelInventorySubMenu.Controls.Add(btnRawMaterials);
@@ -257,7 +250,6 @@
             btnLogout.FlatStyle = FlatStyle.Flat;
             btnLogout.Font = new Font("Arial", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
             btnLogout.ForeColor = Color.Red;
-            btnLogout.Image = (Image)resources.GetObject("btnLogout.Image");
             btnLogout.ImageAlign = ContentAlignment.TopCenter;
             btnLogout.Location = new Point(1206, 10);
             btnLogout.Name = "btnLogout";
@@ -275,7 +267,6 @@
             btnEditInfo.FlatAppearance.BorderSize = 0;
             btnEditInfo.FlatStyle = FlatStyle.Flat;
             btnEditInfo.Font = new Font("Arial", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnEditInfo.Image = (Image)resources.GetObject("btnEditInfo.Image");
             btnEditInfo.ImageAlign = ContentAlignment.TopCenter;
             btnEditInfo.Location = new Point(15, 10);
             btnEditInfo.Name = "btnEditInfo";
@@ -293,7 +284,6 @@
             btnAllEmp.FlatAppearance.BorderSize = 0;
             btnAllEmp.FlatStyle = FlatStyle.Flat;
             btnAllEmp.Font = new Font("Arial", 10.8F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnAllEmp.Image = (Image)resources.GetObject("btnAllEmp.Image");
             btnAllEmp.ImageAlign = ContentAlignment.TopCenter;
             btnAllEmp.Location = new Point(176, 9);
             btnAllEmp.Name = "btnAllEmp";
@@ -312,7 +302,6 @@
             btnAddEmp.FlatAppearance.BorderSize = 0;
             btnAddEmp.FlatStyle = FlatStyle.Flat;
             btnAddEmp.Font = new Font("Arial", 10.8F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnAddEmp.Image = (Image)resources.GetObject("btnAddEmp.Image");
             btnAddEmp.ImageAlign = ContentAlignment.TopCenter;
             btnAddEmp.Location = new Point(15, 9);
             btnAddEmp.Name = "btnAddEmp";
@@ -329,7 +318,6 @@
             btnGST.FlatAppearance.BorderSize = 0;
             btnGST.FlatStyle = FlatStyle.Flat;
             btnGST.Font = new Font("Segoe UI", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnGST.Image = (Image)resources.GetObject("btnGST.Image");
             btnGST.ImageAlign = ContentAlignment.TopCenter;
             btnGST.Location = new Point(1167, 9);
             btnGST.Name = "btnGST";
@@ -345,7 +333,6 @@
             btnBankPayVoucher.FlatAppearance.BorderSize = 0;
             btnBankPayVoucher.FlatStyle = FlatStyle.Flat;
             btnBankPayVoucher.Font = new Font("Segoe UI", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnBankPayVoucher.Image = (Image)resources.GetObject("btnBankPayVoucher.Image");
             btnBankPayVoucher.ImageAlign = ContentAlignment.TopCenter;
             btnBankPayVoucher.Location = new Point(15, 10);
             btnBankPayVoucher.Name = "btnBankPayVoucher";
@@ -362,7 +349,6 @@
             btnCashPayVoucher.FlatAppearance.BorderSize = 0;
             btnCashPayVoucher.FlatStyle = FlatStyle.Flat;
             btnCashPayVoucher.Font = new Font("Segoe UI", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnCashPayVoucher.Image = (Image)resources.GetObject("btnCashPayVoucher.Image");
             btnCashPayVoucher.ImageAlign = ContentAlignment.TopCenter;
             btnCashPayVoucher.Location = new Point(353, 10);
             btnCashPayVoucher.Name = "btnCashPayVoucher";
@@ -378,7 +364,6 @@
             btnTCS.FlatAppearance.BorderSize = 0;
             btnTCS.FlatStyle = FlatStyle.Flat;
             btnTCS.Font = new Font("Segoe UI", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnTCS.Image = (Image)resources.GetObject("btnTCS.Image");
             btnTCS.ImageAlign = ContentAlignment.TopCenter;
             btnTCS.Location = new Point(1008, 10);
             btnTCS.Name = "btnTCS";
@@ -394,7 +379,6 @@
             btnCashReceiptVoucher.FlatAppearance.BorderSize = 0;
             btnCashReceiptVoucher.FlatStyle = FlatStyle.Flat;
             btnCashReceiptVoucher.Font = new Font("Segoe UI", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnCashReceiptVoucher.Image = (Image)resources.GetObject("btnCashReceiptVoucher.Image");
             btnCashReceiptVoucher.ImageAlign = ContentAlignment.TopCenter;
             btnCashReceiptVoucher.Location = new Point(514, 10);
             btnCashReceiptVoucher.Name = "btnCashReceiptVoucher";
@@ -410,7 +394,6 @@
             btnBankReceiptVoucher.FlatAppearance.BorderSize = 0;
             btnBankReceiptVoucher.FlatStyle = FlatStyle.Flat;
             btnBankReceiptVoucher.Font = new Font("Segoe UI", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnBankReceiptVoucher.Image = (Image)resources.GetObject("btnBankReceiptVoucher.Image");
             btnBankReceiptVoucher.ImageAlign = ContentAlignment.TopCenter;
             btnBankReceiptVoucher.Location = new Point(176, 10);
             btnBankReceiptVoucher.Name = "btnBankReceiptVoucher";
@@ -426,7 +409,6 @@
             btnTDS.FlatAppearance.BorderSize = 0;
             btnTDS.FlatStyle = FlatStyle.Flat;
             btnTDS.Font = new Font("Segoe UI", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnTDS.Image = (Image)resources.GetObject("btnTDS.Image");
             btnTDS.ImageAlign = ContentAlignment.TopCenter;
             btnTDS.Location = new Point(850, 10);
             btnTDS.Name = "btnTDS";
@@ -442,7 +424,6 @@
             btnLedger.FlatAppearance.BorderSize = 0;
             btnLedger.FlatStyle = FlatStyle.Flat;
             btnLedger.Font = new Font("Segoe UI", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnLedger.Image = (Image)resources.GetObject("btnLedger.Image");
             btnLedger.ImageAlign = ContentAlignment.TopCenter;
             btnLedger.Location = new Point(691, 10);
             btnLedger.Name = "btnLedger";
@@ -460,7 +441,6 @@
             btnClear.FlatAppearance.BorderSize = 0;
             btnClear.FlatStyle = FlatStyle.Flat;
             btnClear.Font = new Font("Arial", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnClear.Image = (Image)resources.GetObject("btnClear.Image");
             btnClear.ImageAlign = ContentAlignment.TopCenter;
             btnClear.Location = new Point(1034, 12);
             btnClear.Name = "btnClear";
@@ -471,35 +451,6 @@
             btnClear.UseVisualStyleBackColor = true;
             btnClear.Click += btnClear_Click;
             // 
-            // picRawMaterialIcons
-            // 
-            picRawMaterialIcons.Image = (Image)resources.GetObject("picRawMaterialIcons.Image");
-            picRawMaterialIcons.Location = new Point(297, 6);
-            picRawMaterialIcons.Name = "picRawMaterialIcons";
-            picRawMaterialIcons.Size = new Size(37, 29);
-            picRawMaterialIcons.SizeMode = PictureBoxSizeMode.Zoom;
-            picRawMaterialIcons.TabIndex = 21;
-            picRawMaterialIcons.TabStop = false;
-            // 
-            // btnAddMaterialIcon
-            // 
-            btnAddMaterialIcon.BackColor = Color.Transparent;
-            btnAddMaterialIcon.BackgroundImage = (Image)resources.GetObject("btnAddMaterialIcon.BackgroundImage");
-            btnAddMaterialIcon.BackgroundImageLayout = ImageLayout.Zoom;
-            btnAddMaterialIcon.Cursor = Cursors.Hand;
-            btnAddMaterialIcon.FlatAppearance.BorderSize = 0;
-            btnAddMaterialIcon.FlatAppearance.MouseDownBackColor = Color.Transparent;
-            btnAddMaterialIcon.FlatAppearance.MouseOverBackColor = Color.Transparent;
-            btnAddMaterialIcon.FlatStyle = FlatStyle.Flat;
-            btnAddMaterialIcon.ImageAlign = ContentAlignment.BottomCenter;
-            btnAddMaterialIcon.Location = new Point(109, 10);
-            btnAddMaterialIcon.Name = "btnAddMaterialIcon";
-            btnAddMaterialIcon.Size = new Size(28, 25);
-            btnAddMaterialIcon.TabIndex = 20;
-            btnAddMaterialIcon.TextAlign = ContentAlignment.BottomCenter;
-            btnAddMaterialIcon.UseVisualStyleBackColor = false;
-            btnAddMaterialIcon.Click += btnAddMaterialIcon_Click;
-            // 
             // btnAddMaterial
             // 
             btnAddMaterial.AutoSize = true;
@@ -508,7 +459,6 @@
             btnAddMaterial.FlatAppearance.BorderSize = 0;
             btnAddMaterial.FlatStyle = FlatStyle.Flat;
             btnAddMaterial.Font = new Font("Segoe UI", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnAddMaterial.Image = (Image)resources.GetObject("btnAddMaterial.Image");
             btnAddMaterial.ImageAlign = ContentAlignment.TopCenter;
             btnAddMaterial.Location = new Point(15, 10);
             btnAddMaterial.Margin = new Padding(15, 5, 15, 5);
@@ -529,7 +479,6 @@
             btnAllMaterials.FlatAppearance.BorderSize = 0;
             btnAllMaterials.FlatStyle = FlatStyle.Flat;
             btnAllMaterials.Font = new Font("Segoe UI", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnAllMaterials.Image = (Image)resources.GetObject("btnAllMaterials.Image");
             btnAllMaterials.ImageAlign = ContentAlignment.TopCenter;
             btnAllMaterials.Location = new Point(672, 10);
             btnAllMaterials.Margin = new Padding(15, 5, 15, 5);
@@ -550,7 +499,6 @@
             btnRawMaterials.FlatAppearance.BorderSize = 0;
             btnRawMaterials.FlatStyle = FlatStyle.Flat;
             btnRawMaterials.Font = new Font("Segoe UI", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnRawMaterials.Image = (Image)resources.GetObject("btnRawMaterials.Image");
             btnRawMaterials.ImageAlign = ContentAlignment.TopCenter;
             btnRawMaterials.Location = new Point(175, 10);
             btnRawMaterials.Margin = new Padding(15, 5, 15, 5);
@@ -570,7 +518,6 @@
             btnSemiFinishedGoods.FlatAppearance.BorderSize = 0;
             btnSemiFinishedGoods.FlatStyle = FlatStyle.Flat;
             btnSemiFinishedGoods.Font = new Font("Segoe UI", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnSemiFinishedGoods.Image = (Image)resources.GetObject("btnSemiFinishedGoods.Image");
             btnSemiFinishedGoods.ImageAlign = ContentAlignment.TopCenter;
             btnSemiFinishedGoods.Location = new Point(504, 10);
             btnSemiFinishedGoods.Margin = new Padding(15, 5, 15, 5);
@@ -581,6 +528,7 @@
             btnSemiFinishedGoods.Text = "Semi Finished Goods";
             btnSemiFinishedGoods.TextAlign = ContentAlignment.BottomCenter;
             btnSemiFinishedGoods.UseVisualStyleBackColor = false;
+            btnSemiFinishedGoods.Click += btnSemiFinishedGoods_Click;
             // 
             // btnFinishedGoods
             // 
@@ -590,7 +538,6 @@
             btnFinishedGoods.FlatAppearance.BorderSize = 0;
             btnFinishedGoods.FlatStyle = FlatStyle.Flat;
             btnFinishedGoods.Font = new Font("Segoe UI", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnFinishedGoods.Image = (Image)resources.GetObject("btnFinishedGoods.Image");
             btnFinishedGoods.ImageAlign = ContentAlignment.TopCenter;
             btnFinishedGoods.Location = new Point(336, 10);
             btnFinishedGoods.Margin = new Padding(15, 5, 15, 5);
@@ -601,6 +548,7 @@
             btnFinishedGoods.Text = "Finished Goods";
             btnFinishedGoods.TextAlign = ContentAlignment.BottomCenter;
             btnFinishedGoods.UseVisualStyleBackColor = false;
+            btnFinishedGoods.Click += btnFinishedGoods_Click;
             // 
             // btnSalesReturnOrder
             // 
@@ -608,7 +556,6 @@
             btnSalesReturnOrder.FlatAppearance.BorderSize = 0;
             btnSalesReturnOrder.FlatStyle = FlatStyle.Flat;
             btnSalesReturnOrder.Font = new Font("Segoe UI", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnSalesReturnOrder.Image = (Image)resources.GetObject("btnSalesReturnOrder.Image");
             btnSalesReturnOrder.ImageAlign = ContentAlignment.TopCenter;
             btnSalesReturnOrder.Location = new Point(667, 10);
             btnSalesReturnOrder.Margin = new Padding(15, 5, 15, 5);
@@ -626,7 +573,6 @@
             btnSalesOrders.FlatAppearance.BorderSize = 0;
             btnSalesOrders.FlatStyle = FlatStyle.Flat;
             btnSalesOrders.Font = new Font("Segoe UI", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnSalesOrders.Image = (Image)resources.GetObject("btnSalesOrders.Image");
             btnSalesOrders.ImageAlign = ContentAlignment.TopCenter;
             btnSalesOrders.Location = new Point(338, 10);
             btnSalesOrders.Margin = new Padding(15, 5, 15, 5);
@@ -644,7 +590,6 @@
             btnSalesInvoice.FlatAppearance.BorderSize = 0;
             btnSalesInvoice.FlatStyle = FlatStyle.Flat;
             btnSalesInvoice.Font = new Font("Segoe UI", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnSalesInvoice.Image = (Image)resources.GetObject("btnSalesInvoice.Image");
             btnSalesInvoice.ImageAlign = ContentAlignment.TopCenter;
             btnSalesInvoice.Location = new Point(506, 10);
             btnSalesInvoice.Margin = new Padding(15, 5, 15, 5);
@@ -662,7 +607,6 @@
             btnCustomers.FlatAppearance.BorderSize = 0;
             btnCustomers.FlatStyle = FlatStyle.Flat;
             btnCustomers.Font = new Font("Segoe UI", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnCustomers.Image = (Image)resources.GetObject("btnCustomers.Image");
             btnCustomers.ImageAlign = ContentAlignment.TopCenter;
             btnCustomers.Location = new Point(15, 10);
             btnCustomers.Margin = new Padding(15, 5, 15, 5);
@@ -681,7 +625,6 @@
             btnSalesQuotes.FlatAppearance.BorderSize = 0;
             btnSalesQuotes.FlatStyle = FlatStyle.Flat;
             btnSalesQuotes.Font = new Font("Segoe UI", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnSalesQuotes.Image = (Image)resources.GetObject("btnSalesQuotes.Image");
             btnSalesQuotes.ImageAlign = ContentAlignment.TopCenter;
             btnSalesQuotes.Location = new Point(176, 10);
             btnSalesQuotes.Margin = new Padding(15, 5, 15, 5);
@@ -699,7 +642,6 @@
             btnVendors.FlatAppearance.BorderSize = 0;
             btnVendors.FlatStyle = FlatStyle.Flat;
             btnVendors.Font = new Font("Segoe UI", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnVendors.Image = (Image)resources.GetObject("btnVendors.Image");
             btnVendors.ImageAlign = ContentAlignment.TopCenter;
             btnVendors.Location = new Point(15, 10);
             btnVendors.Margin = new Padding(15, 5, 15, 5);
@@ -719,7 +661,6 @@
             btnPurchaseInvoice.FlatAppearance.BorderSize = 0;
             btnPurchaseInvoice.FlatStyle = FlatStyle.Flat;
             btnPurchaseInvoice.Font = new Font("Segoe UI", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnPurchaseInvoice.Image = (Image)resources.GetObject("btnPurchaseInvoice.Image");
             btnPurchaseInvoice.ImageAlign = ContentAlignment.TopCenter;
             btnPurchaseInvoice.Location = new Point(499, 10);
             btnPurchaseInvoice.Margin = new Padding(15, 5, 15, 5);
@@ -738,7 +679,6 @@
             btnPurchaseReturnOrder.FlatAppearance.BorderSize = 0;
             btnPurchaseReturnOrder.FlatStyle = FlatStyle.Flat;
             btnPurchaseReturnOrder.Font = new Font("Segoe UI", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnPurchaseReturnOrder.Image = (Image)resources.GetObject("btnPurchaseReturnOrder.Image");
             btnPurchaseReturnOrder.ImageAlign = ContentAlignment.TopCenter;
             btnPurchaseReturnOrder.Location = new Point(660, 10);
             btnPurchaseReturnOrder.Margin = new Padding(15, 5, 15, 5);
@@ -757,7 +697,6 @@
             btnPurchaseQuotes.FlatAppearance.BorderSize = 0;
             btnPurchaseQuotes.FlatStyle = FlatStyle.Flat;
             btnPurchaseQuotes.Font = new Font("Segoe UI", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnPurchaseQuotes.Image = (Image)resources.GetObject("btnPurchaseQuotes.Image");
             btnPurchaseQuotes.ImageAlign = ContentAlignment.TopCenter;
             btnPurchaseQuotes.Location = new Point(177, 10);
             btnPurchaseQuotes.Margin = new Padding(15, 5, 15, 5);
@@ -776,7 +715,6 @@
             btnPurchaseOrder.FlatAppearance.BorderSize = 0;
             btnPurchaseOrder.FlatStyle = FlatStyle.Flat;
             btnPurchaseOrder.Font = new Font("Segoe UI", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnPurchaseOrder.Image = (Image)resources.GetObject("btnPurchaseOrder.Image");
             btnPurchaseOrder.ImageAlign = ContentAlignment.TopCenter;
             btnPurchaseOrder.Location = new Point(338, 10);
             btnPurchaseOrder.Margin = new Padding(15, 5, 15, 5);
@@ -795,7 +733,6 @@
             btnFutureOrders.FlatAppearance.BorderSize = 0;
             btnFutureOrders.FlatStyle = FlatStyle.Flat;
             btnFutureOrders.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnFutureOrders.Image = (Image)resources.GetObject("btnFutureOrders.Image");
             btnFutureOrders.ImageAlign = ContentAlignment.TopCenter;
             btnFutureOrders.Location = new Point(176, 10);
             btnFutureOrders.Margin = new Padding(15, 5, 15, 5);
@@ -814,7 +751,6 @@
             btnAddorder.FlatAppearance.BorderSize = 0;
             btnAddorder.FlatStyle = FlatStyle.Flat;
             btnAddorder.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnAddorder.Image = (Image)resources.GetObject("btnAddorder.Image");
             btnAddorder.ImageAlign = ContentAlignment.TopCenter;
             btnAddorder.Location = new Point(15, 10);
             btnAddorder.Margin = new Padding(15, 5, 15, 5);
@@ -834,7 +770,6 @@
             btnFinishedOrders.FlatAppearance.BorderSize = 0;
             btnFinishedOrders.FlatStyle = FlatStyle.Flat;
             btnFinishedOrders.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnFinishedOrders.Image = (Image)resources.GetObject("btnFinishedOrders.Image");
             btnFinishedOrders.ImageAlign = ContentAlignment.TopCenter;
             btnFinishedOrders.Location = new Point(660, 10);
             btnFinishedOrders.Margin = new Padding(15, 5, 15, 5);
@@ -853,7 +788,6 @@
             btnPendingOrders.FlatAppearance.BorderSize = 0;
             btnPendingOrders.FlatStyle = FlatStyle.Flat;
             btnPendingOrders.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnPendingOrders.Image = (Image)resources.GetObject("btnPendingOrders.Image");
             btnPendingOrders.ImageAlign = ContentAlignment.TopCenter;
             btnPendingOrders.Location = new Point(337, 10);
             btnPendingOrders.Margin = new Padding(15, 5, 15, 5);
@@ -872,7 +806,6 @@
             btnAllOrders.FlatAppearance.BorderSize = 0;
             btnAllOrders.FlatStyle = FlatStyle.Flat;
             btnAllOrders.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnAllOrders.Image = (Image)resources.GetObject("btnAllOrders.Image");
             btnAllOrders.ImageAlign = ContentAlignment.TopCenter;
             btnAllOrders.Location = new Point(822, 10);
             btnAllOrders.Margin = new Padding(15, 5, 15, 5);
@@ -891,7 +824,6 @@
             btnOrdersInProcess.FlatAppearance.BorderSize = 0;
             btnOrdersInProcess.FlatStyle = FlatStyle.Flat;
             btnOrdersInProcess.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnOrdersInProcess.Image = (Image)resources.GetObject("btnOrdersInProcess.Image");
             btnOrdersInProcess.ImageAlign = ContentAlignment.TopCenter;
             btnOrdersInProcess.Location = new Point(499, 10);
             btnOrdersInProcess.Margin = new Padding(15, 5, 15, 5);
@@ -910,7 +842,6 @@
             btnHR.FlatAppearance.BorderSize = 0;
             btnHR.FlatStyle = FlatStyle.Flat;
             btnHR.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnHR.Image = (Image)resources.GetObject("btnHR.Image");
             btnHR.ImageAlign = ContentAlignment.TopCenter;
             btnHR.Location = new Point(176, 10);
             btnHR.Margin = new Padding(15, 5, 15, 5);
@@ -929,7 +860,6 @@
             btnTechnical.FlatAppearance.BorderSize = 0;
             btnTechnical.FlatStyle = FlatStyle.Flat;
             btnTechnical.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnTechnical.Image = (Image)resources.GetObject("btnTechnical.Image");
             btnTechnical.ImageAlign = ContentAlignment.TopCenter;
             btnTechnical.Location = new Point(337, 10);
             btnTechnical.Margin = new Padding(15, 5, 15, 5);
@@ -948,7 +878,6 @@
             btnProduction.FlatAppearance.BorderSize = 0;
             btnProduction.FlatStyle = FlatStyle.Flat;
             btnProduction.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnProduction.Image = (Image)resources.GetObject("btnProduction.Image");
             btnProduction.ImageAlign = ContentAlignment.TopCenter;
             btnProduction.Location = new Point(499, 10);
             btnProduction.Margin = new Padding(15, 5, 15, 5);
@@ -967,7 +896,6 @@
             btnSales.FlatAppearance.BorderSize = 0;
             btnSales.FlatStyle = FlatStyle.Flat;
             btnSales.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnSales.Image = (Image)resources.GetObject("btnSales.Image");
             btnSales.ImageAlign = ContentAlignment.TopCenter;
             btnSales.Location = new Point(660, 10);
             btnSales.Margin = new Padding(15, 5, 15, 5);
@@ -986,7 +914,6 @@
             btnStore.FlatAppearance.BorderSize = 0;
             btnStore.FlatStyle = FlatStyle.Flat;
             btnStore.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnStore.Image = (Image)resources.GetObject("btnStore.Image");
             btnStore.ImageAlign = ContentAlignment.TopCenter;
             btnStore.Location = new Point(822, 10);
             btnStore.Margin = new Padding(15, 5, 15, 5);
@@ -1005,7 +932,6 @@
             btnAdmin.FlatAppearance.BorderSize = 0;
             btnAdmin.FlatStyle = FlatStyle.Flat;
             btnAdmin.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnAdmin.Image = (Image)resources.GetObject("btnAdmin.Image");
             btnAdmin.ImageAlign = ContentAlignment.TopCenter;
             btnAdmin.Location = new Point(15, 10);
             btnAdmin.Margin = new Padding(15, 5, 15, 5);
@@ -1019,7 +945,7 @@
             // 
             // panelContent
             // 
-            panelContent.BackColor = Color.RoyalBlue;
+            panelContent.BackColor = Color.FromArgb(83, 144, 204);
             panelContent.Controls.Add(pnlLoading);
             panelContent.Controls.Add(picJPSCURA);
             panelContent.Dock = DockStyle.Fill;
@@ -1033,6 +959,7 @@
             // 
             pnlLoading.BackColor = Color.FromArgb(120, 0, 0, 0);
             pnlLoading.Controls.Add(pnlLoaderBox);
+            pnlLoading.Dock = DockStyle.Fill;
             pnlLoading.Location = new Point(0, 0);
             pnlLoading.Name = "pnlLoading";
             pnlLoading.Size = new Size(1370, 625);
@@ -1079,14 +1006,14 @@
             picJPSCURA.Image = (Image)resources.GetObject("picJPSCURA.Image");
             picJPSCURA.Location = new Point(361, 213);
             picJPSCURA.Name = "picJPSCURA";
-            picJPSCURA.Size = new Size(629, 228);
+            picJPSCURA.Size = new Size(936, 314);
             picJPSCURA.SizeMode = PictureBoxSizeMode.AutoSize;
             picJPSCURA.TabIndex = 0;
             picJPSCURA.TabStop = false;
             // 
             // panelTopMenu
             // 
-            panelTopMenu.BackColor = Color.RoyalBlue;
+            panelTopMenu.BackColor = Color.FromArgb(83, 144, 204);
             panelTopMenu.Controls.Add(panelUserInfo);
             panelTopMenu.Controls.Add(btnSales1);
             panelTopMenu.Controls.Add(btnPurchasing);
@@ -1115,7 +1042,7 @@
             // 
             // btnUserInfo
             // 
-            btnUserInfo.BackColor = Color.RoyalBlue;
+            btnUserInfo.BackColor = Color.FromArgb(83, 144, 204);
             btnUserInfo.Cursor = Cursors.Hand;
             btnUserInfo.Dock = DockStyle.Fill;
             btnUserInfo.FlatAppearance.BorderSize = 0;
@@ -1331,9 +1258,6 @@
             panelEMPSubMenu.PerformLayout();
             panelSubMenuUser.ResumeLayout(false);
             panelSubMenuUser.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)PicAllEmp).EndInit();
-            ((System.ComponentModel.ISupportInitialize)picEmp).EndInit();
-            ((System.ComponentModel.ISupportInitialize)picRawMaterialIcons).EndInit();
             panelContent.ResumeLayout(false);
             panelContent.PerformLayout();
             pnlLoading.ResumeLayout(false);

@@ -141,7 +141,7 @@ namespace JPSCURA
             ApplyMainModuleAccess();
             SetLoggedInUserInfo();
 
-            ApplyButtonAccess();
+            //ApplyButtonAccess();
             SetLoggedInUserInfo();
             btnClear.Visible = false;
 
@@ -579,7 +579,10 @@ namespace JPSCURA
 
         private async void btnVendors_Click(object sender, EventArgs e)
         {
-            await OpenFormInPanelAsync(new Vendors());
+            await RunWithLoadingAsync(async () =>
+            {
+                await OpenFormInPanelAsync(new Vendors());
+            });
         }
 
         private async void btnVendoricon_Click(object sender, EventArgs e)
@@ -606,14 +609,14 @@ namespace JPSCURA
             });
         }
 
-        private async void btnAddMaterialIcon_Click(object sender, EventArgs e)
-        {
-            await RunWithLoadingAsync(async () =>
-            {
-                await OpenFormInPanelAsync(new Material());
-                btnClear.Visible = false;
-            });
-        }
+        //private async void btnAddMaterialIcon_Click(object sender, EventArgs e)
+        //{
+        //    await RunWithLoadingAsync(async () =>
+        //    {
+        //        await OpenFormInPanelAsync(new Material());
+        //        btnClear.Visible = false;
+        //    });
+        //}
 
 
 
@@ -623,7 +626,7 @@ namespace JPSCURA
             panelSubMenu.Visible = false;
             SetActiveTopMenu(btnLogindetails);
             ShowHome();
-        }
+
             SetActiveTopMenu(btnLogindetails);
             panelSubMenu.Controls.Clear();
             panelSubMenuUser.Visible = false;
@@ -636,7 +639,7 @@ namespace JPSCURA
                 // 🔥 DB + FORM LOAD happens HERE
                 await OpenFormInPanelAsync(new GLD());
             });
-            }
+        }
 
         private void btnCompanyinfo_Click(object sender, EventArgs e)
         {
@@ -656,19 +659,19 @@ namespace JPSCURA
             });
         }
 
-        private async void btnAllMaterialIcon_Click(object sender, EventArgs e)
-        {
-            await RunWithLoadingAsync(async () =>
-            {
-                await OpenFormInPanelAsync(new AllMaterial());
-                btnClear.Visible = true;
+        //private async void btnAllMaterialIcon_Click(object sender, EventArgs e)
+        //{
+        //    await RunWithLoadingAsync(async () =>
+        //    {
+        //        await OpenFormInPanelAsync(new AllMaterial());
+        //        btnClear.Visible = true;
 
-            });
-        }
+        //    });
+        //}
 
         private async void btnAddEmp_Click(object sender, EventArgs e)
         {
-            await OpenFormInPanelAsync(new AddEmp());
+
             await RunWithLoadingAsync(async () =>
             {
                 await OpenFormInPanelAsync(new AddEmp());
@@ -724,8 +727,12 @@ namespace JPSCURA
 
         private async void btnEditInfo_Click(object sender, EventArgs e)
         {
+            await RunWithLoadingAsync(async () =>
+            {
+                await OpenFormInPanelAsync(new EditInfo());
 
-            await OpenFormInPanelAsync(new EditInfo());
+            });
+
         }
 
         private void btnLogout_Click(object sender, EventArgs e)
@@ -748,6 +755,22 @@ namespace JPSCURA
             this.Close(); // close Home
         }
 
+        private async void btnFinishedGoods_Click(object sender, EventArgs e)
+        {
+            await RunWithLoadingAsync(async () =>
+            {
+                await OpenFormInPanelAsync(new FinishedGoods());
+            });
+            btnClear.Visible = false;
+        }
 
+        private async void  btnSemiFinishedGoods_Click(object sender, EventArgs e)
+        {
+            await RunWithLoadingAsync(async () =>
+            {
+                await OpenFormInPanelAsync(new SemiFinishedGoods());
+            });
+            btnClear.Visible = false;
+        }
     }
 }

@@ -28,7 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(GLD));
             panelMainGLD = new Panel();
             panelCenterGLD = new Panel();
             panelHeaderGLD = new Panel();
@@ -49,7 +48,7 @@
             // 
             // panelMainGLD
             // 
-            panelMainGLD.BackColor = Color.RoyalBlue;
+            panelMainGLD.BackColor = Color.FromArgb(83, 144, 204);
             panelMainGLD.Controls.Add(panelCenterGLD);
             panelMainGLD.Dock = DockStyle.Fill;
             panelMainGLD.Location = new Point(0, 0);
@@ -106,7 +105,6 @@
             btnSaveGLD.FlatAppearance.BorderSize = 0;
             btnSaveGLD.FlatStyle = FlatStyle.Flat;
             btnSaveGLD.Font = new Font("Arial", 11.25F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnSaveGLD.Image = (Image)resources.GetObject("btnSaveGLD.Image");
             btnSaveGLD.ImageAlign = ContentAlignment.MiddleLeft;
             btnSaveGLD.Location = new Point(322, 266);
             btnSaveGLD.Name = "btnSaveGLD";

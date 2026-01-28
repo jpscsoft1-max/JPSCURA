@@ -66,7 +66,7 @@
             // 
             // panelSearchEmp
             // 
-            panelSearchEmp.BackColor = Color.RoyalBlue;
+            panelSearchEmp.BackColor = Color.FromArgb(83, 144, 204);
             panelSearchEmp.Controls.Add(txtSearchRole);
             panelSearchEmp.Controls.Add(txtSearchDepartment);
             panelSearchEmp.Controls.Add(txtSearchContact);

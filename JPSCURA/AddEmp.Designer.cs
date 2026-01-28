@@ -40,6 +40,8 @@
             txtEMP = new TextBox();
             lblEMPName = new Label();
             panelCenter = new Panel();
+            txtIFSC = new TextBox();
+            lblIFSC = new Label();
             btnAddEmp = new Button();
             txtAadhar = new TextBox();
             lblemail = new Label();
@@ -65,7 +67,7 @@
             // 
             // panelContentEMP
             // 
-            panelContentEMP.BackColor = Color.RoyalBlue;
+            panelContentEMP.BackColor = Color.FromArgb(83, 144, 204);
             panelContentEMP.Controls.Add(tableLayoutPanelEMP);
             panelContentEMP.Dock = DockStyle.Fill;
             panelContentEMP.Location = new Point(0, 0);
@@ -203,7 +205,8 @@
             // 
             // panelCenter
             // 
-            panelCenter.Anchor = AnchorStyles.Top;
+            panelCenter.Controls.Add(txtIFSC);
+            panelCenter.Controls.Add(lblIFSC);
             panelCenter.Controls.Add(btnAddEmp);
             panelCenter.Controls.Add(txtAadhar);
             panelCenter.Controls.Add(lblemail);
@@ -211,23 +214,48 @@
             panelCenter.Controls.Add(txtEmail);
             panelCenter.Controls.Add(txtContact);
             panelCenter.Controls.Add(lblAadharCard);
+            panelCenter.Dock = DockStyle.Fill;
             panelCenter.Location = new Point(412, 2);
             panelCenter.Margin = new Padding(3, 2, 3, 2);
             panelCenter.Name = "panelCenter";
             panelCenter.Size = new Size(415, 616);
             panelCenter.TabIndex = 1;
             // 
+            // txtIFSC
+            // 
+            txtIFSC.Anchor = AnchorStyles.Top;
+            txtIFSC.Location = new Point(166, 138);
+            txtIFSC.Margin = new Padding(3, 2, 3, 2);
+            txtIFSC.Name = "txtIFSC";
+            txtIFSC.PlaceholderText = "   Enter IFSC";
+            txtIFSC.Size = new Size(245, 23);
+            txtIFSC.TabIndex = 14;
+            // 
+            // lblIFSC
+            // 
+            lblIFSC.Anchor = AnchorStyles.Top;
+            lblIFSC.AutoSize = true;
+            lblIFSC.Font = new Font("Arial", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            lblIFSC.ForeColor = Color.White;
+            lblIFSC.Location = new Point(18, 139);
+            lblIFSC.Margin = new Padding(2, 0, 2, 0);
+            lblIFSC.Name = "lblIFSC";
+            lblIFSC.Size = new Size(99, 18);
+            lblIFSC.TabIndex = 13;
+            lblIFSC.Text = "IFSC Code  :";
+            lblIFSC.TextAlign = ContentAlignment.MiddleLeft;
+            // 
             // btnAddEmp
             // 
             btnAddEmp.Anchor = AnchorStyles.Top;
             btnAddEmp.AutoSize = true;
-            btnAddEmp.BackColor = Color.LightSkyBlue;
+            btnAddEmp.BackColor = Color.AliceBlue;
             btnAddEmp.Cursor = Cursors.Hand;
             btnAddEmp.FlatAppearance.BorderColor = Color.FromArgb(192, 255, 255);
             btnAddEmp.FlatAppearance.BorderSize = 2;
             btnAddEmp.Font = new Font("Arial", 10.8F, FontStyle.Bold, GraphicsUnit.Point, 0);
             btnAddEmp.ForeColor = SystemColors.ActiveCaptionText;
-            btnAddEmp.Location = new Point(167, 141);
+            btnAddEmp.Location = new Point(167, 213);
             btnAddEmp.Margin = new Padding(3, 2, 3, 2);
             btnAddEmp.Name = "btnAddEmp";
             btnAddEmp.Size = new Size(151, 38);
@@ -476,5 +504,7 @@
         private Label lblRole;
         private ComboBox cmbRole;
         private Label lblBankAcc;
+        private Label lblIFSC;
+        private TextBox txtIFSC;
     }
 }

@@ -114,11 +114,11 @@ INSERT INTO EMPLOYEE_MASTER..Employees
 (Emp_code, Emp_Name, Contact_no, Alt_Contact, Email,
  Address, Aadharcard, Blood_Grp,
  Account_No, RoleId, DepartmentId,
- CreatedAt, IsActive)
+ CreatedAt, IFSC_Code,IsActive)
 VALUES
 (@code,@name,@contact,@alt,@email,
  @addr,@aadhar,@blood,
- @acc,@role,@dept,
+ @acc,@ifsc,@role,@dept,
  GETDATE(),1)", con);
 
             cmd.Parameters.AddWithValue("@code", txtEMPCode.Text.Trim());
@@ -130,6 +130,7 @@ VALUES
             cmd.Parameters.AddWithValue("@aadhar", txtAadhar.Text.Trim());
             cmd.Parameters.AddWithValue("@blood", cmbBloodGroup.Text);
             cmd.Parameters.AddWithValue("@acc", txtBankAcc.Text.Trim());
+            cmd.Parameters.AddWithValue("@acc", txtIFSC.Text.Trim());
             cmd.Parameters.AddWithValue("@role", roleId);
             cmd.Parameters.AddWithValue("@dept", deptId);
 

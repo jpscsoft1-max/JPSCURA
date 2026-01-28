@@ -199,6 +199,14 @@ namespace JPSCURA
 
             dgvEmployee.Columns.Add(new DataGridViewTextBoxColumn
             {
+                Name = "IFSC",
+                HeaderText = "IFSC Code",
+                DataPropertyName = "IFSC_Code",
+                FillWeight = 10
+            });
+
+            dgvEmployee.Columns.Add(new DataGridViewTextBoxColumn
+            {
                 Name = "Department",
                 HeaderText = "Department",
                 DataPropertyName = "DepartmentName",
@@ -244,6 +252,7 @@ SELECT
     e.Aadharcard,
     e.Blood_Grp,
     e.Account_No,
+    e.IFSC_Code,
     d.DepartmentName,
     r.RoleName
 FROM EMPLOYEE_MASTER..Employees e
@@ -272,6 +281,7 @@ ORDER BY e.Emp_Name
                     dr["Aadharcard"],
                     dr["Blood_Grp"],
                     dr["Account_No"],
+                    dr["IFSC_Code"],
                     dr["DepartmentName"],
                     dr["RoleName"]
                 );

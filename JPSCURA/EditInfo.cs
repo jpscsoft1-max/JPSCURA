@@ -21,6 +21,7 @@ namespace JPSCURA
             ApplyBaseUI();          // 👈 clean display mode
             LoadLoggedInUserData(); // 👈 load current user
             UpdateUserProfile();
+            FixAlignment();
         }
 
         // ================= BASE UI (VIEW MODE) =================
@@ -62,6 +63,25 @@ namespace JPSCURA
             EnableEditable(txtContact);
             EnableEditable(txtAltContact);
             EnableEditable(txtAddress);
+            EnableEditable(txtEmail);
+            EnableEditable(txtBankAcc);
+            EnableEditable(txtIFSC);
+        }
+        private void FixAlignment()
+        {
+            foreach (Control c in tblProfile.Controls)
+            {
+                if (c is TextBox txt)
+                {
+                    txt.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+                    txt.Margin = new Padding(3, 8, 3, 3);
+                }
+                else if (c is Label lbl)
+                {
+                    lbl.TextAlign = ContentAlignment.MiddleLeft;
+                    lbl.Margin = new Padding(3, 8, 3, 3);
+                }
+            }
         }
 
         private void EnableEditable(TextBox txt)
@@ -95,6 +115,7 @@ SELECT
     e.Address,
     e.Aadharcard,
     e.Account_No,
+    e.IFSC_Code,
     e.Blood_Grp,
     d.DepartmentName,
     r.RoleName
@@ -121,6 +142,7 @@ WHERE e.Emp_id = @EmpId
                 txtAddress.Text = dr["Address"].ToString();
                 txtAadhar.Text = dr["Aadharcard"].ToString();
                 txtBankAcc.Text = dr["Account_No"].ToString();
+                txtIFSC.Text = dr["IFSC_Code"].ToString();
                 txtBloodGroup.Text = dr["Blood_Grp"].ToString();
                 txtDepartment.Text = dr["DepartmentName"].ToString();
                 txtRole.Text = dr["RoleName"].ToString();
@@ -136,6 +158,8 @@ SET
     Emp_Name   = @Name,
     Contact_no = @Contact,
     Alt_Contact = @AltContact,
+    IFSC_Code=@ifsc,
+Account_No=@account,
     Address    = @Address
 WHERE Emp_id = @EmpId
 ", con);
@@ -144,6 +168,8 @@ WHERE Emp_id = @EmpId
             cmd.Parameters.AddWithValue("@Contact", txtContact.Text.Trim());
             cmd.Parameters.AddWithValue("@AltContact", txtAltContact.Text.Trim());
             cmd.Parameters.AddWithValue("@Address", txtAddress.Text.Trim());
+            cmd.Parameters.AddWithValue("@account", txtBankAcc.Text.Trim());
+            cmd.Parameters.AddWithValue("@ifsc", txtIFSC.Text.Trim());
             cmd.Parameters.AddWithValue("@EmpId", Session.UserId);
 
             con.Open();
@@ -166,6 +192,8 @@ SET
     Emp_Name = @Name,
     Contact_no = @Contact,
     Alt_Contact = @AltContact,
+    IFSC_Code=@ifsc,
+Account_No=@account,
     Address = @Address
 WHERE Emp_id = @EmpId
 ", con);
@@ -174,6 +202,8 @@ WHERE Emp_id = @EmpId
             cmd.Parameters.AddWithValue("@Contact", txtContact.Text.Trim());
             cmd.Parameters.AddWithValue("@AltContact", txtAltContact.Text.Trim());
             cmd.Parameters.AddWithValue("@Address", txtAddress.Text.Trim());
+            cmd.Parameters.AddWithValue("@account", txtBankAcc.Text.Trim());
+            cmd.Parameters.AddWithValue("@ifsc", txtIFSC.Text.Trim());
             cmd.Parameters.AddWithValue("@EmpId", Session.UserId);
 
             con.Open();
