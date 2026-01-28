@@ -84,7 +84,7 @@
             // 
             // tableLayoutPanelMaterial
             // 
-            tableLayoutPanelMaterial.BackColor = Color.RoyalBlue;
+            tableLayoutPanelMaterial.BackColor = Color.FromArgb(83, 144, 204);
             tableLayoutPanelMaterial.ColumnCount = 3;
             tableLayoutPanelMaterial.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33F));
             tableLayoutPanelMaterial.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 34F));

@@ -45,7 +45,7 @@
             // 
             // panelPOPUP
             // 
-            panelPOPUP.BackColor = Color.RoyalBlue;
+            panelPOPUP.BackColor = Color.FromArgb(83, 144, 204);
             panelPOPUP.Controls.Add(txtQty);
             panelPOPUP.Controls.Add(lblQty);
             panelPOPUP.Controls.Add(btnOK);
@@ -84,7 +84,7 @@
             // 
             // btnOK
             // 
-            btnOK.BackColor = Color.DodgerBlue;
+            btnOK.BackColor = Color.PowderBlue;
             btnOK.Cursor = Cursors.Hand;
             btnOK.FlatAppearance.BorderSize = 0;
             btnOK.FlatStyle = FlatStyle.Flat;
