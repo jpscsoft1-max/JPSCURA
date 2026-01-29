@@ -135,7 +135,6 @@
             lbljpsucrawithlogo.FlatStyle = FlatStyle.Flat;
             lbljpsucrawithlogo.Font = new Font("Impact", 21F, FontStyle.Regular, GraphicsUnit.Point, 0);
             lbljpsucrawithlogo.ForeColor = Color.FromArgb(59, 43, 151);
-            lbljpsucrawithlogo.Image = (Image)resources.GetObject("lbljpsucrawithlogo.Image");
             lbljpsucrawithlogo.ImageAlign = ContentAlignment.MiddleLeft;
             lbljpsucrawithlogo.Location = new Point(71, 17);
             lbljpsucrawithlogo.Name = "lbljpsucrawithlogo";
@@ -170,6 +169,7 @@
             btnLogin.TabIndex = 4;
             btnLogin.Text = "Login";
             btnLogin.UseVisualStyleBackColor = false;
+            btnLogin.Click += btnLogin_Click;
             // 
             // picEye
             // 

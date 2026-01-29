@@ -246,8 +246,8 @@ WHERE U.Username = @u
         private void LoadEyeImage(bool open)
         {
             picEye.Image = open
-                ? Image.FromFile("eye_open.png")
-                : Image.FromFile("eye_close.png");
+                ? Properties.Resources.eye_open
+                : Properties.Resources.eye_close;
         }
 
         // ================= PANEL PAINT =================
