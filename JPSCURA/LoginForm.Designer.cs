@@ -30,22 +30,30 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(LoginForm));
             panel1 = new Panel();
+            pnllogintitlebar = new Panel();
+            loginclosebutton = new Button();
+            lblappname = new Label();
+            pctboxlogo = new PictureBox();
             pnlLogin = new Panel();
-            label3 = new Label();
-            label1 = new Label();
+            lbljpsucrawithlogo = new Label();
+            lblusername = new Label();
             btnLogin = new Button();
             picEye = new PictureBox();
-            label2 = new Label();
+            lblpassword = new Label();
             txtUsername = new TextBox();
             txtPassword = new TextBox();
             panel1.SuspendLayout();
+            pnllogintitlebar.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)pctboxlogo).BeginInit();
             pnlLogin.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)picEye).BeginInit();
             SuspendLayout();
             // 
             // panel1
             // 
-            panel1.BackColor = Color.FromArgb(100, 225, 225, 225);
+            panel1.BackColor = Color.FromArgb(70, 225, 225, 225);
+            panel1.BorderStyle = BorderStyle.FixedSingle;
+            panel1.Controls.Add(pnllogintitlebar);
             panel1.Controls.Add(pnlLogin);
             panel1.Dock = DockStyle.Fill;
             panel1.Location = new Point(0, 0);
@@ -53,49 +61,101 @@
             panel1.Size = new Size(429, 408);
             panel1.TabIndex = 0;
             // 
+            // pnllogintitlebar
+            // 
+            pnllogintitlebar.BackColor = Color.White;
+            pnllogintitlebar.Controls.Add(loginclosebutton);
+            pnllogintitlebar.Controls.Add(lblappname);
+            pnllogintitlebar.Controls.Add(pctboxlogo);
+            pnllogintitlebar.Dock = DockStyle.Top;
+            pnllogintitlebar.Location = new Point(0, 0);
+            pnllogintitlebar.Name = "pnllogintitlebar";
+            pnllogintitlebar.Size = new Size(427, 31);
+            pnllogintitlebar.TabIndex = 8;
+            // 
+            // loginclosebutton
+            // 
+            loginclosebutton.Cursor = Cursors.Hand;
+            loginclosebutton.Dock = DockStyle.Right;
+            loginclosebutton.FlatAppearance.BorderSize = 0;
+            loginclosebutton.FlatAppearance.MouseDownBackColor = Color.FromArgb(230, 15, 35);
+            loginclosebutton.FlatAppearance.MouseOverBackColor = Color.FromArgb(230, 15, 35);
+            loginclosebutton.FlatStyle = FlatStyle.Flat;
+            loginclosebutton.Image = Properties.Resources.close3;
+            loginclosebutton.Location = new Point(396, 0);
+            loginclosebutton.Name = "loginclosebutton";
+            loginclosebutton.Size = new Size(31, 31);
+            loginclosebutton.TabIndex = 2;
+            loginclosebutton.UseVisualStyleBackColor = true;
+            loginclosebutton.Click += loginclosebutton_Click;
+            // 
+            // lblappname
+            // 
+            lblappname.AutoSize = true;
+            lblappname.BackColor = Color.White;
+            lblappname.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            lblappname.ForeColor = Color.FromArgb(59, 43, 151);
+            lblappname.Location = new Point(26, 9);
+            lblappname.Name = "lblappname";
+            lblappname.Size = new Size(340, 15);
+            lblappname.TabIndex = 1;
+            lblappname.Text = "JPSCURA – An Indigenous Software Of JPSCUBE ENGINEERS";
+            // 
+            // pctboxlogo
+            // 
+            pctboxlogo.BackColor = Color.Transparent;
+            pctboxlogo.Image = Properties.Resources.logo_32;
+            pctboxlogo.Location = new Point(4, 5);
+            pctboxlogo.Name = "pctboxlogo";
+            pctboxlogo.Size = new Size(22, 22);
+            pctboxlogo.SizeMode = PictureBoxSizeMode.Zoom;
+            pctboxlogo.TabIndex = 0;
+            pctboxlogo.TabStop = false;
+            // 
             // pnlLogin
             // 
             pnlLogin.BackColor = Color.FromArgb(190, 225, 225, 225);
-            pnlLogin.Controls.Add(label3);
-            pnlLogin.Controls.Add(label1);
+            pnlLogin.Controls.Add(lbljpsucrawithlogo);
+            pnlLogin.Controls.Add(lblusername);
             pnlLogin.Controls.Add(btnLogin);
             pnlLogin.Controls.Add(picEye);
-            pnlLogin.Controls.Add(label2);
+            pnlLogin.Controls.Add(lblpassword);
             pnlLogin.Controls.Add(txtUsername);
             pnlLogin.Controls.Add(txtPassword);
-            pnlLogin.Location = new Point(70, 91);
+            pnlLogin.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            pnlLogin.Location = new Point(70, 107);
             pnlLogin.Name = "pnlLogin";
             pnlLogin.Size = new Size(289, 222);
             pnlLogin.TabIndex = 7;
             pnlLogin.Paint += pnlLogin_Paint;
             // 
-            // label3
+            // lbljpsucrawithlogo
             // 
-            label3.BackColor = Color.Transparent;
-            label3.FlatStyle = FlatStyle.Flat;
-            label3.Font = new Font("Impact", 21F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            label3.ForeColor = Color.FromArgb(59, 43, 151);
-            label3.Image = (Image)resources.GetObject("label3.Image");
-            label3.ImageAlign = ContentAlignment.MiddleLeft;
-            label3.Location = new Point(72, 17);
-            label3.Name = "label3";
-            label3.Size = new Size(143, 40);
-            label3.TabIndex = 7;
-            label3.Text = "JPSCURA";
-            label3.TextAlign = ContentAlignment.MiddleRight;
-            label3.UseCompatibleTextRendering = true;
+            lbljpsucrawithlogo.BackColor = Color.Transparent;
+            lbljpsucrawithlogo.FlatStyle = FlatStyle.Flat;
+            lbljpsucrawithlogo.Font = new Font("Impact", 21F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            lbljpsucrawithlogo.ForeColor = Color.FromArgb(59, 43, 151);
+            lbljpsucrawithlogo.Image = (Image)resources.GetObject("lbljpsucrawithlogo.Image");
+            lbljpsucrawithlogo.ImageAlign = ContentAlignment.MiddleLeft;
+            lbljpsucrawithlogo.Location = new Point(71, 17);
+            lbljpsucrawithlogo.Name = "lbljpsucrawithlogo";
+            lbljpsucrawithlogo.Size = new Size(143, 40);
+            lbljpsucrawithlogo.TabIndex = 7;
+            lbljpsucrawithlogo.Text = "JPSCURA";
+            lbljpsucrawithlogo.TextAlign = ContentAlignment.MiddleRight;
+            lbljpsucrawithlogo.UseCompatibleTextRendering = true;
             // 
-            // label1
+            // lblusername
             // 
-            label1.AutoSize = true;
-            label1.BackColor = Color.FromArgb(0, 0, 0, 0);
-            label1.Font = new Font("Tahoma", 8.5F, FontStyle.Bold);
-            label1.ForeColor = Color.FromArgb(59, 43, 151);
-            label1.Location = new Point(19, 76);
-            label1.Name = "label1";
-            label1.Size = new Size(66, 14);
-            label1.TabIndex = 0;
-            label1.Text = "Username";
+            lblusername.AutoSize = true;
+            lblusername.BackColor = Color.FromArgb(0, 0, 0, 0);
+            lblusername.Font = new Font("Tahoma", 8.5F, FontStyle.Bold);
+            lblusername.ForeColor = Color.FromArgb(59, 43, 151);
+            lblusername.Location = new Point(19, 76);
+            lblusername.Name = "lblusername";
+            lblusername.Size = new Size(66, 14);
+            lblusername.TabIndex = 0;
+            lblusername.Text = "Username";
             // 
             // btnLogin
             // 
@@ -115,25 +175,26 @@
             // 
             picEye.BackColor = Color.White;
             picEye.Cursor = Cursors.Hand;
-            picEye.Image = (Image)resources.GetObject("picEye.Image");
+            picEye.Image = Properties.Resources.eye_close;
             picEye.Location = new Point(248, 150);
             picEye.Name = "picEye";
             picEye.Size = new Size(15, 15);
             picEye.SizeMode = PictureBoxSizeMode.StretchImage;
             picEye.TabIndex = 5;
             picEye.TabStop = false;
+            picEye.Click += picEye_Click;
             // 
-            // label2
+            // lblpassword
             // 
-            label2.AutoSize = true;
-            label2.BackColor = Color.FromArgb(0, 0, 0, 0);
-            label2.Font = new Font("Tahoma", 8.5F, FontStyle.Bold);
-            label2.ForeColor = Color.FromArgb(59, 43, 151);
-            label2.Location = new Point(18, 128);
-            label2.Name = "label2";
-            label2.Size = new Size(66, 14);
-            label2.TabIndex = 2;
-            label2.Text = "Password";
+            lblpassword.AutoSize = true;
+            lblpassword.BackColor = Color.FromArgb(0, 0, 0, 0);
+            lblpassword.Font = new Font("Tahoma", 8.5F, FontStyle.Bold);
+            lblpassword.ForeColor = Color.FromArgb(59, 43, 151);
+            lblpassword.Location = new Point(18, 128);
+            lblpassword.Name = "lblpassword";
+            lblpassword.Size = new Size(66, 14);
+            lblpassword.TabIndex = 2;
+            lblpassword.Text = "Password";
             // 
             // txtUsername
             // 
@@ -156,20 +217,23 @@
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.Honeydew;
-            BackgroundImage = (Image)resources.GetObject("$this.BackgroundImage");
-            BackgroundImageLayout = ImageLayout.None;
+            BackgroundImage = Properties.Resources.login_image;
+            BackgroundImageLayout = ImageLayout.Stretch;
             ClientSize = new Size(429, 408);
             Controls.Add(panel1);
             ForeColor = SystemColors.ActiveCaptionText;
-            FormBorderStyle = FormBorderStyle.FixedSingle;
+            FormBorderStyle = FormBorderStyle.None;
             Icon = (Icon)resources.GetObject("$this.Icon");
             MaximizeBox = false;
             MinimizeBox = false;
             Name = "LoginForm";
             StartPosition = FormStartPosition.CenterScreen;
-            Text = "JPSCURA";
+            Text = "JPSCURA – An Indigenous Software Of JPSCUBE ENGINEERS ";
             Load += LoginForm_Load;
             panel1.ResumeLayout(false);
+            pnllogintitlebar.ResumeLayout(false);
+            pnllogintitlebar.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)pctboxlogo).EndInit();
             pnlLogin.ResumeLayout(false);
             pnlLogin.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)picEye).EndInit();
@@ -180,12 +244,16 @@
 
         private Panel panel1;
         private Panel pnlLogin;
-        private Label label3;
-        private Label label1;
+        private Label lbljpsucrawithlogo;
+        private Label lblusername;
         private Button btnLogin;
         private PictureBox picEye;
-        private Label label2;
+        private Label lblpassword;
         private TextBox txtUsername;
         private TextBox txtPassword;
+        private Panel pnllogintitlebar;
+        private PictureBox pctboxlogo;
+        private Label lblappname;
+        private Button loginclosebutton;
     }
 }

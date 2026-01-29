@@ -1,29 +1,116 @@
-﻿using System;
+﻿using Microsoft.Data.SqlClient;
+using Microsoft.VisualBasic.Logging;
+using System;
 using System.Drawing;
-using System.Windows.Forms;
-using Microsoft.Data.SqlClient;
 using System.Drawing.Drawing2D;
+using System.Windows.Forms;
 
 namespace JPSCURA
 {
     public partial class LoginForm : Form
     {
         private bool isPasswordVisible = false;
+        private Region cachedPanelRegion = null;
 
         public LoginForm()
         {
             InitializeComponent();
             StartPosition = FormStartPosition.CenterScreen;
-            KeyPreview = true;   // Enter key support
+            KeyPreview = true;
+
+            // 🔥 Form level double buffering
+            this.DoubleBuffered = true;
+            this.SetStyle(
+                ControlStyles.OptimizedDoubleBuffer |
+                ControlStyles.AllPaintingInWmPaint |
+                ControlStyles.UserPaint,
+                true);
+            this.UpdateStyles();
+
+            // 🔥 Panel ko double buffered banao
+            SetDoubleBuffered(pnlLogin);
+
+            // 🔥 Baaki controls ko bhi
+            if (txtUsername != null) SetDoubleBuffered(txtUsername);
+            if (txtPassword != null) SetDoubleBuffered(txtPassword);
+            if (btnLogin != null) SetDoubleBuffered(btnLogin);
+            if (picEye != null) SetDoubleBuffered(picEye);
         }
 
+        protected override void OnHandleCreated(EventArgs e)
+        {
+            base.OnHandleCreated(e);
 
+            this.MaximizedBounds = Screen.FromHandle(this.Handle).WorkingArea;
+            this.WindowState = FormWindowState.Maximized;
+        }
+
+        // 🔥 Kisi bhi control ko double buffered banana
+        private void SetDoubleBuffered(Control control)
+        {
+            if (control == null) return;
+
+            try
+            {
+                typeof(Control).InvokeMember("DoubleBuffered",
+                    System.Reflection.BindingFlags.SetProperty |
+                    System.Reflection.BindingFlags.Instance |
+                    System.Reflection.BindingFlags.NonPublic,
+                    null, control, new object[] { true });
+            }
+            catch { }
+        }
+
+        // 🔥 MAIN FIX - Background erase disable
+        protected override CreateParams CreateParams
+        {
+            get
+            {
+                CreateParams cp = base.CreateParams;
+                cp.ExStyle |= 0x02000000; // WS_EX_COMPOSITED
+                return cp;
+            }
+        }
 
         private void LoginForm_Load(object sender, EventArgs e)
         {
             txtUsername.Focus();
             txtPassword.PasswordChar = '●';
             LoadEyeImage(false);
+
+            // 🔥 Panel region pehle set kar do
+            SetupPanelRegion();
+        }
+
+        // 🔥 Panel ka region ek baar setup karo
+        private void SetupPanelRegion()
+        {
+            if (cachedPanelRegion != null)
+                return;
+
+            int radius = 18;
+            int borderThickness = 2;
+
+            Rectangle rect = new Rectangle(
+                borderThickness,
+                borderThickness,
+                pnlLogin.Width - borderThickness * 2,
+                pnlLogin.Height - borderThickness * 2
+            );
+
+            using (GraphicsPath path = new GraphicsPath())
+            {
+                int d = radius * 2;
+
+                path.AddArc(rect.X, rect.Y, d, d, 180, 90);
+                path.AddArc(rect.Right - d, rect.Y, d, d, 270, 90);
+                path.AddArc(rect.Right - d, rect.Bottom - d, d, d, 0, 90);
+                path.AddArc(rect.X, rect.Bottom - d, d, d, 90, 90);
+                path.CloseFigure();
+
+                cachedPanelRegion = new Region(path);
+                pnlLogin.Region = cachedPanelRegion;
+            }
         }
 
         // ================= LOGIN =================
@@ -55,7 +142,6 @@ namespace JPSCURA
                 {
                     con.Open();
 
-                    // 🔹 STEP 1: Check username + password
                     using (SqlCommand cmd = new SqlCommand(@"
                 SELECT 
     U.UserId,
@@ -94,7 +180,6 @@ WHERE U.Username = @u
                                 return;
                             }
 
-                            // 🔒 STEP 2: User active check
                             if (!Convert.ToBoolean(dr["IsActive"]))
                             {
                                 MessageBox.Show(
@@ -105,7 +190,6 @@ WHERE U.Username = @u
                                 return;
                             }
 
-                            // 🔒 STEP 3: Employee active check
                             if (!Convert.ToBoolean(dr["EmpIsActive"]))
                             {
                                 MessageBox.Show(
@@ -122,12 +206,10 @@ WHERE U.Username = @u
                             Session.Username = dr["Username"].ToString();
                             Session.Role = dr["RoleName"].ToString().Trim().ToUpper();
                             Session.Department = dr["DepartmentName"].ToString().Trim();
-
                         }
                     }
                 }
 
-                // ✅ SUCCESS
                 Home home = new Home();
                 home.Show();
                 Hide();
@@ -141,7 +223,6 @@ WHERE U.Username = @u
                     MessageBoxIcon.Error);
             }
         }
-
 
         // ================= ENTER KEY =================
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
@@ -169,6 +250,7 @@ WHERE U.Username = @u
                 : Image.FromFile("eye_close.png");
         }
 
+        // ================= PANEL PAINT =================
         private void pnlLogin_Paint(object sender, PaintEventArgs e)
         {
             Panel pnl = sender as Panel;
@@ -197,14 +279,24 @@ WHERE U.Username = @u
                 path.AddArc(rect.X, rect.Bottom - d, d, d, 90, 90);
                 path.CloseFigure();
 
-                pnl.Region = new Region(path);
-
                 using (Pen pen = new Pen(borderColor, borderThickness))
                 {
                     pen.Alignment = PenAlignment.Inset;
                     e.Graphics.DrawPath(pen, path);
                 }
             }
+        }
+
+
+        protected override void OnFormClosed(FormClosedEventArgs e)
+        {
+            cachedPanelRegion?.Dispose();
+            base.OnFormClosed(e);
+        }
+
+        private void loginclosebutton_Click(object sender, EventArgs e)
+        {
+            Application.Exit();
         }
     }
 }
