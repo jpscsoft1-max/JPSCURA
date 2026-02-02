@@ -119,15 +119,17 @@ SELECT
     e.Blood_Grp,
     d.DepartmentName,
     r.RoleName
-FROM EMPLOYEE_MASTER..Employees e
+FROM EMPLOYEE_MASTER..Users u
+INNER JOIN EMPLOYEE_MASTER..Employees e
+    ON u.Emp_id = e.Emp_id
 LEFT JOIN EMPLOYEE_MASTER..Departments d
     ON e.DepartmentId = d.DepartmentId
 LEFT JOIN EMPLOYEE_MASTER..Roles r
     ON e.RoleId = r.RoleId
-WHERE e.Emp_id = @EmpId
+WHERE u.UserId = @UserId;
 ", con);
 
-            cmd.Parameters.AddWithValue("@EmpId", Session.UserId);
+            cmd.Parameters.AddWithValue("UserId", Session.UserId);
 
             con.Open();
             using SqlDataReader dr = cmd.ExecuteReader();
@@ -177,25 +179,25 @@ WHERE Emp_id = @EmpId
         }
 
         // ================= EDIT PROFILE CLICK =================
-        private void lblEditProfile_Click(object sender, EventArgs e)
-        {
-            ApplyBaseUI();   // reset first
-            EnableEditMode();
-        }
+
 
         private void btnSaveUSer_Click(object sender, EventArgs e)
         {
             using SqlConnection con = new SqlConnection(DBconection.GetConnectionString());
             using SqlCommand cmd = new SqlCommand(@"
-UPDATE EMPLOYEE_MASTER..Employees
+UPDATE e
 SET 
-    Emp_Name = @Name,
-    Contact_no = @Contact,
-    Alt_Contact = @AltContact,
-    IFSC_Code=@ifsc,
-Account_No=@account,
-    Address = @Address
-WHERE Emp_id = @EmpId
+    e.Emp_Name = @Name,
+    e.Contact_no = @Contact,
+    e.Alt_Contact = @AltContact,
+    e.IFSC_Code = @ifsc,
+    e.Account_No = @account,
+    e.Address = @Address
+FROM EMPLOYEE_MASTER..Employees e
+INNER JOIN EMPLOYEE_MASTER..Users u
+    ON u.Emp_id = e.Emp_id
+WHERE u.UserId = @UserId
+
 ", con);
 
             cmd.Parameters.AddWithValue("@Name", txtName.Text.Trim());
@@ -204,7 +206,9 @@ WHERE Emp_id = @EmpId
             cmd.Parameters.AddWithValue("@Address", txtAddress.Text.Trim());
             cmd.Parameters.AddWithValue("@account", txtBankAcc.Text.Trim());
             cmd.Parameters.AddWithValue("@ifsc", txtIFSC.Text.Trim());
-            cmd.Parameters.AddWithValue("@EmpId", Session.UserId);
+            //cmd.Parameters.AddWithValue("@EmpId", Session.UserId);
+            cmd.Parameters.AddWithValue("@UserId", Session.UserId);
+
 
             con.Open();
             cmd.ExecuteNonQuery();
@@ -218,9 +222,16 @@ WHERE Emp_id = @EmpId
             // 🔹 STEP 2.3: BACK TO DISPLAY MODE
             ApplyBaseUI();
             LoadLoggedInUserData();
+            UpdateUserProfile();
 
             MessageBox.Show("Profile updated successfully");
         }
+
+        private void btnEditProfile_Click(object sender, EventArgs e)
+        {
+            ApplyBaseUI();   // reset first
+            EnableEditMode();
+        }
     }
-    }
+}
 

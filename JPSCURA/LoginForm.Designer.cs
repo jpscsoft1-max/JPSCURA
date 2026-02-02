@@ -94,7 +94,7 @@
             lblappname.AutoSize = true;
             lblappname.BackColor = Color.White;
             lblappname.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            lblappname.ForeColor = Color.FromArgb(59, 43, 151);
+            lblappname.ForeColor = Color.Black;
             lblappname.Location = new Point(26, 9);
             lblappname.Name = "lblappname";
             lblappname.Size = new Size(340, 15);
@@ -135,6 +135,7 @@
             lbljpsucrawithlogo.FlatStyle = FlatStyle.Flat;
             lbljpsucrawithlogo.Font = new Font("Impact", 21F, FontStyle.Regular, GraphicsUnit.Point, 0);
             lbljpsucrawithlogo.ForeColor = Color.FromArgb(59, 43, 151);
+            lbljpsucrawithlogo.Image = Properties.Resources.logo_32;
             lbljpsucrawithlogo.ImageAlign = ContentAlignment.MiddleLeft;
             lbljpsucrawithlogo.Location = new Point(71, 17);
             lbljpsucrawithlogo.Name = "lbljpsucrawithlogo";

@@ -28,9 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
-            DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
-            DataGridViewCellStyle dataGridViewCellStyle3 = new DataGridViewCellStyle();
             panel2ndtableTopContent = new Panel();
             btnAddNew = new Button();
             btnBack = new Button();
@@ -136,14 +133,6 @@
             DgvMainTable.MultiSelect = false;
             DgvMainTable.Name = "DgvMainTable";
             DgvMainTable.ReadOnly = true;
-            //dataGridViewCellStyle5.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            //dataGridViewCellStyle5.BackColor = SystemColors.Control;
-            //dataGridViewCellStyle5.Font = new Font("Segoe UI", 9F);
-            //dataGridViewCellStyle5.ForeColor = SystemColors.WindowText;
-            //dataGridViewCellStyle5.SelectionBackColor = Color.FromArgb(255, 255, 128);
-            //dataGridViewCellStyle5.SelectionForeColor = SystemColors.HighlightText;
-            //dataGridViewCellStyle5.WrapMode = DataGridViewTriState.True;
-            //DgvMainTable.RowHeadersDefaultCellStyle = dataGridViewCellStyle5;
             DgvMainTable.RowHeadersVisible = false;
             DgvMainTable.RowHeadersWidth = 51;
             DgvMainTable.SelectionMode = DataGridViewSelectionMode.CellSelect;
@@ -170,10 +159,6 @@
             // 
             ColMaterialName.ActiveLinkColor = Color.Black;
             ColMaterialName.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
-            //dataGridViewCellStyle4.ForeColor = Color.Black;
-            //dataGridViewCellStyle4.SelectionBackColor = Color.White;
-            //dataGridViewCellStyle4.SelectionForeColor = Color.Black;
-            //ColMaterialName.DefaultCellStyle = dataGridViewCellStyle4;
             ColMaterialName.HeaderText = "Material Name";
             ColMaterialName.LinkBehavior = LinkBehavior.HoverUnderline;
             ColMaterialName.LinkColor = Color.Black;
@@ -269,7 +254,7 @@
             btnExport.FlatStyle = FlatStyle.Flat;
             btnExport.Font = new Font("Arial", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
             btnExport.ForeColor = Color.White;
-            btnExport.Image = Properties.Resources.icons8_export_excel_25;
+            btnExport.Image = Properties.Resources.xls;
             btnExport.ImageAlign = ContentAlignment.MiddleLeft;
             btnExport.Location = new Point(1257, 0);
             btnExport.Name = "btnExport";
@@ -358,14 +343,6 @@
             dgv2ndTable.Location = new Point(0, 0);
             dgv2ndTable.Name = "dgv2ndTable";
             dgv2ndTable.ReadOnly = true;
-            //dataGridViewCellStyle6.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            //dataGridViewCellStyle6.BackColor = SystemColors.Control;
-            //dataGridViewCellStyle6.Font = new Font("Segoe UI", 9F);
-            //dataGridViewCellStyle6.ForeColor = SystemColors.WindowText;
-            //dataGridViewCellStyle6.SelectionBackColor = Color.FromArgb(255, 192, 192);
-            //dataGridViewCellStyle6.SelectionForeColor = SystemColors.HighlightText;
-            //dataGridViewCellStyle6.WrapMode = DataGridViewTriState.True;
-            //dgv2ndTable.RowHeadersDefaultCellStyle = dataGridViewCellStyle6;
             dgv2ndTable.RowHeadersVisible = false;
             dgv2ndTable.RowHeadersWidth = 51;
             dgv2ndTable.SelectionMode = DataGridViewSelectionMode.CellSelect;
