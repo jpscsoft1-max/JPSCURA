@@ -22,7 +22,7 @@ namespace JPSCURA
         private void AddEmp_Load(object sender, EventArgs e)
         {
             LoadDepartments();
-            LoadRoles();
+       
             LoadBloodGroup();
         }
         private void InsertSelect(DataTable dt, string idCol, string nameCol)
@@ -51,13 +51,17 @@ namespace JPSCURA
             cmbDepartment.ValueMember = "DepartmentId";
         }
 
-        private void LoadRoles()
+        private void LoadRolesByDepartment(int departmentId)
         {
             using SqlConnection con = new SqlConnection(DBconection.GetConnectionString());
 
             SqlDataAdapter da = new SqlDataAdapter(
-                "SELECT RoleId, RoleName FROM EMPLOYEE_MASTER..Roles ORDER BY RoleName",
-                con);
+                @"SELECT RoleId, RoleName 
+          FROM EMPLOYEE_MASTER..Roles
+          WHERE DepartmentId = @deptId
+          ORDER BY RoleName", con);
+
+            da.SelectCommand.Parameters.AddWithValue("@deptId", departmentId);
 
             DataTable dt = new DataTable();
             da.Fill(dt);
@@ -67,6 +71,23 @@ namespace JPSCURA
             cmbRole.DataSource = dt;
             cmbRole.DisplayMember = "RoleName";
             cmbRole.ValueMember = "RoleId";
+        }
+        private void cmbDepartment_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            int deptId = GetComboValueSafe(cmbDepartment);
+
+            if (deptId > 0)
+            {
+                LoadRolesByDepartment(deptId);
+                cmbRole.SelectedIndex = 0;
+            }
+            else
+            {
+                cmbRole.DataSource = null;
+                cmbRole.Items.Clear();
+                cmbRole.Items.Add("-- Select --");
+                cmbRole.SelectedIndex = 0;
+            }
         }
 
         private void LoadBloodGroup()
@@ -118,8 +139,8 @@ INSERT INTO EMPLOYEE_MASTER..Employees
 VALUES
 (@code,@name,@contact,@alt,@email,
  @addr,@aadhar,@blood,
- @acc,@ifsc,@role,@dept,
- GETDATE(),1)", con);
+ @acc,@role,@dept,
+ GETDATE(),@ifsc,1)", con);
 
             cmd.Parameters.AddWithValue("@code", txtEMPCode.Text.Trim());
             cmd.Parameters.AddWithValue("@name", txtEMP.Text.Trim());
@@ -130,16 +151,48 @@ VALUES
             cmd.Parameters.AddWithValue("@aadhar", txtAadhar.Text.Trim());
             cmd.Parameters.AddWithValue("@blood", cmbBloodGroup.Text);
             cmd.Parameters.AddWithValue("@acc", txtBankAcc.Text.Trim());
-            cmd.Parameters.AddWithValue("@acc", txtIFSC.Text.Trim());
+            cmd.Parameters.AddWithValue("@ifsc", txtIFSC.Text.Trim());
             cmd.Parameters.AddWithValue("@role", roleId);
             cmd.Parameters.AddWithValue("@dept", deptId);
 
             cmd.ExecuteNonQuery();
 
             MessageBox.Show("Employee added successfully");
-            //ClearEmployeeForm();
+            ClearEmployeeForm();
+        }
+
+        private void ClearEmployeeForm()
+        {
+            // TextBoxes clear
+            txtEMPCode.Clear();
+            txtEMP.Clear();
+            txtContact.Clear();
+            txtAltContact.Clear();
+            txtEmail.Clear();
+            txtaddress.Clear();
+            txtAadhar.Clear();
+            txtBankAcc.Clear();
+            txtIFSC.Clear();
+
+            // Department reset
+            cmbDepartment.SelectedIndex = 0;
+
+            // Role combo safe reset
+            cmbRole.DataSource = null;
+            cmbRole.Items.Clear();
+            cmbRole.Text = "-- Select --";
+
+            // Blood group reset
+            if (cmbBloodGroup.Items.Count > 0)
+                cmbBloodGroup.SelectedIndex = 0;
+
+            txtEMPCode.Focus();
         }
 
 
+        private void btnClear_Click(object sender, EventArgs e)
+        {
+            ClearEmployeeForm ();
+        }
     }
 }

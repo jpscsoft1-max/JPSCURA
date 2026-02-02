@@ -40,6 +40,7 @@
             txtEMP = new TextBox();
             lblEMPName = new Label();
             panelCenter = new Panel();
+            btnClear = new Button();
             txtIFSC = new TextBox();
             lblIFSC = new Label();
             btnAddEmp = new Button();
@@ -52,7 +53,7 @@
             panelRight = new Panel();
             lblBankAcc = new Label();
             txtEMPCode = new TextBox();
-            label1 = new Label();
+            lblEMPCOde = new Label();
             txtAltContact = new TextBox();
             txtBankAcc = new TextBox();
             cmbBloodGroup = new ComboBox();
@@ -145,6 +146,7 @@
             cmbDepartment.Name = "cmbDepartment";
             cmbDepartment.Size = new Size(245, 23);
             cmbDepartment.TabIndex = 13;
+            cmbDepartment.SelectedIndexChanged += cmbDepartment_SelectedIndexChanged;
             // 
             // lblDepartment
             // 
@@ -205,6 +207,7 @@
             // 
             // panelCenter
             // 
+            panelCenter.Controls.Add(btnClear);
             panelCenter.Controls.Add(txtIFSC);
             panelCenter.Controls.Add(lblIFSC);
             panelCenter.Controls.Add(btnAddEmp);
@@ -220,6 +223,26 @@
             panelCenter.Name = "panelCenter";
             panelCenter.Size = new Size(415, 616);
             panelCenter.TabIndex = 1;
+            // 
+            // btnClear
+            // 
+            btnClear.Anchor = AnchorStyles.Top;
+            btnClear.AutoSize = true;
+            btnClear.BackColor = Color.LimeGreen;
+            btnClear.Cursor = Cursors.Hand;
+            btnClear.FlatAppearance.BorderSize = 0;
+            btnClear.FlatAppearance.MouseDownBackColor = Color.Red;
+            btnClear.FlatAppearance.MouseOverBackColor = Color.Red;
+            btnClear.FlatStyle = FlatStyle.Flat;
+            btnClear.Font = new Font("Arial", 11.25F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            btnClear.ImageAlign = ContentAlignment.MiddleLeft;
+            btnClear.Location = new Point(330, 216);
+            btnClear.Name = "btnClear";
+            btnClear.Size = new Size(81, 32);
+            btnClear.TabIndex = 15;
+            btnClear.Text = "Clear";
+            btnClear.UseVisualStyleBackColor = false;
+            btnClear.Click += btnClear_Click;
             // 
             // txtIFSC
             // 
@@ -255,7 +278,7 @@
             btnAddEmp.FlatAppearance.BorderSize = 2;
             btnAddEmp.Font = new Font("Arial", 10.8F, FontStyle.Bold, GraphicsUnit.Point, 0);
             btnAddEmp.ForeColor = SystemColors.ActiveCaptionText;
-            btnAddEmp.Location = new Point(167, 213);
+            btnAddEmp.Location = new Point(3, 213);
             btnAddEmp.Margin = new Padding(3, 2, 3, 2);
             btnAddEmp.Name = "btnAddEmp";
             btnAddEmp.Size = new Size(151, 38);
@@ -340,7 +363,7 @@
             // 
             panelRight.Controls.Add(lblBankAcc);
             panelRight.Controls.Add(txtEMPCode);
-            panelRight.Controls.Add(label1);
+            panelRight.Controls.Add(lblEMPCOde);
             panelRight.Controls.Add(txtAltContact);
             panelRight.Controls.Add(txtBankAcc);
             panelRight.Controls.Add(cmbBloodGroup);
@@ -373,23 +396,23 @@
             txtEMPCode.Location = new Point(159, 102);
             txtEMPCode.Margin = new Padding(3, 2, 3, 2);
             txtEMPCode.Name = "txtEMPCode";
-            txtEMPCode.PlaceholderText = "   Enter Email";
+            txtEMPCode.PlaceholderText = "   Enter EMP Code";
             txtEMPCode.Size = new Size(245, 23);
             txtEMPCode.TabIndex = 13;
             // 
-            // label1
+            // lblEMPCOde
             // 
-            label1.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            label1.AutoSize = true;
-            label1.Font = new Font("Arial", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            label1.ForeColor = Color.White;
-            label1.Location = new Point(11, 107);
-            label1.Margin = new Padding(2, 0, 2, 0);
-            label1.Name = "label1";
-            label1.Size = new Size(133, 18);
-            label1.TabIndex = 12;
-            label1.Text = "Employee Code  :";
-            label1.TextAlign = ContentAlignment.MiddleLeft;
+            lblEMPCOde.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            lblEMPCOde.AutoSize = true;
+            lblEMPCOde.Font = new Font("Arial", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            lblEMPCOde.ForeColor = Color.White;
+            lblEMPCOde.Location = new Point(11, 107);
+            lblEMPCOde.Margin = new Padding(2, 0, 2, 0);
+            lblEMPCOde.Name = "lblEMPCOde";
+            lblEMPCOde.Size = new Size(133, 18);
+            lblEMPCOde.TabIndex = 12;
+            lblEMPCOde.Text = "Employee Code  :";
+            lblEMPCOde.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // txtAltContact
             // 
@@ -497,7 +520,7 @@
         private ComboBox cmbBloodGroup;
         private Button btnAddEmp;
         private TextBox txtEMPCode;
-        private Label label1;
+        private Label lblEMPCOde;
         private TextBox txtBankAcc;
         private Label lblDepartment;
         private ComboBox cmbDepartment;
@@ -506,5 +529,6 @@
         private Label lblBankAcc;
         private Label lblIFSC;
         private TextBox txtIFSC;
+        private Button btnClear;
     }
 }

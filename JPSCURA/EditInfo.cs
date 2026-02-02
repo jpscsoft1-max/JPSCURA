@@ -8,6 +8,13 @@ namespace JPSCURA
     public partial class EditInfo : Form
     {
         public event Action<string> UserNameUpdated;
+        // ===== OLD VALUES =====
+        private string oldName;
+        private string oldContact;
+        private string oldAltContact;
+        private string oldAddress;
+        private string oldAccount;
+        private string oldIFSC;
 
         public EditInfo()
         {
@@ -119,15 +126,17 @@ SELECT
     e.Blood_Grp,
     d.DepartmentName,
     r.RoleName
-FROM EMPLOYEE_MASTER..Employees e
+FROM EMPLOYEE_MASTER..Users u
+INNER JOIN EMPLOYEE_MASTER..Employees e
+    ON u.Emp_id = e.Emp_id
 LEFT JOIN EMPLOYEE_MASTER..Departments d
     ON e.DepartmentId = d.DepartmentId
 LEFT JOIN EMPLOYEE_MASTER..Roles r
     ON e.RoleId = r.RoleId
-WHERE e.Emp_id = @EmpId
+WHERE u.UserId = @UserId;
 ", con);
 
-            cmd.Parameters.AddWithValue("@EmpId", Session.UserId);
+            cmd.Parameters.AddWithValue("UserId", Session.UserId);
 
             con.Open();
             using SqlDataReader dr = cmd.ExecuteReader();
@@ -146,6 +155,15 @@ WHERE e.Emp_id = @EmpId
                 txtBloodGroup.Text = dr["Blood_Grp"].ToString();
                 txtDepartment.Text = dr["DepartmentName"].ToString();
                 txtRole.Text = dr["RoleName"].ToString();
+
+                // ===== STORE ORIGINAL VALUES =====
+                oldName = txtName.Text.Trim();
+                oldContact = txtContact.Text.Trim();
+                oldAltContact = txtAltContact.Text.Trim();
+                oldAddress = txtAddress.Text.Trim();
+                oldAccount = txtBankAcc.Text.Trim();
+                oldIFSC = txtIFSC.Text.Trim();
+
             }
         }
         //For Update Detailes In DB
@@ -177,50 +195,104 @@ WHERE Emp_id = @EmpId
         }
 
         // ================= EDIT PROFILE CLICK =================
-        private void lblEditProfile_Click(object sender, EventArgs e)
+
+
+        private void btnSaveUSer_Click(object sender, EventArgs e)
+        {
+            {
+                // ===== NO CHANGE VALIDATION =====
+                bool isChanged =
+                    oldName != txtName.Text.Trim() ||
+                    oldContact != txtContact.Text.Trim() ||
+                    oldAltContact != txtAltContact.Text.Trim() ||
+                    oldAddress != txtAddress.Text.Trim() ||
+                    oldAccount != txtBankAcc.Text.Trim() ||
+                    oldIFSC != txtIFSC.Text.Trim();
+
+                if (!isChanged)
+                {
+                    MessageBox.Show(
+                        "No changes detected.\nPlease edit something before saving.",
+                        "Info",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Information
+                    );
+                    return;
+                }
+
+                // ===== CONFIRMATION =====
+                DialogResult result = MessageBox.Show(
+                    "Are you sure you want to save the changes?",
+                    "Confirm Update",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question
+                );
+
+                if (result == DialogResult.No)
+                {
+                    RestoreOldValues(); // old data back
+                    EnableEditMode();   // still editable
+                    return;
+                }
+
+                // ===== UPDATE DATABASE =====
+                using SqlConnection con = new SqlConnection(DBconection.GetConnectionString());
+                using SqlCommand cmd = new SqlCommand(@"
+UPDATE e
+SET 
+    e.Emp_Name = @Name,
+    e.Contact_no = @Contact,
+    e.Alt_Contact = @AltContact,
+    e.IFSC_Code = @IFSC,
+    e.Account_No = @Account,
+    e.Address = @Address
+FROM EMPLOYEE_MASTER..Employees e
+INNER JOIN EMPLOYEE_MASTER..Users u ON u.Emp_id = e.Emp_id
+WHERE u.UserId = @UserId
+", con);
+
+                cmd.Parameters.AddWithValue("@Name", txtName.Text.Trim());
+                cmd.Parameters.AddWithValue("@Contact", txtContact.Text.Trim());
+                cmd.Parameters.AddWithValue("@AltContact", txtAltContact.Text.Trim());
+                cmd.Parameters.AddWithValue("@Address", txtAddress.Text.Trim());
+                cmd.Parameters.AddWithValue("@Account", txtBankAcc.Text.Trim());
+                cmd.Parameters.AddWithValue("@IFSC", txtIFSC.Text.Trim());
+                cmd.Parameters.AddWithValue("@UserId", Session.UserId);
+
+                con.Open();
+                cmd.ExecuteNonQuery();
+
+                // ===== SESSION + UI =====
+                Session.RealName = txtName.Text.Trim();
+                UserNameUpdated?.Invoke(Session.RealName);
+
+                ApplyBaseUI();
+                LoadLoggedInUserData();
+
+                MessageBox.Show(
+                    "Profile updated successfully",
+                    "Success",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information
+                );
+            }
+        }
+
+        private void btnEditProfile_Click(object sender, EventArgs e)
         {
             ApplyBaseUI();   // reset first
             EnableEditMode();
         }
 
-        private void btnSaveUSer_Click(object sender, EventArgs e)
+        private void RestoreOldValues()
         {
-            using SqlConnection con = new SqlConnection(DBconection.GetConnectionString());
-            using SqlCommand cmd = new SqlCommand(@"
-UPDATE EMPLOYEE_MASTER..Employees
-SET 
-    Emp_Name = @Name,
-    Contact_no = @Contact,
-    Alt_Contact = @AltContact,
-    IFSC_Code=@ifsc,
-Account_No=@account,
-    Address = @Address
-WHERE Emp_id = @EmpId
-", con);
-
-            cmd.Parameters.AddWithValue("@Name", txtName.Text.Trim());
-            cmd.Parameters.AddWithValue("@Contact", txtContact.Text.Trim());
-            cmd.Parameters.AddWithValue("@AltContact", txtAltContact.Text.Trim());
-            cmd.Parameters.AddWithValue("@Address", txtAddress.Text.Trim());
-            cmd.Parameters.AddWithValue("@account", txtBankAcc.Text.Trim());
-            cmd.Parameters.AddWithValue("@ifsc", txtIFSC.Text.Trim());
-            cmd.Parameters.AddWithValue("@EmpId", Session.UserId);
-
-            con.Open();
-            cmd.ExecuteNonQuery();
-
-            // 🔹 STEP 2.1: SESSION UPDATE
-            Session.RealName = txtName.Text.Trim();
-
-            // 🔹 STEP 2.2: HOME KO SIGNAL
-            UserNameUpdated?.Invoke(Session.RealName);
-
-            // 🔹 STEP 2.3: BACK TO DISPLAY MODE
-            ApplyBaseUI();
-            LoadLoggedInUserData();
-
-            MessageBox.Show("Profile updated successfully");
+            txtName.Text = oldName;
+            txtContact.Text = oldContact;
+            txtAltContact.Text = oldAltContact;
+            txtAddress.Text = oldAddress;
+            txtBankAcc.Text = oldAccount;
+            txtIFSC.Text = oldIFSC;
         }
-    }
-    }
 
+    }
+}

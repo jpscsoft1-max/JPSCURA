@@ -3,13 +3,14 @@ using DocumentFormat.OpenXml.Bibliography;
 using DocumentFormat.OpenXml.Office2013.Drawing.ChartStyle;
 using DocumentFormat.OpenXml.Vml;
 using Microsoft.Data.SqlClient;
-using WinFormsTextBox = System.Windows.Forms.TextBox;
 using Microsoft.VisualBasic.Logging;
 using System;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
+using WinFormsTextBox = System.Windows.Forms.TextBox;
 
 namespace JPSCURA
 {
@@ -27,13 +28,66 @@ namespace JPSCURA
 
         private Color menuTextNormal = Color.WhiteSmoke;
         private Color menuTextActive = Color.White;
+        private const int panelhometitlebar = 31; // match your panel height
+
+        private System.Windows.Forms.Timer dbHealthTimer;
+        private ToolTip userToolTip = new ToolTip();
+        // ================= IN-APP NOTIFICATION =================
+        private System.Windows.Forms.Timer inAppNotifyTimer;
+
+        //private bool isAppActive = true;
+
+        private bool firstSuccessShown = false;
+
+        private bool dbWasConnectedAtLogin = true; // 👈 login success proof
+        private bool isDbConnected = true;
+        private InAppPopup dbPopup;   // 👈 SINGLE popup reference
+        private InAppPopup currentPopup = null;
+        private bool CheckDatabaseConnection()
+        {
+            try
+            {
+                using (SqlConnection con = new SqlConnection(DBconection.GetConnectionString()))
+                {
+                    con.Open();
+
+                    using (SqlCommand cmd = new SqlCommand("SELECT 1", con))
+                    {
+                        cmd.CommandTimeout = 2; // 🔥 FAST
+                        cmd.ExecuteScalar();
+                    }
+                }
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+
 
         // ================= RESIZE STATE =================
-        private const int RESIZE_HANDLE_SIZE = 10;
-        private bool isResizing = false;
-        private Point resizeStart;
-        private Size resizeSizeStart;
-        private ResizeDirection resizeDir;
+        //private const int RESIZE_HANDLE_SIZE = 10;
+        //private bool isResizing = false;
+        //private Point resizeStart;
+        //private Size resizeSizeStart;
+        //private ResizeDirection resizeDir;
+        // ================= WINDOW DRAG (CUSTOM TITLE BAR) =================
+        [DllImport("user32.dll")]
+        public static extern bool ReleaseCapture();
+
+        [DllImport("user32.dll")]
+        private static extern IntPtr SendMessage(
+            IntPtr hWnd, int Msg, IntPtr wParam, IntPtr lParam);
+
+
+        private const int WM_NCLBUTTONDOWN = 0xA1;
+        private const int HT_CAPTION = 0x2;
+        private System.Drawing.Rectangle _restoreBounds;
+
+
+
 
         private enum ResizeDirection
         {
@@ -55,32 +109,182 @@ namespace JPSCURA
             this.Resize += Home_Resize;
             this.FormClosing += Home_FormClosing;
             this.DoubleBuffered = true;
-
+            this.Shown += Home_Shown;
+            panelTopMenu.DoubleClick += pnlhometitlebar_DoubleClick;
             panelContent.DoubleBuffered(true);
             pnlLoading.DoubleBuffered(true);
 
-            // Attach resize events
-            AttachResizeEventsRecursively(this);
+
+
+        }
+        protected override void OnActivated(EventArgs e)
+        {
+            base.OnActivated(e);
+
+            if (WindowState == FormWindowState.Normal && _restoreBounds != System.Drawing.Rectangle.Empty)
+            {
+                Bounds = _restoreBounds;
+            }
         }
 
-        // 🔥 FIX: OnHandleCreated override for proper maximize behavior
-        protected override void OnHandleCreated(EventArgs e)
+
+        protected override CreateParams CreateParams
         {
-            base.OnHandleCreated(e);
+            get
+            {
+                const int WS_THICKFRAME = 0x00040000;
+                const int WS_MAXIMIZEBOX = 0x00010000;
+                const int WS_MINIMIZEBOX = 0x00020000;
 
-            // Get working area (excludes taskbar)
-            Screen screen = Screen.FromHandle(this.Handle);
-            System.Drawing.Rectangle workingArea = screen.WorkingArea;
+                var cp = base.CreateParams;
+                cp.Style |= WS_THICKFRAME | WS_MAXIMIZEBOX | WS_MINIMIZEBOX;
+                return cp;
+            }
+        }
 
-            // Set bounds BEFORE maximizing
-            this.MaximizedBounds = workingArea;
 
-            // Set location and size explicitly to fill working area
-            this.Location = workingArea.Location;
-            this.Size = workingArea.Size;
 
-            // Start in NORMAL state (not maximized) but fill working area
-            this.WindowState = FormWindowState.Normal;
+        // ================= WINDOWS 11 SNAP + RESIZE =================
+        protected override void WndProc(ref Message m)
+        {
+            const int WM_NCHITTEST = 0x84;
+            const int HTCLIENT = 1;
+            const int HTCAPTION = 2;
+
+            if (m.Msg == WM_NCHITTEST)
+            {
+                base.WndProc(ref m);
+
+                if ((int)m.Result == HTCLIENT)
+                {
+                    // 🔥 IMPORTANT: mouse position from message
+                    Point p = PointToClient(new Point(m.LParam.ToInt32()));
+
+                    // 🔥 custom titlebar area
+                    if (pnlhometitlebar.Bounds.Contains(p))
+                    {
+                        m.Result = (IntPtr)HTCAPTION; // ← LEFT CLICK DRAG
+                    }
+                }
+                return;
+            }
+
+            base.WndProc(ref m);
+        }
+
+
+
+
+        private void ShowDbPopup(string message, Color color, bool autoClose)
+        {
+            this.BeginInvoke(new Action(() =>
+            {
+              
+                if (dbPopup != null && !dbPopup.IsDisposed)
+                {
+                    dbPopup.BackColor = color;
+                    dbPopup.Controls[0].Text = message; // lblMessage
+                    return;
+                }
+
+                dbPopup = new InAppPopup(
+                    message,
+                    color,
+                    autoClose
+                );
+
+                dbPopup.Show();
+            }));
+        }
+
+
+
+        private void CloseDbPopup()
+        {
+            this.BeginInvoke(new Action(() =>
+            {
+                if (dbPopup != null && !dbPopup.IsDisposed)
+                {
+                    dbPopup.Close();
+                    dbPopup = null;
+                }
+            }));
+        }
+
+
+
+
+
+
+        private async void StartDbHealthMonitor()
+        {
+            isDbConnected = await Task.Run(CheckDatabaseConnection);
+
+            if (isDbConnected && !firstSuccessShown)
+            {
+                firstSuccessShown = true;
+
+                ShowDbPopup(
+                    "Database connected successfully",
+                    Color.FromArgb(40, 167, 69),
+                    autoClose: true
+                );
+            }
+
+            dbHealthTimer = new System.Windows.Forms.Timer();
+            dbHealthTimer.Interval = 2000;
+
+            dbHealthTimer.Tick += async (s, e) =>
+            {
+                bool currentStatus = await Task.Run(CheckDatabaseConnection);
+
+                //  CONNECTED → DISCONNECTED
+                if (isDbConnected && !currentStatus)
+                {
+                    ShowDbPopup(
+                        "Database disconnected. Trying to reconnect...",
+                        Color.FromArgb(220, 53, 69),
+                        autoClose: false   // NEVER HIDE
+                    );
+                }
+
+                // DISCONNECTED → CONNECTED
+                if (!isDbConnected && currentStatus)
+                {
+                    CloseDbPopup(); // remove red
+
+                    ShowDbPopup(
+                        "Database reconnected successfully",
+                        Color.FromArgb(40, 167, 69),
+                        autoClose: true
+                    );
+                }
+
+                isDbConnected = currentStatus;
+            };
+
+            dbHealthTimer.Start();
+        }
+
+
+
+
+        private void Home_Shown(object sender, EventArgs e)
+        {
+            this.FormBorderStyle = FormBorderStyle.None;
+            this.MaximizedBounds = Screen.FromHandle(this.Handle).WorkingArea;
+            this.WindowState = FormWindowState.Maximized;
+        }
+
+
+
+        private void pnlhometitlebar_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                ReleaseCapture();
+                SendMessage(this.Handle, 0xA1, (IntPtr)0x2, IntPtr.Zero);
+            }
         }
 
         public async Task RunWithLoadingAsync(Func<Task> work, int minDelayMs = 2000)
@@ -146,7 +350,6 @@ namespace JPSCURA
             }
             catch { }
 
-            // 🔴 IF user clicked ❌ (not logout)
             if (!isLogout)
             {
                 Application.Exit();
@@ -158,20 +361,38 @@ namespace JPSCURA
         {
             HookTopMenuEvents();
             SetActiveTopMenu(btnHome);
+           
             panelSubMenu.Visible = false;
+            onlsub.Visible = false;
             ShowHome();
-
+            CenterLogo();
             ApplyMainModuleAccess();
             SetLoggedInUserInfo();
+            dbWasConnectedAtLogin = true;
+
+            StartDbHealthMonitor();
             btnClear.Visible = false;
 
             await Task.Delay(50);
             this.Opacity = 1;
+            this.MinimizeBox = true;
+            this.MaximizeBox = true;
+            this.DoubleBuffered = true;
+            this.FormBorderStyle = FormBorderStyle.None;
+            this.MaximizedBounds = Screen.FromHandle(this.Handle).WorkingArea;
+
         }
+
 
         private void Home_Resize(object sender, EventArgs e)
         {
+            if (WindowState == FormWindowState.Normal)
+                _restoreBounds = Bounds;
+
             UpdateMaximizeButtonIcon();
+            CenterLogo();
+            UpdateMaximizeButtonIcon();
+            CenterLogo();
         }
 
         // ================= MENU HOVER + ACTIVE =================
@@ -200,7 +421,7 @@ namespace JPSCURA
                     btn.Visible = false;
             }
 
-            // 2. DB se allowed modules lao
+            // 2. DB se allowed modules 
             using (SqlConnection con = new SqlConnection(DBconection.GetConnectionString()))
             using (SqlCommand cmd = new SqlCommand(@"
                 SELECT M.ModuleName
@@ -215,6 +436,8 @@ namespace JPSCURA
                 cmd.Parameters.AddWithValue("@RoleId", Session.RoleId);
                 con.Open();
 
+
+
                 using (SqlDataReader dr = cmd.ExecuteReader())
                 {
                     while (dr.Read())
@@ -228,9 +451,9 @@ namespace JPSCURA
                         else if (name == "Sales") btnSales1.Visible = true;
                         else if (name == "Inventory") btnInventory.Visible = true;
                         else if (name == "Finance") btnFinance.Visible = true;
-                        else if (name == "Employees") btnEmployees.Visible = true;
+                        else if (name == "Employee") btnEmployees.Visible = true;
                         else if (name == "GLD") btnLogindetails.Visible = true;
-                        else if (name == "Company Info") btnCompanyinfo.Visible = true;
+                        else if (name == "CompanyInfo") btnCompanyinfo.Visible = true;
                     }
                 }
             }
@@ -292,6 +515,8 @@ namespace JPSCURA
                     cmd.Parameters.AddWithValue("@RoleId", Session.RoleId);
                     cmd.Parameters.AddWithValue("@ModuleName", moduleName);
                     con.Open();
+                    //await Task.Run(CheckDatabaseConnection);
+
 
                     using (SqlDataReader dr = cmd.ExecuteReader())
                     {
@@ -357,7 +582,7 @@ namespace JPSCURA
             btnUserInfo.Text = "👤 " + Session.RealName;
             btnUserInfo.TextAlign = ContentAlignment.MiddleCenter;
             btnUserInfo.ImageAlign = ContentAlignment.MiddleLeft;
-            btnUserInfo.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
+            btnUserInfo.Font = new Font("Arial", 12F, FontStyle.Bold);
         }
 
         private void SetActiveTopMenu(Button btn)
@@ -451,8 +676,10 @@ namespace JPSCURA
         private void btnHome_Click(object sender, EventArgs e)
         {
             SetActiveTopMenu(btnHome);
+          
             panelSubMenu.Controls.Clear();
             panelSubMenu.Visible = false;
+            onlsub.Visible = false;
             ShowHome();
         }
 
@@ -462,6 +689,7 @@ namespace JPSCURA
             panelSubMenu.Controls.Clear();
             panelDeptsubmenu.Visible = true;
             panelSubMenu.Visible = true;
+            onlsub.Visible = true;
             panelSubMenu.Controls.Add(panelDeptsubmenu);
             ApplySubModuleAccess("Department", panelDeptsubmenu);
             ShowHome();
@@ -473,6 +701,7 @@ namespace JPSCURA
             panelSubMenu.Controls.Clear();
             panelWorkOrderSubMenu.Visible = true;
             panelSubMenu.Visible = true;
+            onlsub.Visible = true;
             panelSubMenu.Controls.Add(panelWorkOrderSubMenu);
             ApplySubModuleAccess("Workorder", panelWorkOrderSubMenu);
             ShowHome();
@@ -484,6 +713,7 @@ namespace JPSCURA
             panelSubMenu.Controls.Clear();
             panelPurchasingSubMenu.Visible = true;
             panelSubMenu.Visible = true;
+            onlsub.Visible = true;
             panelSubMenu.Controls.Add(panelPurchasingSubMenu);
             ApplySubModuleAccess("Purchasing", panelPurchasingSubMenu);
             ShowHome();
@@ -495,6 +725,7 @@ namespace JPSCURA
             panelSubMenu.Controls.Clear();
             panelSalesSubMenu.Visible = true;
             panelSubMenu.Visible = true;
+            onlsub.Visible = true;
             panelSubMenu.Controls.Add(panelSalesSubMenu);
             ApplySubModuleAccess("Sales", panelSalesSubMenu);
             ShowHome();
@@ -506,6 +737,7 @@ namespace JPSCURA
             panelSubMenu.Controls.Clear();
             panelInventorySubMenu.Visible = true;
             panelSubMenu.Visible = true;
+            onlsub.Visible = true;
             panelSubMenu.Controls.Add(panelInventorySubMenu);
             ApplySubModuleAccess("Inventory", panelInventorySubMenu);
             btnClear.Visible = false;
@@ -519,6 +751,7 @@ namespace JPSCURA
             panelEMPSubMenu.Visible = false;
             panelFinanceSubMenu.Visible = true;
             panelSubMenu.Visible = true;
+            onlsub.Visible = true;
             panelSubMenu.Controls.Add(panelFinanceSubMenu);
             ApplySubModuleAccess("Finance", panelFinanceSubMenu);
             ShowHome();
@@ -531,8 +764,9 @@ namespace JPSCURA
             panelSubMenuUser.Visible = false;
             panelEMPSubMenu.Visible = true;
             panelSubMenu.Visible = true;
+            onlsub.Visible = true;
             panelSubMenu.Controls.Add(panelEMPSubMenu);
-            ApplySubModuleAccess("Employees", panelEMPSubMenu);
+            ApplySubModuleAccess("Employee", panelEMPSubMenu);
             ShowHome();
         }
 
@@ -542,10 +776,6 @@ namespace JPSCURA
             await OpenFormInPanelAsync(new AddOrderForm());
         }
 
-        private async void btnAddorderIcon_Click(object sender, EventArgs e)
-        {
-            await OpenFormInPanelAsync(new AddOrderForm());
-        }
 
         private async void btnVendors_Click(object sender, EventArgs e)
         {
@@ -555,20 +785,13 @@ namespace JPSCURA
             });
         }
 
-        private async void btnVendoricon_Click(object sender, EventArgs e)
-        {
-            await OpenFormInPanelAsync(new Vendors());
-        }
+  
 
         private async void btnCustomers_Click(object sender, EventArgs e)
         {
             await OpenFormInPanelAsync(new Customer());
         }
 
-        private async void btnCustomericon_Click(object sender, EventArgs e)
-        {
-            await OpenFormInPanelAsync(new Customer());
-        }
 
         private async void btnAddMaterial_Click(object sender, EventArgs e)
         {
@@ -579,20 +802,14 @@ namespace JPSCURA
             });
         }
 
-        //private async void btnAddMaterialIcon_Click(object sender, EventArgs e)
-        //{
-        //    await RunWithLoadingAsync(async () =>
-        //    {
-        //        await OpenFormInPanelAsync(new Material());
-        //        btnClear.Visible = false;
-        //    });
-        //}
 
         private async void btnLogindetails_Click(object sender, EventArgs e)
         {
             panelSubMenu.Controls.Clear();
             panelSubMenu.Visible = false;
+            onlsub.Visible = false;
             SetActiveTopMenu(btnLogindetails);
+        
             ShowHome();
 
             await RunWithLoadingAsync(async () =>
@@ -605,7 +822,9 @@ namespace JPSCURA
         {
             panelSubMenu.Controls.Clear();
             panelSubMenu.Visible = false;
+            onlsub.Visible = false;
             SetActiveTopMenu(btnCompanyinfo);
+           
             ShowHome();
         }
 
@@ -618,15 +837,7 @@ namespace JPSCURA
             });
         }
 
-        //private async void btnAllMaterialIcon_Click(object sender, EventArgs e)
-        //{
-        //    await RunWithLoadingAsync(async () =>
-        //    {
-        //        await OpenFormInPanelAsync(new AllMaterial());
-        //        btnClear.Visible = true;
 
-        //    });
-        //}
 
         private async void btnAddEmp_Click(object sender, EventArgs e)
         {
@@ -676,6 +887,7 @@ namespace JPSCURA
             panelSubMenu.Controls.Clear();
             panelSubMenuUser.Visible = true;
             panelSubMenu.Visible = true;
+            onlsub.Visible = true;
             panelSubMenu.Controls.Add(panelSubMenuUser);
             ShowHome();
         }
@@ -716,7 +928,7 @@ namespace JPSCURA
 
         private void btnhideminimize_Click(object sender, EventArgs e)
         {
-            this.WindowState = FormWindowState.Minimized;
+            WindowState = FormWindowState.Minimized;
         }
 
         // ================= MAXIMIZE/RESTORE LOGIC =================
@@ -743,225 +955,10 @@ namespace JPSCURA
 
         private void btnminimax_Click(object sender, EventArgs e)
         {
-            Screen screen = Screen.FromHandle(this.Handle);
-            System.Drawing.Rectangle workingArea = screen.WorkingArea;
-
-            if (IsWindowMaximized())
-            {
-                // Switch to windowed mode
-                this.FormBorderStyle = FormBorderStyle.None;
-
-                int windowWidth = (int)(screen.Bounds.Width * 0.75);
-                int windowHeight = (int)(screen.Bounds.Height * 0.75);
-                int windowX = (screen.Bounds.Width - windowWidth) / 2;
-                int windowY = (screen.Bounds.Height - windowHeight) / 2;
-
-                this.Location = new Point(windowX, windowY);
-                this.Size = new Size(windowWidth, windowHeight);
-            }
-            else
-            {
-                // Switch to maximized mode
-                this.FormBorderStyle = FormBorderStyle.None;
-                this.Location = workingArea.Location;
-                this.Size = workingArea.Size;
-            }
-        }
-
-
-        // ================= RECURSIVE EVENT ATTACHMENT =================
-        private void AttachResizeEventsRecursively(Control control)
-        {
-            // 🔥 SKIP: Title bar buttons specifically by NAME
-            if (control == btnhomeclose ||
-                control == btnminimax ||
-                control == btnhideminimize ||
-                control == btnUserInfo)
-            {
-                // Don't attach events to these buttons
-                return;
-            }
-
-            // Attach events to current control
-            control.MouseDown += Home_MouseDown;
-            control.MouseMove += Home_MouseMove;
-            control.MouseUp += Home_MouseUp;
-
-            foreach (Control child in control.Controls)
-            {
-                // Recursively attach to children
-                AttachResizeEventsRecursively(child);
-            }
-        }
-
-        // ================= CUSTOM RESIZE LOGIC =================
-        private void Home_MouseMove(object sender, MouseEventArgs e)
-        {
-            // 🔥 Extra safety: Skip if source is a button
-            Control sourceControl = (Control)sender;
-            if (sourceControl is Button)
-            {
-                this.Cursor = Cursors.Default;
-                return;
-            }
-
-            if (IsWindowMaximized())
-            {
-                this.Cursor = Cursors.Default;
-                return;
-            }
-
-            Point formPoint = this.PointToClient(sourceControl.PointToScreen(e.Location));
-            ResizeDirection dir = GetResizeDirection(formPoint);
-
-            switch (dir)
-            {
-                case ResizeDirection.Left:
-                case ResizeDirection.Right:
-                    this.Cursor = Cursors.SizeWE;
-                    break;
-                case ResizeDirection.Top:
-                case ResizeDirection.Bottom:
-                    this.Cursor = Cursors.SizeNS;
-                    break;
-                case ResizeDirection.TopLeft:
-                case ResizeDirection.BottomRight:
-                    this.Cursor = Cursors.SizeNWSE;
-                    break;
-                case ResizeDirection.TopRight:
-                case ResizeDirection.BottomLeft:
-                    this.Cursor = Cursors.SizeNESW;
-                    break;
-                default:
-                    this.Cursor = Cursors.Default;
-                    break;
-            }
-
-            if (isResizing)
-            {
-                ResizeForm(formPoint);
-            }
-        }
-
-        private void Home_MouseDown(object sender, MouseEventArgs e)
-        {
-            if (IsWindowMaximized()) return;
-
-            Control sourceControl = (Control)sender;
-            Point formPoint = this.PointToClient(sourceControl.PointToScreen(e.Location));
-
-            resizeDir = GetResizeDirection(formPoint);
-
-            if (resizeDir != ResizeDirection.None)
-            {
-                isResizing = true;
-                resizeStart = formPoint;
-                resizeSizeStart = this.Size;
-            }
-        }
-
-        private void Home_MouseUp(object sender, MouseEventArgs e)
-        {
-            isResizing = false;
-            resizeDir = ResizeDirection.None;
-        }
-
-        private ResizeDirection GetResizeDirection(Point point)
-        {
-            int x = point.X;
-            int y = point.Y;
-            int w = this.Width;
-            int h = this.Height;
-
-            // Corners (priority)
-            if (x <= RESIZE_HANDLE_SIZE && y <= RESIZE_HANDLE_SIZE)
-                return ResizeDirection.TopLeft;
-            if (x >= w - RESIZE_HANDLE_SIZE && y <= RESIZE_HANDLE_SIZE)
-                return ResizeDirection.TopRight;
-            if (x <= RESIZE_HANDLE_SIZE && y >= h - RESIZE_HANDLE_SIZE)
-                return ResizeDirection.BottomLeft;
-            if (x >= w - RESIZE_HANDLE_SIZE && y >= h - RESIZE_HANDLE_SIZE)
-                return ResizeDirection.BottomRight;
-
-            // Edges
-            if (x <= RESIZE_HANDLE_SIZE)
-                return ResizeDirection.Left;
-            if (x >= w - RESIZE_HANDLE_SIZE)
-                return ResizeDirection.Right;
-            if (y <= RESIZE_HANDLE_SIZE)
-                return ResizeDirection.Top;
-            if (y >= h - RESIZE_HANDLE_SIZE)
-                return ResizeDirection.Bottom;
-
-            return ResizeDirection.None;
-        }
-
-        private void ResizeForm(Point currentPoint)
-        {
-            int deltaX = currentPoint.X - resizeStart.X;
-            int deltaY = currentPoint.Y - resizeStart.Y;
-
-            int newWidth = resizeSizeStart.Width;
-            int newHeight = resizeSizeStart.Height;
-            int newX = this.Location.X;
-            int newY = this.Location.Y;
-
-            int minWidth = 800;
-            int minHeight = 600;
-
-            switch (resizeDir)
-            {
-                case ResizeDirection.Right:
-                    newWidth = Math.Max(minWidth, resizeSizeStart.Width + deltaX);
-                    break;
-
-                case ResizeDirection.Left:
-                    newWidth = Math.Max(minWidth, resizeSizeStart.Width - deltaX);
-                    if (newWidth > minWidth)
-                        newX = this.Location.X + deltaX;
-                    break;
-
-                case ResizeDirection.Bottom:
-                    newHeight = Math.Max(minHeight, resizeSizeStart.Height + deltaY);
-                    break;
-
-                case ResizeDirection.Top:
-                    newHeight = Math.Max(minHeight, resizeSizeStart.Height - deltaY);
-                    if (newHeight > minHeight)
-                        newY = this.Location.Y + deltaY;
-                    break;
-
-                case ResizeDirection.BottomRight:
-                    newWidth = Math.Max(minWidth, resizeSizeStart.Width + deltaX);
-                    newHeight = Math.Max(minHeight, resizeSizeStart.Height + deltaY);
-                    break;
-
-                case ResizeDirection.BottomLeft:
-                    newWidth = Math.Max(minWidth, resizeSizeStart.Width - deltaX);
-                    newHeight = Math.Max(minHeight, resizeSizeStart.Height + deltaY);
-                    if (newWidth > minWidth)
-                        newX = this.Location.X + deltaX;
-                    break;
-
-                case ResizeDirection.TopRight:
-                    newWidth = Math.Max(minWidth, resizeSizeStart.Width + deltaX);
-                    newHeight = Math.Max(minHeight, resizeSizeStart.Height - deltaY);
-                    if (newHeight > minHeight)
-                        newY = this.Location.Y + deltaY;
-                    break;
-
-                case ResizeDirection.TopLeft:
-                    newWidth = Math.Max(minWidth, resizeSizeStart.Width - deltaX);
-                    newHeight = Math.Max(minHeight, resizeSizeStart.Height - deltaY);
-                    if (newWidth > minWidth)
-                        newX = this.Location.X + deltaX;
-                    if (newHeight > minHeight)
-                        newY = this.Location.Y + deltaY;
-                    break;
-            }
-
-            this.Location = new Point(newX, newY);
-            this.Size = new Size(newWidth, newHeight);
+            this.WindowState =
+                this.WindowState == FormWindowState.Maximized
+                ? FormWindowState.Normal
+                : FormWindowState.Maximized;
         }
 
         private async void btnFinishedGoods_Click(object sender, EventArgs e)
@@ -990,5 +987,14 @@ namespace JPSCURA
             });
             btnClear.Visible = false;
         }
+
+        private void pnlhometitlebar_DoubleClick(object sender, EventArgs e)
+        {
+            this.WindowState =
+                this.WindowState == FormWindowState.Maximized
+                ? FormWindowState.Normal
+                : FormWindowState.Maximized;
+        }
+
     }
 }

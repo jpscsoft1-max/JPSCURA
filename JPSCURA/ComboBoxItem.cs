@@ -8,9 +8,10 @@ namespace JPSCURA
 {
     public class ComboBoxItem
     {
-        public int Id { get; set; }        // EmpId / DepartmentId
-        public int ExtraId { get; set; }   // RoleId (sirf Employee ke liye)
-        public string Text { get; set; }
+        public int Id { get; set; }        // EmpId / DeptId
+        public int ExtraId { get; set; }   // RoleId
+        public string Text { get; set; }   // Display text
+        public string EmpName { get; set; } // ✅ Real Employee Name
 
         public override string ToString()
         {
