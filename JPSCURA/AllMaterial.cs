@@ -71,6 +71,22 @@ namespace JPSCURA
         // ================= FORM LOAD =================
         private void AllMaterial_Load(object sender, EventArgs e)
         {
+            // 🔐 FETCH PERMISSION (ADDED)
+            var permission = GetPermission(); // ADDED
+            ApplyGridCursorPermission();
+            // ❌ BLOCK VIEW IF NOT ALLOWED (ADDED)
+            if (!permission.CanView) // ADDED
+            {
+                MessageBox.Show(
+                    "You are not authorized to view this module.", // ADDED
+                    "Access Denied",                               // ADDED
+                    MessageBoxButtons.OK,                          // ADDED
+                    MessageBoxIcon.Warning                         // ADDED
+                );
+                this.Close(); // ADDED
+                return;       // ADDED
+                
+            }
 
             // ===== MAIN TABLE SELECTION =====
             DgvMainTable.MultiSelect = true;
@@ -95,10 +111,13 @@ namespace JPSCURA
 
             btnAddNew.Visible = false;
 
-
             LoadMainGrid();
             EnableDoubleBuffering(this);
+
+            // ✏️ APPLY EDIT PERMISSION AFTER UI LOAD (ADDED)
+            ApplyEditPermission(permission.CanEdit); // ADDED
         }
+
         private void EnableDoubleBuffering(Control control)
         {
             typeof(Control)
@@ -227,10 +246,11 @@ namespace JPSCURA
         // ================= MAIN GRID =================
         private void LoadMainGrid()
         {
+            var permission = GetPermission();
+         
             // 🔥 FLICKER + LAG FIX
             this.SuspendLayout();
             DgvMainTable.SuspendLayout();
-
             try
             {
                 // ===== RESET GRID =====
@@ -297,6 +317,29 @@ namespace JPSCURA
 
                 DgvMainTable.Columns["MinThreshold"].Visible = false;
                 DgvMainTable.Columns["MaxThreshold"].Visible = false;
+
+                // 🔐 VIEW-ONLY → HIDE TOTAL VALUE
+                if (!permission.CanEdit)
+                {
+                    DgvMainTable.Columns["TotalValue"].Visible = false;
+                }
+
+                // 🔒 TEXT CELLS READ-ONLY (CHECKBOX CHALEGA)
+                foreach (DataGridViewColumn col in DgvMainTable.Columns)
+                {
+                    if (col.Name != "SelectRow")
+                    {
+                        col.ReadOnly = true;
+                    }
+                }
+
+                // 🔥 THIS IS THE MISSING PIECE
+                DgvMainTable.EditMode = DataGridViewEditMode.EditProgrammatically;
+                DgvMainTable.AllowUserToAddRows = false;
+
+                // ✅ Selection behavior
+                DgvMainTable.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+                DgvMainTable.MultiSelect = false;
 
                 ApplyGridLines(DgvMainTable);
 
@@ -408,24 +451,45 @@ ORDER BY m.Material_Name
         // ================= DOUBLE CLICK =================
         private void DgvMainTable_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex < 0) return;
+            // ❌ Invalid row
+            if (e.RowIndex < 0)
+                return;
 
+            // 🔐 Permission check
+            var permission = GetPermission();
+
+            // 🚫 View-only user → nothing opens
+            if (!permission.CanEdit)
+            {
+                DgvMainTable.Cursor = Cursors.Default;
+                return;
+            }
+
+            // ❌ Null material id
             if (DgvMainTable.Rows[e.RowIndex].Cells["Material_ID"].Value == null)
                 return;
 
+            // 🔥 IMPORTANT: update CLASS-LEVEL variable
             selectedMaterialId = Convert.ToInt32(
                 DgvMainTable.Rows[e.RowIndex].Cells["Material_ID"].Value);
 
             if (selectedMaterialId <= 0)
                 return;
 
+            // ✅ Edit user UX
+            DgvMainTable.Cursor = Cursors.Hand;
+
+            // ✅ Open second panel
             panelMainContent.Visible = false;
             panel2ndTable.Visible = true;
             btnAddNew.Visible = true;
             btnBack.Visible = true;
             panel2ndtableTopContent.Visible = true;
+
+            // 🔥 Now data will load correctly
             LoadUsageGrid();
         }
+
 
 
         private void ApplyGridLines(DataGridView dgv)
@@ -623,6 +687,10 @@ ORDER BY m.Material_Name
             }
 
             dgv2ndTable.ResumeLayout();
+
+            // 🔐 RE-APPLY PERMISSION AFTER GRID LOAD (ADDED)
+            var permission = GetPermission();        // ADDED
+            ApplyEditPermission(permission.CanEdit); // ADDED
         }
 
 
@@ -637,6 +705,8 @@ ORDER BY m.Material_Name
         // ================= RATE CHANGE =================
         private void dgv2ndTable_CellValueChanged(object sender, DataGridViewCellEventArgs e)
         {
+            var permission = GetPermission();       // ✅ ADDED
+            if (!permission.CanEdit) return;        // ✅ ADDED
             if (e.RowIndex < 0) return;
             if (dgv2ndTable.Columns[e.ColumnIndex].Name != "Rate") return;
 
@@ -905,6 +975,12 @@ WHERE Usage_ID = @id", con);
 
         private void dgv2ndTable_CellBeginEdit(object sender, DataGridViewCellCancelEventArgs e)
         {
+            var permission = GetPermission();          // ✅ ADDED
+            if (!permission.CanEdit)                   // ✅ ADDED
+            {
+                e.Cancel = true;                       // ✅ ADDED
+                return;                                // ✅ ADDED
+            }
             if (dgv2ndTable.Columns[e.ColumnIndex].Name == "Rate")
             {
                 if (dgv2ndTable.Rows[e.RowIndex].Cells["Rate"].ReadOnly)
@@ -1234,6 +1310,12 @@ WHERE Usage_ID = @id", con);
 
         private void btnImport_Click(object sender, EventArgs e)
         {
+            var permission = GetPermission();       // ✅ ADDED
+            if (!permission.CanEdit)                // ✅ ADDED
+            {
+                MessageBox.Show("Import permission denied");
+                return;
+            }
             OpenFileDialog ofd = new OpenFileDialog
             {
                 Filter = "Excel Files (*.xlsx)|*.xlsx"
@@ -1433,11 +1515,90 @@ VALUES
             }
         }
 
+        //EDIE/ VIEW Permission
 
+        private (bool CanView, bool CanEdit) GetPermission()
+        {
+            // 🔑 ADMIN BYPASS (VERY IMPORTANT)
+            if (Session.RoleId == 1)
+                return (true, true);
 
+            using SqlConnection con =
+                new SqlConnection(DBconection.GetConnectionString());
+
+            using SqlCommand cmd = new SqlCommand(@"
+        SELECT CanView, CanEdit
+        FROM EMPLOYEE_MASTER.dbo.RoleSubModulePermissions
+        WHERE RoleId = @RoleId
+          AND SubModuleId = @SubModuleId", con);
+
+            cmd.Parameters.AddWithValue("@RoleId", Session.RoleId);
+            cmd.Parameters.AddWithValue("@SubModuleId", 28); // 👈 AllMaterial SubModuleId
+
+            con.Open();
+            using SqlDataReader dr = cmd.ExecuteReader();
+
+            if (dr.Read())
+            {
+                return (
+                    Convert.ToBoolean(dr["CanView"]),
+                    Convert.ToBoolean(dr["CanEdit"])
+                );
+            }
+
+            // default deny
+            return (false, false);
+        }
+
+        private void ApplyEditPermission(bool canEdit)
+        {
+            // 🔒 Main grid
+            if (DgvMainTable != null)
+            {
+                DgvMainTable.ReadOnly = !canEdit;
+
+                if (DgvMainTable.Columns.Contains("SelectRow"))
+                    DgvMainTable.Columns["SelectRow"].ReadOnly = !canEdit;
+            }
+
+            // 🔒 Buttons
+            if (btnAddNew != null) btnAddNew.Enabled = canEdit;
+            if (btnImport != null) btnImport.Enabled = canEdit;
+
+            // 🔒 Usage grid (VERY IMPORTANT SAFETY)
+            if (dgv2ndTable != null &&
+                dgv2ndTable.Columns.Count > 0 &&
+                dgv2ndTable.Columns.Contains("Rate"))
+            {
+                dgv2ndTable.Columns["Rate"].ReadOnly = !canEdit;
+            }
+
+            // 🔒 Visual UX
+            if (!canEdit)
+            {
+                if (DgvMainTable != null)
+                    DgvMainTable.DefaultCellStyle.BackColor = Color.White;
+
+                if (dgv2ndTable != null)
+                    dgv2ndTable.DefaultCellStyle.BackColor = Color.White;
+            }
+            else
+            {
+                if (DgvMainTable != null)
+                    DgvMainTable.DefaultCellStyle.BackColor = Color.White;
+
+                if (dgv2ndTable != null)
+                    dgv2ndTable.DefaultCellStyle.BackColor = Color.White;
+            }
+        }
+
+        private void ApplyGridCursorPermission()
+        {
+            var permission = GetPermission();
+            DgvMainTable.Cursor = permission.CanEdit
+                ? Cursors.Hand
+                : Cursors.Default;
+        }
 
     }
 }
-
-
-

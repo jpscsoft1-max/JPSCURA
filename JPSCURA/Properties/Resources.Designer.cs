@@ -271,16 +271,6 @@ namespace JPSCURA.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
-        /// </summary>
-        internal static byte[] favicon {
-            get {
-                object obj = ResourceManager.GetObject("favicon", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap Finished_Order_2 {
@@ -406,6 +396,16 @@ namespace JPSCURA.Properties {
         internal static System.Drawing.Bitmap logout__1_ {
             get {
                 object obj = ResourceManager.GetObject("logout (1)", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap logowhite {
+            get {
+                object obj = ResourceManager.GetObject("logowhite", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

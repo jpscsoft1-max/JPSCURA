@@ -429,7 +429,6 @@
             // 
             lblEditProfile.Cursor = Cursors.Hand;
             lblEditProfile.Font = new Font("Arial", 12F, FontStyle.Bold);
-           // lblEditProfile.Image = Properties.Resources.edit_profile;
             lblEditProfile.ImageAlign = ContentAlignment.TopLeft;
             lblEditProfile.Location = new Point(12, 10);
             lblEditProfile.Name = "lblEditProfile";

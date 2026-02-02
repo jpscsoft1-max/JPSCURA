@@ -310,7 +310,7 @@
             btnAddEmp.Name = "btnAddEmp";
             btnAddEmp.Size = new Size(152, 61);
             btnAddEmp.TabIndex = 2;
-            btnAddEmp.Tag = "Add Employee";
+            btnAddEmp.Tag = "Add Employees";
             btnAddEmp.Text = "Add Employee";
             btnAddEmp.TextAlign = ContentAlignment.BottomCenter;
             btnAddEmp.UseVisualStyleBackColor = true;
@@ -1292,7 +1292,7 @@
             // pcthomelogo
             // 
             pcthomelogo.BackColor = Color.Transparent;
-            pcthomelogo.Image = Properties.Resources.logo_32;
+            pcthomelogo.Image = Properties.Resources.logowhite;
             pcthomelogo.Location = new Point(4, 5);
             pcthomelogo.Name = "pcthomelogo";
             pcthomelogo.Size = new Size(22, 22);

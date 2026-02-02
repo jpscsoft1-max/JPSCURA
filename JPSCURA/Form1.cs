@@ -228,7 +228,7 @@ namespace JPSCURA
                         else if (name == "Sales") btnSales1.Visible = true;
                         else if (name == "Inventory") btnInventory.Visible = true;
                         else if (name == "Finance") btnFinance.Visible = true;
-                        else if (name == "Employees") btnEmployees.Visible = true;
+                        else if (name == "Employee") btnEmployees.Visible = true;
                         else if (name == "GLD") btnLogindetails.Visible = true;
                         else if (name == "Company Info") btnCompanyinfo.Visible = true;
                     }
@@ -532,7 +532,7 @@ namespace JPSCURA
             panelEMPSubMenu.Visible = true;
             panelSubMenu.Visible = true;
             panelSubMenu.Controls.Add(panelEMPSubMenu);
-            ApplySubModuleAccess("Employees", panelEMPSubMenu);
+            ApplySubModuleAccess("Employee", panelEMPSubMenu);
             ShowHome();
         }
 
