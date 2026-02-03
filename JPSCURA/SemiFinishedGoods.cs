@@ -23,15 +23,36 @@ namespace JPSCURA
         // ================= FORM LOAD =================
         private void SemiFinishedGoods_Load(object sender, EventArgs e)
         {
+            // 🔐 FETCH PERMISSION (ADDED)
+            var permission = GetPermission();   // ADDED
+
+            // ❌ BLOCK VIEW IF NOT ALLOWED (ADDED)
+            if (!permission.CanView)            // ADDED
+            {
+                MessageBox.Show(
+                    "You are not authorized to view Semi Finished Goods.",
+                    "Access Denied",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning
+                );
+                this.Close();
+                return;
+            }
+
             SetupGrid();
             LoadSemiFinishedGoodsGrid();
             WireSearchEvents();
             BeginInvoke(new Action(SyncSearchBoxesWithGrid));
+
+            // ✏️ APPLY EDIT PERMISSION (ADDED – FUTURE SAFE)
+            ApplyEditPermission(permission.CanEdit); // ADDED
         }
+
 
         // ================= GRID SETUP =================
         private void SetupGrid()
         {
+            var permission = GetPermission();
             dgv.SuspendLayout();
 
             dgv.AllowUserToAddRows = false;
@@ -83,6 +104,11 @@ namespace JPSCURA
             dgv.Columns["minthreshold"].Visible = false;
             dgv.Columns["maxthreshold"].Visible = false;
 
+            // 🔐 VIEW-ONLY → HIDE TOTAL VALUE
+            if (!permission.CanEdit)
+            {
+                dgv.Columns["TotalValue"].Visible = false;
+            }
             // ===== WIDTH RATIO =====
             dgv.Columns["srno"].FillWeight = 5;
             dgv.Columns["materialname"].FillWeight = 22;
@@ -299,5 +325,55 @@ ORDER BY m.Material_Name
         {
             SyncSearchBoxesWithGrid();
         }
+        // ================= VIEW / EDIT PERMISSION =================
+        private (bool CanView, bool CanEdit) GetPermission()
+        {
+            // 🔑 ADMIN FULL ACCESS
+            if (Session.RoleId == 1)
+                return (true, true);
+
+            using SqlConnection con =
+                new SqlConnection(DBconection.GetConnectionString());
+
+            using SqlCommand cmd = new SqlCommand(@"
+        SELECT CanView, CanEdit
+        FROM EMPLOYEE_MASTER.dbo.RoleSubModulePermissions
+        WHERE RoleId = @RoleId
+          AND SubModuleId = @SubModuleId", con);
+
+            cmd.Parameters.AddWithValue("@RoleId", Session.RoleId);
+            cmd.Parameters.AddWithValue("@SubModuleId", 27);
+            // 👆 SemiFinishedGoods ka actual SubModuleId yahan rakhna
+
+            con.Open();
+            using SqlDataReader dr = cmd.ExecuteReader();
+
+            if (dr.Read())
+            {
+                return (
+                    Convert.ToBoolean(dr["CanView"]),
+                    Convert.ToBoolean(dr["CanEdit"])
+                );
+            }
+
+            return (false, false); // default deny
+        }
+        // ================= APPLY EDIT PERMISSION =================
+        private void ApplyEditPermission(bool canEdit)
+        {
+            // 🔒 Grid edit control (already readonly, but future-proof)
+            dgv.ReadOnly = !canEdit;
+
+            // 🔒 Visual UX (optional but clean)
+            if (!canEdit)
+            {
+                dgv.DefaultCellStyle.BackColor = Color.White;
+            }
+            else
+            {
+                dgv.DefaultCellStyle.BackColor = Color.White;
+            }
+        }
+
     }
 }

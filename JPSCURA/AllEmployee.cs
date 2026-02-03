@@ -1,4 +1,5 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using ClosedXML.Excel;
+using Microsoft.Data.SqlClient;
 using System;
 using System.Drawing;
 using System.Windows.Forms;
@@ -17,6 +18,22 @@ namespace JPSCURA
         // ================= FORM LOAD =================
         private void AllEmployee_Load(object sender, EventArgs e)
         {
+            // 🔐 FETCH PERMISSION (ADDED)
+            var permission = GetPermission();   // ADDED
+
+            // ❌ BLOCK VIEW IF NOT ALLOWED (ADDED)
+            if (!permission.CanView)            // ADDED
+            {
+                MessageBox.Show(
+                    "You are not authorized to view Employees.",
+                    "Access Denied",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning
+                );
+                this.Close();
+                return;
+            }
+
             panelEmployee.Dock = DockStyle.Fill;
             dgvEmployee.Dock = DockStyle.Fill;
 
@@ -25,7 +42,11 @@ namespace JPSCURA
             WireSearchEvents();
 
             EnableDoubleBuffering(this);
+
+            // ✏️ APPLY EDIT PERMISSION (ADDED – FUTURE SAFE)
+            ApplyEditPermission(permission.CanEdit); // ADDED
         }
+
         private void AlignSearchBoxes()
         {
             if (dgvEmployee.Columns.Count == 0) return;
@@ -221,6 +242,14 @@ namespace JPSCURA
                 FillWeight = 8
             });
 
+            dgvEmployee.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                Name = "IsActive",
+                DataPropertyName = "IsActive",
+                Visible = false   // 🔒 ALWAYS HIDDEN
+            });
+
+
             // ===== EVENTS FOR SEARCH ALIGN =====
             dgvEmployee.ColumnWidthChanged += (s, e) => AlignSearchBoxes();
             dgvEmployee.SizeChanged += (s, e) => AlignSearchBoxes();
@@ -254,13 +283,17 @@ SELECT
     e.Account_No,
     e.IFSC_Code,
     d.DepartmentName,
-    r.RoleName
+    r.RoleName,
+    e.IsActive
 FROM EMPLOYEE_MASTER..Employees e
 LEFT JOIN EMPLOYEE_MASTER..Departments d
     ON e.DepartmentId = d.DepartmentId
 LEFT JOIN EMPLOYEE_MASTER..Roles r
     ON e.RoleId = r.RoleId
-ORDER BY e.Emp_Name
+ORDER BY
+    e.IsActive DESC,     
+    e.Emp_Name;
+
 ", con);
 
             con.Open();
@@ -283,7 +316,8 @@ ORDER BY e.Emp_Name
                     dr["Account_No"],
                     dr["IFSC_Code"],
                     dr["DepartmentName"],
-                    dr["RoleName"]
+                    dr["RoleName"],
+                    dr["IsActive"]
                 );
             }
 
@@ -397,5 +431,98 @@ ORDER BY e.Emp_Name
         {
             dgvEmployee.Rows[e.RowIndex].Cells["SrNo"].Value = e.RowIndex + 1;
         }
+
+        // ================= VIEW / EDIT PERMISSION =================
+        private (bool CanView, bool CanEdit) GetPermission()
+        {
+            // 🔑 ADMIN FULL ACCESS
+            if (Session.RoleId == 1)
+                return (true, true);
+
+            using SqlConnection con =
+                new SqlConnection(DBconection.GetConnectionString());
+
+            using SqlCommand cmd = new SqlCommand(@"
+        SELECT CanView, CanEdit
+        FROM EMPLOYEE_MASTER.dbo.RoleSubModulePermissions
+        WHERE RoleId = @RoleId
+          AND SubModuleId = @SubModuleId", con);
+
+            cmd.Parameters.AddWithValue("@RoleId", Session.RoleId);
+            cmd.Parameters.AddWithValue("@SubModuleId", 38); // 👈 AllEmployee SubModuleId
+
+            con.Open();
+            using SqlDataReader dr = cmd.ExecuteReader();
+
+            if (dr.Read())
+            {
+                return (
+                    Convert.ToBoolean(dr["CanView"]),
+                    Convert.ToBoolean(dr["CanEdit"])
+                );
+            }
+
+            return (false, false); // default deny
+        }
+        // ================= APPLY EDIT PERMISSION =================
+        private void ApplyEditPermission(bool canEdit)
+        {
+            // 🔒 Grid edit control (currently view-only anyway)
+            dgvEmployee.ReadOnly = !canEdit;
+
+            // 🔒 Visual UX (optional but clean)
+            if (!canEdit)
+            {
+                dgvEmployee.DefaultCellStyle.BackColor = Color.White;
+            }
+            else
+            {
+                dgvEmployee.DefaultCellStyle.BackColor = Color.White;
+            }
+        }
+        private void dgvEmployee_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0) return;
+
+            var permission = GetPermission();
+            if (!permission.CanEdit)
+            {
+                MessageBox.Show("You are not authorized to edit employee.");
+                return;
+            }
+
+            int empId = Convert.ToInt32(
+                dgvEmployee.Rows[e.RowIndex].Cells["EmpId"].Value
+            );
+
+            using (EditEmployee frm = new EditEmployee(empId))
+            {
+                frm.ShowDialog();
+            }
+
+            LoadEmployeeGrid(); // 🔄 refresh after update
+        }
+
+        private void dgvEmployee_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
+        {
+            if (!dgvEmployee.Columns.Contains("IsActive"))
+                return;
+
+            DataGridViewRow row = dgvEmployee.Rows[e.RowIndex];
+            if (row.Cells["IsActive"].Value == null)
+                return;
+
+            bool isActive = Convert.ToBoolean(row.Cells["IsActive"].Value);
+
+            if (!isActive)
+            {
+                row.DefaultCellStyle.BackColor = Color.MistyRose;
+                row.DefaultCellStyle.ForeColor = Color.DarkRed;
+
+                row.DefaultCellStyle.SelectionBackColor = Color.LightCoral;
+                row.DefaultCellStyle.SelectionForeColor = Color.Black;
+            }
+        }
+
     }
 }

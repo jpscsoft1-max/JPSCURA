@@ -60,6 +60,8 @@
             dgvEmployee.Name = "dgvEmployee";
             dgvEmployee.Size = new Size(1280, 691);
             dgvEmployee.TabIndex = 1;
+            dgvEmployee.CellDoubleClick += dgvEmployee_CellDoubleClick;
+            dgvEmployee.CellFormatting += dgvEmployee_CellFormatting;
             dgvEmployee.ColumnWidthChanged += dgvEmployee_ColumnWidthChanged;
             dgvEmployee.RowPostPaint += dgvEmployee_RowPostPaint;
             dgvEmployee.Scroll += dgvEmployee_Scroll;

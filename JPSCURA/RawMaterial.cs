@@ -1,4 +1,5 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using JPSCURA;
+using Microsoft.Data.SqlClient;
 using System;
 using System.Data;
 using System.Drawing;
@@ -17,13 +18,25 @@ namespace JPSCURA
 
         // ================= FORM LOAD =================
         private void RawMaterial_Load(object sender, EventArgs e)
-        {
+        {   
+            var permission = GetPermission();
+
+            // ❌ VIEW bhi allowed nahi
+            if (!permission.CanView)
+            {
+                MessageBox.Show("You are not authorized to view Raw Material");
+                this.Close();
+                return;
+            }
+
             SetupGrid();
             LoadRawMaterial();
             WireSearchEvents();
             EnableDoubleBuffering(this);
 
-            // 🔥 alignment triggers
+            ApplyEditPermission(permission.CanEdit); // 🔥 ADD THIS
+
+            // alignment triggers
             dataGridViewemployee.ColumnWidthChanged += (s, ev) => AlignSearchBoxes();
             dataGridViewemployee.Scroll += (s, ev) =>
             {
@@ -33,9 +46,12 @@ namespace JPSCURA
             this.Resize += (s, ev) => AlignSearchBoxes();
         }
 
+
         // ================= GRID SETUP =================
         private void SetupGrid()
         {
+            var permission = GetPermission();
+
             dataGridViewemployee.SuspendLayout();
             dataGridViewemployee.Columns.Clear();
             dataGridViewemployee.Rows.Clear();
@@ -124,6 +140,11 @@ namespace JPSCURA
                 HeaderText = "Total Value",
                 FillWeight = 8
             });
+            // 🔐 VIEW-ONLY → HIDE TOTAL VALUE
+            if (!permission.CanEdit)
+            {
+                dataGridViewemployee.Columns["TotalValue"].Visible = false;
+            }
 
             dataGridViewemployee.CellFormatting += dataGridViewemployee_CellFormatting;
 
@@ -132,7 +153,7 @@ namespace JPSCURA
 
         // ================= LOAD DATA =================
         private void LoadRawMaterial()
-        {
+        {   
             dataGridViewemployee.Rows.Clear();
 
             using SqlConnection con =
@@ -291,6 +312,47 @@ ORDER BY m.Material_Name;
 
             foreach (Control child in control.Controls)
                 EnableDoubleBuffering(child);
+        }
+        // READ/VIEW PERMISIION LOGIC
+
+        private (bool CanView, bool CanEdit) GetPermission()
+        {
+            using SqlConnection con =
+                new SqlConnection(DBconection.GetConnectionString());
+
+            using SqlCommand cmd = new SqlCommand(@"
+        SELECT CanView, CanEdit
+        FROM EMPLOYEE_MASTER..RoleSubModulePermissions
+        WHERE RoleId = @RoleId
+          AND SubModuleId = @SubModuleId", con);
+
+            cmd.Parameters.AddWithValue("@RoleId", Session.RoleId);      // 🔴 tera login session
+            cmd.Parameters.AddWithValue("@SubModuleId", 26);
+
+            con.Open();
+            using SqlDataReader dr = cmd.ExecuteReader();
+
+            if (dr.Read())
+            {
+                return (
+                    Convert.ToBoolean(dr["CanView"]),
+                    Convert.ToBoolean(dr["CanEdit"])
+                );
+            }
+
+            return (false, false);
+        }
+
+        private void ApplyEditPermission(bool canEdit)
+        {
+            dataGridViewemployee.ReadOnly = !canEdit;
+
+            dataGridViewemployee.AllowUserToAddRows = canEdit;
+            dataGridViewemployee.AllowUserToDeleteRows = canEdit;
+
+            // UX clear ho
+            dataGridViewemployee.DefaultCellStyle.BackColor =
+                canEdit ? Color.White : Color.White;
         }
     }
 }

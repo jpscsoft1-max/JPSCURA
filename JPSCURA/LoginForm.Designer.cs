@@ -114,7 +114,7 @@
             // 
             // pnlLogin
             // 
-            pnlLogin.BackColor = Color.FromArgb(190, 225, 225, 225);
+            pnlLogin.BackColor = Color.FromArgb(225, 225, 225, 225);
             pnlLogin.Controls.Add(lbljpsucrawithlogo);
             pnlLogin.Controls.Add(lblusername);
             pnlLogin.Controls.Add(btnLogin);
@@ -149,11 +149,11 @@
             // 
             lblusername.AutoSize = true;
             lblusername.BackColor = Color.FromArgb(0, 0, 0, 0);
-            lblusername.Font = new Font("Tahoma", 8.5F, FontStyle.Bold);
+            lblusername.Font = new Font("Tahoma", 11.25F, FontStyle.Bold, GraphicsUnit.Point, 0);
             lblusername.ForeColor = Color.FromArgb(59, 43, 151);
-            lblusername.Location = new Point(19, 76);
+            lblusername.Location = new Point(18, 69);
             lblusername.Name = "lblusername";
-            lblusername.Size = new Size(66, 14);
+            lblusername.Size = new Size(83, 18);
             lblusername.TabIndex = 0;
             lblusername.Text = "Username";
             // 
@@ -162,11 +162,11 @@
             btnLogin.BackColor = Color.White;
             btnLogin.BackgroundImageLayout = ImageLayout.None;
             btnLogin.FlatAppearance.BorderSize = 0;
-            btnLogin.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            btnLogin.Font = new Font("Segoe UI", 9.75F, FontStyle.Bold, GraphicsUnit.Point, 0);
             btnLogin.ForeColor = SystemColors.Highlight;
-            btnLogin.Location = new Point(103, 184);
+            btnLogin.Location = new Point(100, 182);
             btnLogin.Name = "btnLogin";
-            btnLogin.Size = new Size(75, 23);
+            btnLogin.Size = new Size(81, 28);
             btnLogin.TabIndex = 4;
             btnLogin.Text = "Login";
             btnLogin.UseVisualStyleBackColor = false;
@@ -189,11 +189,11 @@
             // 
             lblpassword.AutoSize = true;
             lblpassword.BackColor = Color.FromArgb(0, 0, 0, 0);
-            lblpassword.Font = new Font("Tahoma", 8.5F, FontStyle.Bold);
+            lblpassword.Font = new Font("Tahoma", 11.25F, FontStyle.Bold, GraphicsUnit.Point, 0);
             lblpassword.ForeColor = Color.FromArgb(59, 43, 151);
-            lblpassword.Location = new Point(18, 128);
+            lblpassword.Location = new Point(18, 126);
             lblpassword.Name = "lblpassword";
-            lblpassword.Size = new Size(66, 14);
+            lblpassword.Size = new Size(81, 18);
             lblpassword.TabIndex = 2;
             lblpassword.Text = "Password";
             // 

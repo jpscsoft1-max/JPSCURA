@@ -17,6 +17,7 @@ namespace JPSCURA
         // ================= GRID SETUP =================
         private void SetupGrid()
         {
+            var permission = GetPermission();
             dgvFinishedGoods.SuspendLayout();
 
             dgvFinishedGoods.AllowUserToAddRows = false;
@@ -69,6 +70,12 @@ namespace JPSCURA
             dgvFinishedGoods.Columns.Add("maxthreshold", "MaxThreshold");
             dgvFinishedGoods.Columns["minthreshold"].Visible = false;
             dgvFinishedGoods.Columns["maxthreshold"].Visible = false;
+
+            // 🔐 VIEW-ONLY → HIDE TOTAL VALUE
+            if (!permission.CanEdit)
+            {
+                dgvFinishedGoods.Columns["TotalValue"].Visible = false;
+            }
 
             // ===== COLUMN WIDTH RATIO =====
             dgvFinishedGoods.Columns["srno"].FillWeight = 5;
@@ -128,9 +135,28 @@ namespace JPSCURA
         // ================= FORM LOAD =================
         private void FinishedGoods_Load(object sender, EventArgs e)
         {
+            // 🔐 FETCH PERMISSION (ADDED)
+            var permission = GetPermission();   // ADDED
+
+            // ❌ BLOCK VIEW IF NOT ALLOWED (ADDED)
+            if (!permission.CanView)            // ADDED
+            {
+                MessageBox.Show(
+                    "You are not authorized to view Finished Goods.",
+                    "Access Denied",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning
+                );
+                this.Close();
+                return;
+            }
+
             SetupGrid();
             LoadFinishedGoodsGrid();
             BeginInvoke(new Action(SyncSearchBoxesWithGrid));
+
+            // ✏️ APPLY EDIT PERMISSION (ADDED – FUTURE SAFE)
+            ApplyEditPermission(permission.CanEdit); // ADDED
         }
 
         private void FinishedGoods_Resize(object sender, EventArgs e)
@@ -360,5 +386,57 @@ ORDER BY m.Material_Name
         {
             ApplyMultiSearch();
         }
+        // ================= VIEW / EDIT PERMISSION =================
+        // ================= VIEW / EDIT PERMISSION =================
+        private (bool CanView, bool CanEdit) GetPermission()
+        {
+            // 🔑 ADMIN FULL ACCESS
+            if (Session.RoleId == 1)
+                return (true, true);
+
+            using SqlConnection con =
+                new SqlConnection(DBconection.GetConnectionString());
+
+            using SqlCommand cmd = new SqlCommand(@"
+        SELECT CanView, CanEdit
+        FROM EMPLOYEE_MASTER.dbo.RoleSubModulePermissions
+        WHERE RoleId = @RoleId
+          AND SubModuleId = @SubModuleId", con);
+
+            cmd.Parameters.AddWithValue("@RoleId", Session.RoleId);
+            cmd.Parameters.AddWithValue("@SubModuleId", 26);
+            // 👆 FinishedGoods ka ACTUAL SubModuleId yahan rakhna
+
+            con.Open();
+            using SqlDataReader dr = cmd.ExecuteReader();
+
+            if (dr.Read())
+            {
+                return (
+                    Convert.ToBoolean(dr["CanView"]),
+                    Convert.ToBoolean(dr["CanEdit"])
+                );
+            }
+
+            return (false, false); // default deny
+        }
+
+        // ================= APPLY EDIT PERMISSION =================
+        private void ApplyEditPermission(bool canEdit)
+        {
+            // 🔒 Grid edit control (already readonly, future ready)
+            dgvFinishedGoods.ReadOnly = !canEdit;
+
+            // 🔒 Visual UX (optional but consistent)
+            if (!canEdit)
+            {
+                dgvFinishedGoods.DefaultCellStyle.BackColor = Color.White;
+            }
+            else
+            {
+                dgvFinishedGoods.DefaultCellStyle.BackColor = Color.White;
+            }
+        }
+
     }
 }
