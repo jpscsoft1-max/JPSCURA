@@ -20,7 +20,7 @@ namespace JPSCURA
         private void AddEmp_Load(object sender, EventArgs e)
         {
             LoadDepartments();
-            LoadRoles();
+       
             LoadBloodGroup();
         }
 
@@ -62,13 +62,16 @@ namespace JPSCURA
             cmbDepartment.ValueMember = "DepartmentId";
         }
 
-        // ================= LOAD ROLES =================
-        private void LoadRoles()
+        private void LoadRolesByDepartment(int departmentId)
         {
             using SqlConnection con = new SqlConnection(DBconection.GetConnectionString());
             SqlDataAdapter da = new SqlDataAdapter(
-                "SELECT RoleId, RoleName FROM EMPLOYEE_MASTER..Roles ORDER BY RoleName",
-                con);
+                @"SELECT RoleId, RoleName 
+          FROM EMPLOYEE_MASTER..Roles
+          WHERE DepartmentId = @deptId
+          ORDER BY RoleName", con);
+
+            da.SelectCommand.Parameters.AddWithValue("@deptId", departmentId);
 
             DataTable dt = new DataTable();
             da.Fill(dt);
@@ -79,8 +82,24 @@ namespace JPSCURA
             cmbRole.DisplayMember = "RoleName";
             cmbRole.ValueMember = "RoleId";
         }
+        private void cmbDepartment_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            int deptId = GetComboValueSafe(cmbDepartment);
 
-        // ================= BLOOD GROUP =================
+            if (deptId > 0)
+            {
+                LoadRolesByDepartment(deptId);
+                cmbRole.SelectedIndex = 0;
+            }
+            else
+            {
+                cmbRole.DataSource = null;
+                cmbRole.Items.Clear();
+                cmbRole.Items.Add("-- Select --");
+                cmbRole.SelectedIndex = 0;
+            }
+        }
+
         private void LoadBloodGroup()
         {
             cmbBloodGroup.Items.Clear();
@@ -195,7 +214,36 @@ VALUES
 
             cmd.ExecuteNonQuery();
 
-            MessageBox.Show("Employee added successfully", "Success");
+            MessageBox.Show("Employee added successfully");
+            ClearEmployeeForm();
+        }
+
+        private void ClearEmployeeForm()
+        {
+            // TextBoxes clear
+            txtEMPCode.Clear();
+            txtEMP.Clear();
+            txtContact.Clear();
+            txtAltContact.Clear();
+            txtEmail.Clear();
+            txtaddress.Clear();
+            txtAadhar.Clear();
+            txtBankAcc.Clear();
+            txtIFSC.Clear();
+
+            // Department reset
+            cmbDepartment.SelectedIndex = 0;
+
+            // Role combo safe reset
+            cmbRole.DataSource = null;
+            cmbRole.Items.Clear();
+            cmbRole.Text = "-- Select --";
+
+            // Blood group reset
+            if (cmbBloodGroup.Items.Count > 0)
+                cmbBloodGroup.SelectedIndex = 0;
+
+            txtEMPCode.Focus();
         }
 
         // ================= INPUT RESTRICTIONS (OPTIONAL) =================
@@ -204,9 +252,9 @@ VALUES
             e.Handled = !char.IsDigit(e.KeyChar) && !char.IsControl(e.KeyChar);
         }
 
-        private void txtContact_KeyPress(object sender, KeyPressEventArgs e)
+        private void btnClear_Click(object sender, EventArgs e)
         {
-            e.Handled = !char.IsDigit(e.KeyChar) && !char.IsControl(e.KeyChar);
+            ClearEmployeeForm ();
         }
     }
 }

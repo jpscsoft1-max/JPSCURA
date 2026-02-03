@@ -104,7 +104,7 @@
             // pctboxlogo
             // 
             pctboxlogo.BackColor = Color.Transparent;
-            pctboxlogo.Image = Properties.Resources.logowhite;
+            pctboxlogo.Image = Properties.Resources.logo_32;
             pctboxlogo.Location = new Point(4, 5);
             pctboxlogo.Name = "pctboxlogo";
             pctboxlogo.Size = new Size(22, 22);
@@ -135,6 +135,7 @@
             lbljpsucrawithlogo.FlatStyle = FlatStyle.Flat;
             lbljpsucrawithlogo.Font = new Font("Impact", 21F, FontStyle.Regular, GraphicsUnit.Point, 0);
             lbljpsucrawithlogo.ForeColor = Color.FromArgb(59, 43, 151);
+            lbljpsucrawithlogo.Image = Properties.Resources.logo_32;
             lbljpsucrawithlogo.ImageAlign = ContentAlignment.MiddleLeft;
             lbljpsucrawithlogo.Location = new Point(71, 17);
             lbljpsucrawithlogo.Name = "lbljpsucrawithlogo";

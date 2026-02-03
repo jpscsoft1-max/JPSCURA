@@ -43,8 +43,8 @@
             lblDepartment = new Label();
             txtEmpCode = new TextBox();
             panelHeader = new Panel();
+            btnEditProfile = new Button();
             btnSaveUSer = new Button();
-            lblEditProfile = new Label();
             panelMainEditInfo.SuspendLayout();
             panelCard.SuspendLayout();
             tblProfile.SuspendLayout();
@@ -403,13 +403,31 @@
             // panelHeader
             // 
             panelHeader.BackColor = Color.FromArgb(83, 144, 204);
+            panelHeader.Controls.Add(btnEditProfile);
             panelHeader.Controls.Add(btnSaveUSer);
-            panelHeader.Controls.Add(lblEditProfile);
             panelHeader.Dock = DockStyle.Top;
             panelHeader.Location = new Point(0, 0);
             panelHeader.Name = "panelHeader";
             panelHeader.Size = new Size(1372, 55);
             panelHeader.TabIndex = 1;
+            // 
+            // btnEditProfile
+            // 
+            btnEditProfile.Cursor = Cursors.Hand;
+            btnEditProfile.Dock = DockStyle.Right;
+            btnEditProfile.FlatAppearance.BorderSize = 0;
+            btnEditProfile.FlatStyle = FlatStyle.Flat;
+            btnEditProfile.Font = new Font("Arial", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            btnEditProfile.Image = Properties.Resources.user_avatar;
+            btnEditProfile.ImageAlign = ContentAlignment.MiddleLeft;
+            btnEditProfile.Location = new Point(1151, 0);
+            btnEditProfile.Name = "btnEditProfile";
+            btnEditProfile.Size = new Size(131, 55);
+            btnEditProfile.TabIndex = 2;
+            btnEditProfile.Text = "Edit Profile";
+            btnEditProfile.TextAlign = ContentAlignment.MiddleRight;
+            btnEditProfile.UseVisualStyleBackColor = true;
+            btnEditProfile.Click += btnEditProfile_Click;
             // 
             // btnSaveUSer
             // 
@@ -418,25 +436,15 @@
             btnSaveUSer.FlatAppearance.BorderSize = 0;
             btnSaveUSer.FlatStyle = FlatStyle.Flat;
             btnSaveUSer.Font = new Font("Arial", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            btnSaveUSer.Image = Properties.Resources.save_file;
+            btnSaveUSer.ImageAlign = ContentAlignment.MiddleLeft;
             btnSaveUSer.Location = new Point(1282, 0);
             btnSaveUSer.Name = "btnSaveUSer";
             btnSaveUSer.Size = new Size(90, 55);
             btnSaveUSer.TabIndex = 0;
             btnSaveUSer.Text = "Save";
+            btnSaveUSer.TextAlign = ContentAlignment.MiddleRight;
             btnSaveUSer.Click += btnSaveUSer_Click;
-            // 
-            // lblEditProfile
-            // 
-            lblEditProfile.Cursor = Cursors.Hand;
-            lblEditProfile.Font = new Font("Arial", 12F, FontStyle.Bold);
-            lblEditProfile.ImageAlign = ContentAlignment.TopLeft;
-            lblEditProfile.Location = new Point(12, 10);
-            lblEditProfile.Name = "lblEditProfile";
-            lblEditProfile.Size = new Size(119, 34);
-            lblEditProfile.TabIndex = 1;
-            lblEditProfile.Text = "Edit Profile";
-            lblEditProfile.TextAlign = ContentAlignment.MiddleRight;
-            lblEditProfile.Click += lblEditProfile_Click;
             // 
             // EditInfo
             // 
@@ -465,7 +473,6 @@
         private System.Windows.Forms.Panel panelHeader;
         private System.Windows.Forms.TableLayoutPanel tblProfile;
         private System.Windows.Forms.Button btnSaveUSer;
-        private System.Windows.Forms.Label lblEditProfile;
         private Label lblAccNo;
         private Label lblEmpCode;
         private Label lblConatct;
@@ -490,5 +497,6 @@
         private TextBox txtEmpCode;
         private TextBox txtIFSC;
         private Label lblIFSc;
+        private Button btnEditProfile;
     }
 }

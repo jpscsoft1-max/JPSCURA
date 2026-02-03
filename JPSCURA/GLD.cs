@@ -26,7 +26,6 @@ namespace JPSCURA
         private void PositionPanelTopCenter()
         {
             int topMargin = 120;
-
             int x = (panelMainGLD.Width - panelCenterGLD.Width) / 2;
             int y = topMargin;
 
@@ -65,7 +64,7 @@ namespace JPSCURA
             }
         }
 
-        // ================= LOAD EMPLOYEES BY DEPARTMENT =================
+        // ================= LOAD EMPLOYEES =================
         private void LoadEmployeesByDepartment(int departmentId)
         {
             cmbEmployee.Items.Clear();
@@ -94,11 +93,18 @@ namespace JPSCURA
 
             while (dr.Read())
             {
+                string empCode = dr["Emp_code"].ToString();
+
+                // Optional: format EMP-001
+                if (!empCode.StartsWith("EMP-"))
+                    empCode = "EMP-" + empCode.PadLeft(3, '0');
+
                 cmbEmployee.Items.Add(new ComboBoxItem
                 {
                     Id = Convert.ToInt32(dr["Emp_id"]),          // EmpId
                     ExtraId = Convert.ToInt32(dr["RoleId"]),    // RoleId
-                    Text = $"{dr["Emp_code"]} - {dr["Emp_Name"]} - {dr["RoleName"]}"
+                    EmpName = dr["Emp_Name"].ToString(),        // ✅ REAL NAME
+                    Text = $"{empCode} - {dr["Emp_Name"]} - {dr["RoleName"]}"
                 });
             }
         }
@@ -114,7 +120,7 @@ namespace JPSCURA
             }
         }
 
-        // ================= SAVE =================
+        // ================= SAVE LOGIN =================
         private void btnSave_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrWhiteSpace(txtUsername.Text) ||
@@ -129,22 +135,18 @@ namespace JPSCURA
             ComboBoxItem empItem = (ComboBoxItem)cmbEmployee.SelectedItem;
             ComboBoxItem deptItem = (ComboBoxItem)cmbDepartment.SelectedItem;
 
-            // RealName extract (CODE - NAME - ROLE)
-            string[] parts = empItem.Text.Split('-');
-            string realName = parts.Length >= 2 ? parts[1].Trim() : empItem.Text;
-
             using SqlConnection con = new SqlConnection(DBconection.GetConnectionString());
             using SqlCommand cmd = new SqlCommand(@"
                 INSERT INTO EMPLOYEE_MASTER.dbo.Users
-                (Emp_id, Username, Password, RealName, RoleId, DepartmentId)
+                (Emp_id, Username, Password, RealName, RoleId, DepartmentId, IsActive, CreatedAt)
                 VALUES
-                (@EmpId, @Username, @Password, @RealName, @RoleId, @DepartmentId)
+                (@EmpId, @Username, @Password, @RealName, @RoleId, @DepartmentId, 1, GETDATE())
             ", con);
 
             cmd.Parameters.AddWithValue("@EmpId", empItem.Id);
             cmd.Parameters.AddWithValue("@Username", txtUsername.Text.Trim());
-            cmd.Parameters.AddWithValue("@Password", txtPassword.Text.Trim());
-            cmd.Parameters.AddWithValue("@RealName", realName);
+            cmd.Parameters.AddWithValue("@Password", txtPassword.Text.Trim()); // later hash
+            cmd.Parameters.AddWithValue("@RealName", empItem.EmpName); // ✅ SAFE
             cmd.Parameters.AddWithValue("@RoleId", empItem.ExtraId);
             cmd.Parameters.AddWithValue("@DepartmentId", deptItem.Id);
 
@@ -166,6 +168,11 @@ namespace JPSCURA
             cmbEmployee.Items.Clear();
             cmbEmployee.Items.Add("-- Select Employee --");
             cmbEmployee.SelectedIndex = 0;
+        }
+
+        private void btnClear_Click(object sender, EventArgs e)
+        {
+            ClearForm();
         }
     }
 }

@@ -30,6 +30,7 @@
         {
             panelMainGLD = new Panel();
             panelCenterGLD = new Panel();
+            btnClear = new Button();
             panelHeaderGLD = new Panel();
             lblGLD = new Label();
             btnSaveGLD = new Button();
@@ -60,6 +61,7 @@
             // 
             panelCenterGLD.Anchor = AnchorStyles.None;
             panelCenterGLD.BackColor = Color.Transparent;
+            panelCenterGLD.Controls.Add(btnClear);
             panelCenterGLD.Controls.Add(panelHeaderGLD);
             panelCenterGLD.Controls.Add(btnSaveGLD);
             panelCenterGLD.Controls.Add(cmbDepartment);
@@ -74,6 +76,25 @@
             panelCenterGLD.Name = "panelCenterGLD";
             panelCenterGLD.Size = new Size(650, 380);
             panelCenterGLD.TabIndex = 0;
+            // 
+            // btnClear
+            // 
+            btnClear.AutoSize = true;
+            btnClear.BackColor = Color.LimeGreen;
+            btnClear.Cursor = Cursors.Hand;
+            btnClear.FlatAppearance.BorderSize = 0;
+            btnClear.FlatAppearance.MouseDownBackColor = Color.Red;
+            btnClear.FlatAppearance.MouseOverBackColor = Color.Red;
+            btnClear.FlatStyle = FlatStyle.Flat;
+            btnClear.Font = new Font("Arial", 11.25F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            btnClear.ImageAlign = ContentAlignment.MiddleLeft;
+            btnClear.Location = new Point(450, 266);
+            btnClear.Name = "btnClear";
+            btnClear.Size = new Size(81, 32);
+            btnClear.TabIndex = 10;
+            btnClear.Text = "Clear";
+            btnClear.UseVisualStyleBackColor = false;
+            btnClear.Click += btnClear_Click;
             // 
             // panelHeaderGLD
             // 
@@ -105,6 +126,7 @@
             btnSaveGLD.FlatAppearance.BorderSize = 0;
             btnSaveGLD.FlatStyle = FlatStyle.Flat;
             btnSaveGLD.Font = new Font("Arial", 11.25F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            btnSaveGLD.Image = Properties.Resources.save_file;
             btnSaveGLD.ImageAlign = ContentAlignment.MiddleLeft;
             btnSaveGLD.Location = new Point(322, 266);
             btnSaveGLD.Name = "btnSaveGLD";
@@ -231,5 +253,6 @@
         private Label lblDepartment;
         private Label lblPassword;
         private Label lblUsername;
+        private Button btnClear;
     }
 }

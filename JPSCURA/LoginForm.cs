@@ -37,13 +37,13 @@ namespace JPSCURA
             if (picEye != null) SetDoubleBuffered(picEye);
         }
 
-        protected override void OnHandleCreated(EventArgs e)
-        {
-            base.OnHandleCreated(e);
+        //protected override void OnHandleCreated(EventArgs e)
+        //{
+        //    base.OnHandleCreated(e);
 
-            this.MaximizedBounds = Screen.FromHandle(this.Handle).WorkingArea;
-            this.WindowState = FormWindowState.Maximized;
-        }
+        //    this.MaximizedBounds = Screen.FromHandle(this.Handle).WorkingArea;
+        //    this.WindowState = FormWindowState.Maximized;
+        //}
 
         // 🔥 Kisi bhi control ko double buffered banana
         private void SetDoubleBuffered(Control control)
@@ -203,6 +203,8 @@ WHERE U.Username = @u
                             Session.UserId = Convert.ToInt32(dr["UserId"]);
                             Session.RoleId = Convert.ToInt32(dr["RoleId"]);
                             Session.RealName = dr["RealName"].ToString();
+                            //Session.RealName = dr["Emp_Name"].ToString();
+
                             Session.Username = dr["Username"].ToString();
                             Session.Role = dr["RoleName"].ToString().Trim().ToUpper();
                             Session.Department = dr["DepartmentName"].ToString().Trim();
@@ -211,8 +213,15 @@ WHERE U.Username = @u
                 }
 
                 Home home = new Home();
+
+                // 🔥 IMPORTANT ORDER
                 home.Show();
-                Hide();
+                home.BringToFront();
+                home.Activate();
+
+                // 🔥 login ko baad me hide karo
+                this.Hide();
+
             }
             catch (Exception ex)
             {

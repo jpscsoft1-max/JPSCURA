@@ -22,8 +22,48 @@ namespace JPSCURA
             InitializeComponent();
             //ResolutionScaler.ApplyScaling(this);
             //ResponsiveHelper.AdjustMaterialLayout(this);
+            this.MinimumSize = new Size(1200, 720);
+            this.MaximumSize = new Size(5000, 720);
+
+            // Allow resize but height locked
+            this.FormBorderStyle = FormBorderStyle.Sizable;
+            this.MaximizeBox = true;
         }
 
+        protected override void OnResize(EventArgs e)
+        {
+            base.OnResize(e);
+
+            // 🔒 Force height lock
+            if (this.Height != 720)
+            {
+                this.Height = 720;
+            }
+        }
+
+
+
+        //private void Material_Resize(object sender, EventArgs e)
+        //{
+        //    // ❌ Never allow width shrink → no horizontal scroll
+        //    if (this.Width < 1200)
+        //        this.Width = 1200;
+
+        //    // ✅ Enable vertical scroll only when height is small
+        //    if (this.Height < 700)
+        //    {
+        //        this.AutoScroll = true;
+        //        this.AutoScrollMinSize = new Size(0, 900); // content height
+        //    }
+        //    else
+        //    {
+        //        this.AutoScroll = false;
+        //    }
+
+        //    // ❌ Force hide horizontal scrollbar
+        //    this.HorizontalScroll.Enabled = false;
+        //    this.HorizontalScroll.Visible = false;
+        //}
 
         // ================= SAFE COMBO VALUE =================
         private int GetComboValueSafe(ComboBox cmb)
@@ -40,6 +80,7 @@ namespace JPSCURA
         // ================= FORM LOAD =================
         private void Material_Load(object sender, EventArgs e)
         {
+            this.MinimumSize = new Size(1100, 650);
             LoadCategory();
             LoadTypes();
             cmbMaterialSubCategory.DataSource = null;
@@ -48,6 +89,13 @@ namespace JPSCURA
             cmbMaterialSubCategory.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbPackage.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbTypesOfCategory.DropDownStyle = ComboBoxStyle.DropDownList;
+            panelLeft.Anchor = AnchorStyles.Top | AnchorStyles.Left;
+            panelCenter.Anchor = AnchorStyles.Top | AnchorStyles.Left;
+            panelRight.Anchor = AnchorStyles.Top | AnchorStyles.Left;
+            panelLeft.Dock = DockStyle.None;
+            panelCenter.Dock = DockStyle.None;
+            panelRight.Dock = DockStyle.None;
+
 
         }
 
@@ -218,34 +266,34 @@ namespace JPSCURA
 
             decimal totalValue = receipt * rate;
 
-                int catId = GetComboValueSafe(cmbMaterialCategory);
-                int subId = GetComboValueSafe(cmbMaterialSubCategory);
-                int pkgId = GetComboValueSafe(cmbPackage);
-                int typeId = GetComboValueSafe(cmbTypesOfCategory);
+            int catId = GetComboValueSafe(cmbMaterialCategory);
+            int subId = GetComboValueSafe(cmbMaterialSubCategory);
+            int pkgId = GetComboValueSafe(cmbPackage);
+            int typeId = GetComboValueSafe(cmbTypesOfCategory);
 
-                if (catId <= 0 || subId <= 0 || pkgId <= 0 || typeId <= 0)
-                {
-                    MessageBox.Show("Please select Category, SubCategory, Package and Type");
-                    return;
-                }
+            if (catId <= 0 || subId <= 0 || pkgId <= 0 || typeId <= 0)
+            {
+                MessageBox.Show("Please select Category, SubCategory, Package and Type");
+                return;
+            }
 
-                using SqlConnection con = new SqlConnection(DBconection.GetConnectionString());
-                con.Open();
+            using SqlConnection con = new SqlConnection(DBconection.GetConnectionString());
+            con.Open();
 
-                // 1️⃣ INSERT MATERIAL
-                SqlCommand cmdMat = new SqlCommand(@"
+            // 1️⃣ INSERT MATERIAL
+            SqlCommand cmdMat = new SqlCommand(@"
 INSERT INTO INVENTORY_MASTER..Material_Table
 (Material_Name, Category_ID, Subcategory_ID, Package_ID, Type_ID, Location, MinThreshold, MaxThreshold)
 OUTPUT INSERTED.Material_ID
 VALUES
 (@name,@cat,@sub,@pkg,@type,@loc,@min,@max)", con);
 
-                cmdMat.Parameters.AddWithValue("@name", txtMaterialName.Text.Trim());
-                cmdMat.Parameters.AddWithValue("@cat", catId);
-                cmdMat.Parameters.AddWithValue("@sub", subId);
-                cmdMat.Parameters.AddWithValue("@pkg", pkgId);
-                cmdMat.Parameters.AddWithValue("@type", typeId);
-                cmdMat.Parameters.AddWithValue("@loc", txtLocation.Text.Trim());
+            cmdMat.Parameters.AddWithValue("@name", txtMaterialName.Text.Trim());
+            cmdMat.Parameters.AddWithValue("@cat", catId);
+            cmdMat.Parameters.AddWithValue("@sub", subId);
+            cmdMat.Parameters.AddWithValue("@pkg", pkgId);
+            cmdMat.Parameters.AddWithValue("@type", typeId);
+            cmdMat.Parameters.AddWithValue("@loc", txtLocation.Text.Trim());
             cmdMat.Parameters.AddWithValue("@min",
     string.IsNullOrWhiteSpace(txtMinThreshold.Text) ? 0 : Convert.ToInt32(txtMinThreshold.Text));
 
@@ -255,30 +303,30 @@ VALUES
 
             int materialId = Convert.ToInt32(cmdMat.ExecuteScalar());
 
-                // 2️⃣ INSERT OPENING STOCK
-                SqlCommand cmdOpen = new SqlCommand(@"
+            // 2️⃣ INSERT OPENING STOCK
+            SqlCommand cmdOpen = new SqlCommand(@"
 INSERT INTO INVENTORY_MASTER..Usage_Table
 (Material_ID, Usage_Date, Particular, Receipt, Issued, Rate_Per_Qty, Balance, Total_Value, V_NO_And_B_NO)
 VALUES
 
 (@mid, @dt, @part, @rec, 0, @rate, @bal, @total, @vno)", con);
 
-                cmdOpen.Parameters.AddWithValue("@mid", materialId);
-                cmdOpen.Parameters.AddWithValue("@dt", dtOpeningDate.Value);
-                cmdOpen.Parameters.AddWithValue("@part", txtParticular.Text.Trim());
-                cmdOpen.Parameters.AddWithValue("@rec", receipt);
-                cmdOpen.Parameters.AddWithValue("@rate", rate);
-                cmdOpen.Parameters.AddWithValue("@total", totalValue);
-                cmdOpen.Parameters.AddWithValue("@bal", receipt);
-                cmdOpen.Parameters.AddWithValue("@vno", txtvoucherorbillno.Text.Trim());
+            cmdOpen.Parameters.AddWithValue("@mid", materialId);
+            cmdOpen.Parameters.AddWithValue("@dt", dtOpeningDate.Value);
+            cmdOpen.Parameters.AddWithValue("@part", txtParticular.Text.Trim());
+            cmdOpen.Parameters.AddWithValue("@rec", receipt);
+            cmdOpen.Parameters.AddWithValue("@rate", rate);
+            cmdOpen.Parameters.AddWithValue("@total", totalValue);
+            cmdOpen.Parameters.AddWithValue("@bal", receipt);
+            cmdOpen.Parameters.AddWithValue("@vno", txtvoucherorbillno.Text.Trim());
 
-                cmdOpen.ExecuteNonQuery();
+            cmdOpen.ExecuteNonQuery();
 
-                MessageBox.Show("Material added successfully");
-                ClearForm();
+            MessageBox.Show("Material added successfully");
+            ClearForm();
 
-            }
-        
+        }
+
 
         // ================= RECEIPT → BALANCE =================
         private void txtReceipt_TextChanged(object sender, EventArgs e)
@@ -558,6 +606,8 @@ VALUES
         {
             ClearAllFields();
         }
+
+       
 
         //private void ShowLoading()
         //{
