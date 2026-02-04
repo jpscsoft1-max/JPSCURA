@@ -14,6 +14,16 @@ namespace JPSCURA
         {
             InitializeComponent();
         }
+        public static class SecurityHelper
+        {
+            public static bool ConfirmWithPassword()
+            {
+                using (PasswordConfirmForm frm = new PasswordConfirmForm())
+                {
+                    return frm.ShowDialog() == DialogResult.OK && frm.IsVerified;
+                }
+            }
+        }
 
         // ================= FORM LOAD =================
         private void AllEmployee_Load(object sender, EventArgs e)
@@ -491,16 +501,63 @@ ORDER BY
                 return;
             }
 
-            int empId = Convert.ToInt32(
-                dgvEmployee.Rows[e.RowIndex].Cells["EmpId"].Value
-            );
+            DataGridViewRow row = dgvEmployee.Rows[e.RowIndex];
 
+            int empId = Convert.ToInt32(row.Cells["EmpId"].Value);
+            bool isActive = Convert.ToBoolean(row.Cells["IsActive"].Value);
+
+            // 🔁 IF EMPLOYEE IS INACTIVE → ASK RESTORE
+            if (!isActive)
+            {
+                DialogResult dr = MessageBox.Show(
+                    "Do you want to restore this employee?",
+                    "Restore Employee",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question
+                );
+
+                if (dr == DialogResult.Yes)
+                {
+                    RestoreEmployee(empId);
+                    LoadEmployeeGrid();   // refresh grid
+                }
+
+                return; // ⛔ do not open edit form
+            }
+
+            // ✏️ NORMAL ACTIVE EMPLOYEE → EDIT
             using (EditEmployee frm = new EditEmployee(empId))
             {
                 frm.ShowDialog();
             }
 
-            LoadEmployeeGrid(); // 🔄 refresh after update
+            LoadEmployeeGrid();
+        }
+        private void RestoreEmployee(int empId)
+        {
+            // 🔐 PASSWORD CONFIRM
+            if (!SecurityHelper.ConfirmWithPassword())
+                return;
+
+            using SqlConnection con =
+                new SqlConnection(DBconection.GetConnectionString());
+
+            using SqlCommand cmd = new SqlCommand(@"
+        UPDATE EMPLOYEE_MASTER..Employees
+        SET IsActive = 1
+        WHERE Emp_id = @EmpId", con);
+
+            cmd.Parameters.AddWithValue("@EmpId", empId);
+
+            con.Open();
+            cmd.ExecuteNonQuery();
+
+            MessageBox.Show(
+                "Employee restored successfully.",
+                "Success",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information
+            );
         }
 
         private void dgvEmployee_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
@@ -522,6 +579,22 @@ ORDER BY
                 row.DefaultCellStyle.SelectionBackColor = Color.LightCoral;
                 row.DefaultCellStyle.SelectionForeColor = Color.Black;
             }
+        }
+        private void dgvEmployee_CellMouseMove(object sender, DataGridViewCellMouseEventArgs e)
+        {
+            // Sirf valid data rows
+            if (e.RowIndex >= 0 && Session.RoleId == 1)   // 👑 ADMIN
+            {
+                dgvEmployee.Cursor = Cursors.Hand;  // pointer
+            }
+            else
+            {
+                dgvEmployee.Cursor = Cursors.Default;
+            }
+        }
+        private void dgvEmployee_MouseLeave(object sender, EventArgs e)
+        {
+            dgvEmployee.Cursor = Cursors.Default;
         }
 
     }

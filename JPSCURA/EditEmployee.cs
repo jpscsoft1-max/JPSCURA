@@ -8,8 +8,14 @@ using System.Windows.Forms;
 
 namespace JPSCURA
 {
+    
+
     public partial class EditEmployee : Form
-    {// 🔒 ORIGINAL VALUES (FOR CHANGE DETECTION)
+    {
+        // 🔒 VALIDATION HELPERS
+        private bool isLoadingData = false;
+
+        // 🔒 ORIGINAL VALUES (FOR CHANGE DETECTION)
         private string _origEmpName;
         private string _origContact;
         private string _origAltContact;
@@ -28,16 +34,57 @@ namespace JPSCURA
         {
             InitializeComponent();
             _empId = empId;
-          
+
+        }
+        public static class SecurityHelper
+        {
+            public static bool ConfirmWithPassword()
+            {
+                using (PasswordConfirmForm frm = new PasswordConfirmForm())
+                {
+                    return frm.ShowDialog() == DialogResult.OK && frm.IsVerified;
+                }
+            }
         }
 
         // ================= FORM LOAD =================
         private void EditEmployee_Load(object sender, EventArgs e)
         {
+            this.AcceptButton = btnUpdate;
+            this.CancelButton = btncancel;
+
+            isLoadingData = true;
+
             LoadDepartments();
             LoadEmployeeData();
-          
+
+            // 🔢 MAX LENGTHS
+            txtContact.MaxLength = 10;
+            txtAltContact.MaxLength = 10;
+            txtAadhar.MaxLength = 12;
+            txtAccountNo.MaxLength = 18;
+            txtIFSC.MaxLength = 11;
+
+            // 🔢 DIGIT ONLY
+            txtContact.KeyPress += AllowOnlyDigits;
+            txtAltContact.KeyPress += AllowOnlyDigits;
+            txtAadhar.KeyPress += AllowOnlyDigits;
+            txtAccountNo.KeyPress += AllowOnlyDigits;
+
+            // 🏧 IFSC
+            txtIFSC.KeyPress += IFSC_KeyPress;
+            txtIFSC.TextChanged += (s, e2) =>
+            {
+                txtIFSC.Text = txtIFSC.Text.ToUpper();
+                txtIFSC.SelectionStart = txtIFSC.Text.Length;
+            };
+
+            // ✉️ EMAIL
+            txtEmail.Leave += txtEmail_Leave;
+
+            isLoadingData = false;
         }
+
 
         private void LoadEmployeeData()
         {
@@ -228,15 +275,45 @@ namespace JPSCURA
                 return false;
             }
 
-            if (string.IsNullOrWhiteSpace(txtContact.Text))
+            if (txtContact.Text.Length != 10)
             {
-                MessageBox.Show("Contact number is required");
+                MessageBox.Show("Contact number must be exactly 10 digits");
                 txtContact.Focus();
+                return false;
+            }
+
+            if (!string.IsNullOrWhiteSpace(txtAltContact.Text) &&
+                txtAltContact.Text.Length != 10)
+            {
+                MessageBox.Show("Alternate contact must be exactly 10 digits");
+                txtAltContact.Focus();
+                return false;
+            }
+
+            if (txtAadhar.Text.Length != 12)
+            {
+                MessageBox.Show("Aadhar must be exactly 12 digits");
+                txtAadhar.Focus();
+                return false;
+            }
+
+            if (!IsValidEmail(txtEmail.Text.Trim()))
+            {
+                MessageBox.Show("Invalid email address");
+                txtEmail.Focus();
+                return false;
+            }
+
+            if (txtIFSC.Text.Length != 11)
+            {
+                MessageBox.Show("Invalid IFSC code");
+                txtIFSC.Focus();
                 return false;
             }
 
             return true;
         }
+
 
         // ================= CANCEL BUTTON (OPTIONAL) =================
         private void btnCancel_Click(object sender, EventArgs e)
@@ -257,6 +334,10 @@ namespace JPSCURA
             );
 
             if (confirm != DialogResult.Yes)
+                return;
+
+            // 🔐 PASSWORD CONFIRM (ADDED)
+            if (!SecurityHelper.ConfirmWithPassword())
                 return;
 
             using SqlConnection con =
@@ -282,6 +363,7 @@ namespace JPSCURA
 
             this.Close();
         }
+
         private void LoadDepartments()
         {
             using SqlConnection con =
@@ -351,9 +433,51 @@ namespace JPSCURA
             if (_origDepartmentId != Convert.ToInt32(cmbDepartment.SelectedValue)) return true;
             if (_origRoleId != Convert.ToInt32(cmbRole.SelectedValue)) return true;
 
-            return false; // ❌ NO CHANGE
+            return false; 
         }
 
+        // ================= INPUT RESTRICTIONS =================
+        private void AllowOnlyDigits(object sender, KeyPressEventArgs e)
+        {
+            e.Handled = !char.IsDigit(e.KeyChar) && !char.IsControl(e.KeyChar);
+        }
 
-}
+        private void IFSC_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            e.Handled =
+                !char.IsLetterOrDigit(e.KeyChar) &&
+                !char.IsControl(e.KeyChar);
+        }
+
+        private bool IsValidEmail(string email)
+        {
+            try
+            {
+                var addr = new System.Net.Mail.MailAddress(email);
+                return addr.Address == email;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private void txtEmail_Leave(object sender, EventArgs e)
+        {
+            if (isLoadingData) return;
+
+            if (!string.IsNullOrWhiteSpace(txtEmail.Text) &&
+                !IsValidEmail(txtEmail.Text.Trim()))
+            {
+                MessageBox.Show(
+                    "Invalid email format",
+                    "Validation",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning
+                );
+                txtEmail.Focus();
+            }
+        }
+
+    }
 }

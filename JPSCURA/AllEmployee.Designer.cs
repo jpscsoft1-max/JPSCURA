@@ -65,15 +65,20 @@
             dataGridViewCellStyle1.WrapMode = DataGridViewTriState.False;
             dgvEmployee.DefaultCellStyle = dataGridViewCellStyle1;
             dgvEmployee.Dock = DockStyle.Fill;
+            dgvEmployee.EditMode = DataGridViewEditMode.EditProgrammatically;
             dgvEmployee.Location = new Point(0, 50);
             dgvEmployee.Name = "dgvEmployee";
+            dgvEmployee.ReadOnly = true;
+            dgvEmployee.SelectionMode = DataGridViewSelectionMode.CellSelect;
             dgvEmployee.Size = new Size(1280, 691);
             dgvEmployee.TabIndex = 1;
             dgvEmployee.CellDoubleClick += dgvEmployee_CellDoubleClick;
             dgvEmployee.CellFormatting += dgvEmployee_CellFormatting;
+            dgvEmployee.CellMouseMove += dgvEmployee_CellMouseMove;
             dgvEmployee.ColumnWidthChanged += dgvEmployee_ColumnWidthChanged;
             dgvEmployee.RowPostPaint += dgvEmployee_RowPostPaint;
             dgvEmployee.Scroll += dgvEmployee_Scroll;
+            dgvEmployee.MouseLeave += dgvEmployee_MouseLeave;
             // 
             // panelSearchEmp
             // 
