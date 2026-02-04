@@ -28,7 +28,11 @@
         /// </summary>
         private void InitializeComponent()
         {
+            DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle3 = new DataGridViewCellStyle();
             panel2ndtableTopContent = new Panel();
+            lblSelectedMaterial = new Label();
             btnAddNew = new Button();
             btnBack = new Button();
             panelMainContent = new Panel();
@@ -70,6 +74,7 @@
             // panel2ndtableTopContent
             // 
             panel2ndtableTopContent.BackColor = Color.FromArgb(83, 144, 204);
+            panel2ndtableTopContent.Controls.Add(lblSelectedMaterial);
             panel2ndtableTopContent.Controls.Add(btnAddNew);
             panel2ndtableTopContent.Controls.Add(btnBack);
             panel2ndtableTopContent.Dock = DockStyle.Top;
@@ -77,6 +82,18 @@
             panel2ndtableTopContent.Name = "panel2ndtableTopContent";
             panel2ndtableTopContent.Size = new Size(1354, 50);
             panel2ndtableTopContent.TabIndex = 2;
+            // 
+            // lblSelectedMaterial
+            // 
+            lblSelectedMaterial.AutoSize = true;
+            lblSelectedMaterial.Font = new Font("Arial Black", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            lblSelectedMaterial.ForeColor = Color.White;
+            lblSelectedMaterial.Location = new Point(175, 12);
+            lblSelectedMaterial.Name = "lblSelectedMaterial";
+            lblSelectedMaterial.Size = new Size(0, 23);
+            lblSelectedMaterial.TabIndex = 8;
+            lblSelectedMaterial.TextAlign = ContentAlignment.MiddleCenter;
+            lblSelectedMaterial.Visible = false;
             // 
             // btnAddNew
             // 
@@ -126,8 +143,24 @@
             DgvMainTable.AllowUserToDeleteRows = false;
             DgvMainTable.BackgroundColor = Color.White;
             DgvMainTable.BorderStyle = BorderStyle.None;
+            dataGridViewCellStyle1.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle1.BackColor = SystemColors.Control;
+            dataGridViewCellStyle1.Font = new Font("Segoe UI", 9F);
+            dataGridViewCellStyle1.ForeColor = SystemColors.WindowText;
+            dataGridViewCellStyle1.SelectionBackColor = Color.White;
+            dataGridViewCellStyle1.SelectionForeColor = SystemColors.HighlightText;
+            dataGridViewCellStyle1.WrapMode = DataGridViewTriState.True;
+            DgvMainTable.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             DgvMainTable.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             DgvMainTable.Columns.AddRange(new DataGridViewColumn[] { ColSrNo, ColMaterialName, colLocation, ColCategory, ColSubCategory, ColPackage, ColumnBalance });
+            dataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle2.BackColor = SystemColors.Window;
+            dataGridViewCellStyle2.Font = new Font("Segoe UI", 9F);
+            dataGridViewCellStyle2.ForeColor = SystemColors.ControlText;
+            dataGridViewCellStyle2.SelectionBackColor = Color.White;
+            dataGridViewCellStyle2.SelectionForeColor = SystemColors.HighlightText;
+            dataGridViewCellStyle2.WrapMode = DataGridViewTriState.False;
+            DgvMainTable.DefaultCellStyle = dataGridViewCellStyle2;
             DgvMainTable.Dock = DockStyle.Fill;
             DgvMainTable.Location = new Point(0, 0);
             DgvMainTable.MultiSelect = false;
@@ -339,6 +372,14 @@
             dgv2ndTable.BorderStyle = BorderStyle.None;
             dgv2ndTable.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dgv2ndTable.Columns.AddRange(new DataGridViewColumn[] { ColumSrNo, ColDate, ColVoucherorBillNo, ColReciept, ColIssued, ColRate, ColBalance, ColTotalValue });
+            dataGridViewCellStyle3.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle3.BackColor = SystemColors.Window;
+            dataGridViewCellStyle3.Font = new Font("Segoe UI", 9F);
+            dataGridViewCellStyle3.ForeColor = SystemColors.ControlText;
+            dataGridViewCellStyle3.SelectionBackColor = Color.White;
+            dataGridViewCellStyle3.SelectionForeColor = SystemColors.HighlightText;
+            dataGridViewCellStyle3.WrapMode = DataGridViewTriState.False;
+            dgv2ndTable.DefaultCellStyle = dataGridViewCellStyle3;
             dgv2ndTable.Dock = DockStyle.Fill;
             dgv2ndTable.Location = new Point(0, 0);
             dgv2ndTable.Name = "dgv2ndTable";
@@ -433,6 +474,7 @@
             Load += AllMaterial_Load;
             Resize += AllMaterial_Resize;
             panel2ndtableTopContent.ResumeLayout(false);
+            panel2ndtableTopContent.PerformLayout();
             panelMainContent.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)DgvMainTable).EndInit();
             panelSearch.ResumeLayout(false);
@@ -474,5 +516,6 @@
         private TextBox txtSearchMaterial;
         private Button btnExport;
         private Button btnImport;
+        private Label lblSelectedMaterial;
     }
 }

@@ -1213,7 +1213,7 @@
             btnHome.Cursor = Cursors.Hand;
             btnHome.FlatAppearance.BorderSize = 0;
             btnHome.FlatStyle = FlatStyle.Flat;
-            btnHome.Font = new Font("Arial", 9.75F, FontStyle.Bold);
+            btnHome.Font = new Font("Arial", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
             btnHome.ForeColor = Color.White;
             btnHome.Location = new Point(0, 2);
             btnHome.Name = "btnHome";
