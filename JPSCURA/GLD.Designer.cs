@@ -30,13 +30,14 @@
         {
             panelMainGLD = new Panel();
             panelCenterGLD = new Panel();
+            txtPassword = new TextBox();
+            picTogglePassword = new PictureBox();
             btnClear = new Button();
             panelHeaderGLD = new Panel();
             lblGLD = new Label();
             btnSaveGLD = new Button();
             cmbDepartment = new ComboBox();
             cmbEmployee = new ComboBox();
-            txtPassword = new TextBox();
             txtUsername = new TextBox();
             lblEmployee = new Label();
             lblDepartment = new Label();
@@ -44,6 +45,7 @@
             lblUsername = new Label();
             panelMainGLD.SuspendLayout();
             panelCenterGLD.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)picTogglePassword).BeginInit();
             panelHeaderGLD.SuspendLayout();
             SuspendLayout();
             // 
@@ -61,21 +63,44 @@
             // 
             panelCenterGLD.Anchor = AnchorStyles.None;
             panelCenterGLD.BackColor = Color.Transparent;
+            panelCenterGLD.Controls.Add(picTogglePassword);
             panelCenterGLD.Controls.Add(btnClear);
             panelCenterGLD.Controls.Add(panelHeaderGLD);
             panelCenterGLD.Controls.Add(btnSaveGLD);
             panelCenterGLD.Controls.Add(cmbDepartment);
             panelCenterGLD.Controls.Add(cmbEmployee);
-            panelCenterGLD.Controls.Add(txtPassword);
             panelCenterGLD.Controls.Add(txtUsername);
             panelCenterGLD.Controls.Add(lblEmployee);
             panelCenterGLD.Controls.Add(lblDepartment);
             panelCenterGLD.Controls.Add(lblPassword);
             panelCenterGLD.Controls.Add(lblUsername);
+            panelCenterGLD.Controls.Add(txtPassword);
             panelCenterGLD.Location = new Point(307, 173);
             panelCenterGLD.Name = "panelCenterGLD";
             panelCenterGLD.Size = new Size(650, 380);
             panelCenterGLD.TabIndex = 0;
+            // 
+            // txtPassword
+            // 
+            txtPassword.Location = new Point(210, 141);
+            txtPassword.Name = "txtPassword";
+            txtPassword.Size = new Size(321, 23);
+            txtPassword.TabIndex = 5;
+            txtPassword.Leave += txtPassword_Leave;
+            // 
+            // picTogglePassword
+            // 
+            picTogglePassword.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            picTogglePassword.BackColor = Color.White;
+            picTogglePassword.Cursor = Cursors.Hand;
+            picTogglePassword.Image = Properties.Resources.eye_close;
+            picTogglePassword.Location = new Point(493, 142);
+            picTogglePassword.Name = "picTogglePassword";
+            picTogglePassword.Size = new Size(38, 20);
+            picTogglePassword.SizeMode = PictureBoxSizeMode.Zoom;
+            picTogglePassword.TabIndex = 11;
+            picTogglePassword.TabStop = false;
+            picTogglePassword.Click += picTogglePassword_Click;
             // 
             // btnClear
             // 
@@ -156,13 +181,6 @@
             cmbEmployee.Size = new Size(321, 23);
             cmbEmployee.TabIndex = 6;
             // 
-            // txtPassword
-            // 
-            txtPassword.Location = new Point(210, 141);
-            txtPassword.Name = "txtPassword";
-            txtPassword.Size = new Size(321, 23);
-            txtPassword.TabIndex = 5;
-            // 
             // txtUsername
             // 
             txtUsername.Location = new Point(210, 99);
@@ -233,6 +251,7 @@
             panelMainGLD.ResumeLayout(false);
             panelCenterGLD.ResumeLayout(false);
             panelCenterGLD.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)picTogglePassword).EndInit();
             panelHeaderGLD.ResumeLayout(false);
             panelHeaderGLD.PerformLayout();
             ResumeLayout(false);
@@ -254,5 +273,6 @@
         private Label lblPassword;
         private Label lblUsername;
         private Button btnClear;
+        private PictureBox picTogglePassword;
     }
 }
