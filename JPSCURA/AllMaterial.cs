@@ -19,6 +19,8 @@ namespace JPSCURA
         private HashSet<int> selectedMaterialIds = new HashSet<int>();
         private Dictionary<int, int> materialOriginalIndex = new();
         private bool _isBulkClearing = false;
+        private string selectedMaterialName = "";
+
 
         private int GetOrCreateId(
         SqlConnection con,
@@ -291,7 +293,7 @@ namespace JPSCURA
                 DataGridViewCheckBoxColumn chk = new DataGridViewCheckBoxColumn
                 {
                     Name = "SelectRow",
-                    HeaderText = "",
+                    HeaderText = "☑️",
                     Width = 30,
                     FillWeight = 1,
                     FalseValue = false,
@@ -447,7 +449,6 @@ ORDER BY m.Material_Name
             }
         }
 
-
         // ================= DOUBLE CLICK =================
         private void DgvMainTable_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
@@ -472,6 +473,11 @@ ORDER BY m.Material_Name
             // 🔥 IMPORTANT: update CLASS-LEVEL variable
             selectedMaterialId = Convert.ToInt32(
                 DgvMainTable.Rows[e.RowIndex].Cells["Material_ID"].Value);
+            selectedMaterialName = DgvMainTable.Rows[e.RowIndex]
+    .Cells["Material"].Value?.ToString() ?? "";
+
+            lblSelectedMaterial.Text = $"Material : {selectedMaterialName}";
+            lblSelectedMaterial.Visible = true;
 
             if (selectedMaterialId <= 0)
                 return;
@@ -892,6 +898,9 @@ WHERE Usage_ID = @id", con);
 
                 panel2ndtableTopContent.Visible = false;
                 panelSearch.Visible = true;
+                lblSelectedMaterial.Text = "";
+                lblSelectedMaterial.Visible = false;
+
 
                 // 🔥 DB + GRID reload during loading
                 LoadMainGrid();
@@ -1039,8 +1048,69 @@ WHERE Usage_ID = @id", con);
 
         }
 
-        private void ExportGridViewToSheet(IXLWorksheet ws, DataGridView dgv)
+        //private void ExportGridViewToSheet(IXLWorksheet ws, DataGridView dgv)
 
+        //{
+        //    int colIndex = 1;
+
+        //    // ===== HEADERS =====
+        //    foreach (DataGridViewColumn col in dgv.Columns)
+        //    {
+        //        if (!col.Visible || col.Name == "SelectRow") continue;
+
+        //        ws.Cell(1, colIndex).Value = col.HeaderText;
+        //        ws.Cell(1, colIndex).Style.Font.Bold = true;
+        //        ws.Cell(1, colIndex).Style.Fill.BackgroundColor = XLColor.LightGray;
+        //        ws.Cell(1, colIndex).Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+
+        //        colIndex++;
+        //    }
+
+        //    bool anyChecked = dgv.Rows
+        //        .Cast<DataGridViewRow>()
+        //        .Any(r => Convert.ToBoolean(r.Cells["SelectRow"].Value));
+
+        //    int rowIndex = 2;
+        //    int excelSrNo = 1;
+        //    foreach (DataGridViewRow row in dgv.Rows)
+        //    {
+        //        if (row.IsNewRow || !row.Visible)
+        //            continue;
+
+        //        bool isChecked = Convert.ToBoolean(row.Cells["SelectRow"].Value);
+
+        //        // 
+        //        if (anyChecked && !isChecked)
+        //            continue;
+
+        //        colIndex = 1;
+
+        //        foreach (DataGridViewColumn col in dgv.Columns)
+        //        {
+        //            if (!col.Visible || col.Name == "SelectRow")
+        //                continue;
+
+        //            // 
+        //            if (col.Name == "SrNo")
+        //            {
+        //                ws.Cell(rowIndex, colIndex).Value = excelSrNo;
+        //            }
+        //            else
+        //            {
+        //                ws.Cell(rowIndex, colIndex).Value =
+        //                    row.Cells[col.Name].Value?.ToString() ?? "";
+        //            }
+
+        //            colIndex++;
+        //        }
+
+        //        excelSrNo++;   // 👈 Sr No increase
+        //        rowIndex++;
+        //    }
+
+        //    ws.Columns().AdjustToContents();
+        //}
+        private void ExportGridViewToSheet(IXLWorksheet ws, DataGridView dgv)
         {
             int colIndex = 1;
 
@@ -1053,6 +1123,8 @@ WHERE Usage_ID = @id", con);
                 ws.Cell(1, colIndex).Style.Font.Bold = true;
                 ws.Cell(1, colIndex).Style.Fill.BackgroundColor = XLColor.LightGray;
                 ws.Cell(1, colIndex).Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+                ws.Cell(1, colIndex).Style.Alignment.Horizontal =
+                    XLAlignmentHorizontalValues.Center;
 
                 colIndex++;
             }
@@ -1063,6 +1135,7 @@ WHERE Usage_ID = @id", con);
 
             int rowIndex = 2;
             int excelSrNo = 1;
+
             foreach (DataGridViewRow row in dgv.Rows)
             {
                 if (row.IsNewRow || !row.Visible)
@@ -1070,7 +1143,6 @@ WHERE Usage_ID = @id", con);
 
                 bool isChecked = Convert.ToBoolean(row.Cells["SelectRow"].Value);
 
-                // 
                 if (anyChecked && !isChecked)
                     continue;
 
@@ -1081,10 +1153,11 @@ WHERE Usage_ID = @id", con);
                     if (!col.Visible || col.Name == "SelectRow")
                         continue;
 
-                    // 
                     if (col.Name == "SrNo")
                     {
                         ws.Cell(rowIndex, colIndex).Value = excelSrNo;
+                        ws.Cell(rowIndex, colIndex).Style.Alignment.Horizontal =
+                            XLAlignmentHorizontalValues.Center;
                     }
                     else
                     {
@@ -1095,12 +1168,39 @@ WHERE Usage_ID = @id", con);
                     colIndex++;
                 }
 
-                excelSrNo++;   // 👈 Sr No increase
+                excelSrNo++;
                 rowIndex++;
             }
 
-            ws.Columns().AdjustToContents();
+            // ================= COLUMN WIDTHS (SPECIFIC) =================
+            // Column order same as Grid export order
+
+            ws.Column(1).Width = 8;    // Sr No
+            ws.Column(2).Width = 30;   // Material Name
+            ws.Column(3).Width = 18;   // Type
+            ws.Column(4).Width = 18;   // Location
+            ws.Column(5).Width = 22;   // Category
+            ws.Column(6).Width = 22;   // Sub Category
+            ws.Column(7).Width = 18;   // Package
+            ws.Column(8).Width = 14;   // Balance
+            ws.Column(9).Width = 18;   // Total Value
+
+            // ================= EXCEL FILTER (EXCEPT SR NO) =================
+            int lastCol = ws.LastColumnUsed().ColumnNumber();
+
+            if (lastCol > 1)
+            {
+                // filter from column 2 → last
+                ws.Range(1, 2, rowIndex - 1, lastCol)
+                  .SetAutoFilter();
+            }
+
+            // ================= HEADER FREEZE =================
+            ws.SheetView.FreezeRows(1);
         }
+
+
+
 
 
 

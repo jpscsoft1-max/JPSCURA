@@ -7,6 +7,9 @@ namespace JPSCURA
 {
     public partial class GLD : Form
     {
+        // 🔐 Password state
+        private bool isPasswordVisible = false;
+
         public GLD()
         {
             InitializeComponent();
@@ -20,6 +23,13 @@ namespace JPSCURA
 
             cmbDepartment.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbEmployee.DropDownStyle = ComboBoxStyle.DropDownList;
+
+            // 🔒 SAME AS LOGIN FORM
+            txtPassword.PasswordChar = '●';
+            isPasswordVisible = false;
+
+            picTogglePassword.Image = Properties.Resources.eye_close;
+            picTogglePassword.Cursor = Cursors.Hand;
         }
 
         // ================= PANEL POSITION =================
@@ -94,8 +104,6 @@ namespace JPSCURA
             while (dr.Read())
             {
                 string empCode = dr["Emp_code"].ToString();
-
-                // Optional: format EMP-001
                 if (!empCode.StartsWith("EMP-"))
                     empCode = "EMP-" + empCode.PadLeft(3, '0');
 
@@ -103,7 +111,7 @@ namespace JPSCURA
                 {
                     Id = Convert.ToInt32(dr["Emp_id"]),          // EmpId
                     ExtraId = Convert.ToInt32(dr["RoleId"]),    // RoleId
-                    EmpName = dr["Emp_Name"].ToString(),        // ✅ REAL NAME
+                    EmpName = dr["Emp_Name"].ToString(),
                     Text = $"{empCode} - {dr["Emp_Name"]} - {dr["RoleName"]}"
                 });
             }
@@ -118,6 +126,26 @@ namespace JPSCURA
             {
                 LoadEmployeesByDepartment(dept.Id);
             }
+        }
+
+        // ================= PASSWORD TOGGLE (LOGIN FORM SAME) =================
+        private void picTogglePassword_Click(object sender, EventArgs e)
+        {
+            isPasswordVisible = !isPasswordVisible;
+
+            txtPassword.PasswordChar = isPasswordVisible ? '\0' : '●';
+
+            picTogglePassword.Image = isPasswordVisible
+                ? Properties.Resources.eye_open
+                : Properties.Resources.eye_close;
+        }
+
+        // 🔒 Auto hide when focus leaves
+        private void txtPassword_Leave(object sender, EventArgs e)
+        {
+            txtPassword.PasswordChar = '●';
+            picTogglePassword.Image = Properties.Resources.eye_close;
+            isPasswordVisible = false;
         }
 
         // ================= SAVE LOGIN =================
@@ -146,7 +174,7 @@ namespace JPSCURA
             cmd.Parameters.AddWithValue("@EmpId", empItem.Id);
             cmd.Parameters.AddWithValue("@Username", txtUsername.Text.Trim());
             cmd.Parameters.AddWithValue("@Password", txtPassword.Text.Trim()); // later hash
-            cmd.Parameters.AddWithValue("@RealName", empItem.EmpName); // ✅ SAFE
+            cmd.Parameters.AddWithValue("@RealName", empItem.EmpName);
             cmd.Parameters.AddWithValue("@RoleId", empItem.ExtraId);
             cmd.Parameters.AddWithValue("@DepartmentId", deptItem.Id);
 
@@ -162,6 +190,10 @@ namespace JPSCURA
         {
             txtUsername.Clear();
             txtPassword.Clear();
+
+            txtPassword.PasswordChar = '●';
+            picTogglePassword.Image = Properties.Resources.eye_close;
+            isPasswordVisible = false;
 
             cmbDepartment.SelectedIndex = 0;
 

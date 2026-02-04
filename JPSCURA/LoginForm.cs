@@ -78,11 +78,10 @@ namespace JPSCURA
             txtPassword.PasswordChar = '●';
             LoadEyeImage(false);
 
-            // 🔥 Panel region pehle set kar do
             SetupPanelRegion();
         }
 
-        // 🔥 Panel ka region ek baar setup karo
+
         private void SetupPanelRegion()
         {
             if (cachedPanelRegion != null)
