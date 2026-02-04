@@ -121,7 +121,7 @@
             btnDelete.BackColor = Color.FromArgb(255, 128, 128);
             btnDelete.FlatAppearance.BorderSize = 0;
             btnDelete.FlatStyle = FlatStyle.Flat;
-            btnDelete.Location = new Point(12, 396);
+            btnDelete.Location = new Point(18, 396);
             btnDelete.Name = "btnDelete";
             btnDelete.Size = new Size(127, 23);
             btnDelete.TabIndex = 26;
@@ -141,7 +141,7 @@
             btncancel.Name = "btncancel";
             btncancel.Size = new Size(75, 23);
             btncancel.TabIndex = 25;
-            btncancel.Text = "Cancle";
+            btncancel.Text = "Cancel";
             btncancel.UseVisualStyleBackColor = false;
             btncancel.Click += btnCancel_Click;
             // 

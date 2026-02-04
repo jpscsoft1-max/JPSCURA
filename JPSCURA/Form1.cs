@@ -19,7 +19,11 @@ namespace JPSCURA
         // ================= STATE =================
         private Form activeForm = null;
         private Button activeTopButton = null;
+        private Button activeSubMenuButton = null;
         private bool isLogout = false;
+
+       
+
 
         // ================= COLORS =================
         private Color menuNormalColor = Color.Transparent;
@@ -691,7 +695,10 @@ namespace JPSCURA
             panelSubMenu.Visible = true;
             onlsub.Visible = true;
             panelSubMenu.Controls.Add(panelDeptsubmenu);
+            ResetSubMenuUI(panelDeptsubmenu);
             ApplySubModuleAccess("Department", panelDeptsubmenu);
+            HookSubMenuEvents(panelDeptsubmenu);   // 👈 ADD THIS
+            activeSubMenuButton = null;             // 👈 RESET
             ShowHome();
         }
 
@@ -703,7 +710,10 @@ namespace JPSCURA
             panelSubMenu.Visible = true;
             onlsub.Visible = true;
             panelSubMenu.Controls.Add(panelWorkOrderSubMenu);
+            ResetSubMenuUI(panelWorkOrderSubMenu);
             ApplySubModuleAccess("Workorder", panelWorkOrderSubMenu);
+            HookSubMenuEvents(panelWorkOrderSubMenu);   // 👈 ADD THIS
+            activeSubMenuButton = null;
             ShowHome();
         }
 
@@ -715,7 +725,10 @@ namespace JPSCURA
             panelSubMenu.Visible = true;
             onlsub.Visible = true;
             panelSubMenu.Controls.Add(panelPurchasingSubMenu);
+            ResetSubMenuUI(panelPurchasingSubMenu);
             ApplySubModuleAccess("Purchasing", panelPurchasingSubMenu);
+            HookSubMenuEvents(panelPurchasingSubMenu);   // 👈 ADD THIS
+            activeSubMenuButton = null;
             ShowHome();
         }
 
@@ -727,7 +740,10 @@ namespace JPSCURA
             panelSubMenu.Visible = true;
             onlsub.Visible = true;
             panelSubMenu.Controls.Add(panelSalesSubMenu);
+            ResetSubMenuUI(panelSalesSubMenu);
             ApplySubModuleAccess("Sales", panelSalesSubMenu);
+            HookSubMenuEvents(panelSalesSubMenu);   // 👈 ADD THIS
+            activeSubMenuButton = null;
             ShowHome();
         }
 
@@ -739,7 +755,10 @@ namespace JPSCURA
             panelSubMenu.Visible = true;
             onlsub.Visible = true;
             panelSubMenu.Controls.Add(panelInventorySubMenu);
+            ResetSubMenuUI(panelInventorySubMenu);
             ApplySubModuleAccess("Inventory", panelInventorySubMenu);
+            HookSubMenuEvents(panelInventorySubMenu);   // 👈 ADD THIS
+            activeSubMenuButton = null;
             btnClear.Visible = false;
             ShowHome();
         }
@@ -753,7 +772,10 @@ namespace JPSCURA
             panelSubMenu.Visible = true;
             onlsub.Visible = true;
             panelSubMenu.Controls.Add(panelFinanceSubMenu);
+            ResetSubMenuUI(panelFinanceSubMenu);
             ApplySubModuleAccess("Finance", panelFinanceSubMenu);
+            HookSubMenuEvents(panelFinanceSubMenu);   // 👈 ADD THIS
+            activeSubMenuButton = null;
             ShowHome();
         }
 
@@ -766,19 +788,24 @@ namespace JPSCURA
             panelSubMenu.Visible = true;
             onlsub.Visible = true;
             panelSubMenu.Controls.Add(panelEMPSubMenu);
+            ResetSubMenuUI(panelEMPSubMenu);
             ApplySubModuleAccess("Employee", panelEMPSubMenu);
+            HookSubMenuEvents(panelEMPSubMenu);   // 👈 ADD THIS
+            activeSubMenuButton = null;
             ShowHome();
         }
 
         // ================= SUB MENU FORMS =================
         private async void btnAddorder_Click(object sender, EventArgs e)
         {
+            
             await OpenFormInPanelAsync(new AddOrderForm());
         }
 
 
         private async void btnVendors_Click(object sender, EventArgs e)
         {
+           
             await RunWithLoadingAsync(async () =>
             {
                 await OpenFormInPanelAsync(new Vendors());
@@ -789,12 +816,14 @@ namespace JPSCURA
 
         private async void btnCustomers_Click(object sender, EventArgs e)
         {
+           
             await OpenFormInPanelAsync(new Customer());
         }
 
 
         private async void btnAddMaterial_Click(object sender, EventArgs e)
         {
+            
             await RunWithLoadingAsync(async () =>
             {
                 await OpenFormInPanelAsync(new Material());
@@ -830,6 +859,7 @@ namespace JPSCURA
 
         private async void btnAllMaterials_Click(object sender, EventArgs e)
         {
+            
             await RunWithLoadingAsync(async () =>
             {
                 await OpenFormInPanelAsync(new AllMaterial());
@@ -841,15 +871,8 @@ namespace JPSCURA
 
         private async void btnAddEmp_Click(object sender, EventArgs e)
         {
+           
 
-            await RunWithLoadingAsync(async () =>
-            {
-                await OpenFormInPanelAsync(new AddEmp());
-            });
-        }
-
-        private async void picEmp_Click(object sender, EventArgs e)
-        {
             await RunWithLoadingAsync(async () =>
             {
                 await OpenFormInPanelAsync(new AddEmp());
@@ -875,6 +898,7 @@ namespace JPSCURA
 
         private async void btnAllEmp_Click(object sender, EventArgs e)
         {
+           
             await RunWithLoadingAsync(async () =>
             {
                 await OpenFormInPanelAsync(new AllEmployee());
@@ -888,12 +912,16 @@ namespace JPSCURA
             panelSubMenuUser.Visible = true;
             panelSubMenu.Visible = true;
             onlsub.Visible = true;
+            ResetSubMenuUI(panelSubMenuUser);
             panelSubMenu.Controls.Add(panelSubMenuUser);
+            HookSubMenuEvents(panelSubMenuUser);   // 👈 ADD THIS
+            activeSubMenuButton = null;
             ShowHome();
         }
 
         private async void btnEditInfo_Click(object sender, EventArgs e)
         {
+           
             await RunWithLoadingAsync(async () =>
             {
                 await OpenFormInPanelAsync(new EditInfo());
@@ -963,6 +991,7 @@ namespace JPSCURA
 
         private async void btnFinishedGoods_Click(object sender, EventArgs e)
         {
+          
             await RunWithLoadingAsync(async () =>
             {
                 await OpenFormInPanelAsync(new FinishedGoods());
@@ -972,6 +1001,7 @@ namespace JPSCURA
 
         private async void btnSemiFinishedGoods_Click(object sender, EventArgs e)
         {
+            
             await RunWithLoadingAsync(async () =>
             {
                 await OpenFormInPanelAsync(new SemiFinishedGoods());
@@ -981,6 +1011,7 @@ namespace JPSCURA
 
         private async void btnRawMaterials_Click(object sender, EventArgs e)
         {
+           
             await RunWithLoadingAsync(async () =>
             {
                 await OpenFormInPanelAsync(new RawMaterial());
@@ -994,6 +1025,73 @@ namespace JPSCURA
                 this.WindowState == FormWindowState.Maximized
                 ? FormWindowState.Normal
                 : FormWindowState.Maximized;
+        }
+        private void SubMenu_MouseEnter(object sender, EventArgs e)
+        {
+            Button btn = sender as Button;
+
+            if (btn != activeSubMenuButton)
+            {
+                btn.BackColor = Color.LightGray;
+                btn.ForeColor = Color.Black;
+            }
+        }
+
+        private void SubMenu_MouseLeave(object sender, EventArgs e)
+        {
+            Button btn = sender as Button;
+
+            if (btn != activeSubMenuButton)
+            {
+                btn.BackColor = Color.Transparent;
+                btn.ForeColor = Color.Black;
+            }
+        }
+        private void SetActiveSubMenu(Button btn)
+        {
+            if (activeSubMenuButton != null)
+            {
+                activeSubMenuButton.BackColor = Color.Transparent;
+                activeSubMenuButton.ForeColor = Color.Black;
+                activeSubMenuButton.Font =
+                    new Font(activeSubMenuButton.Font, FontStyle.Regular);
+            }
+
+            activeSubMenuButton = btn;
+
+            activeSubMenuButton.BackColor = Color.LightGray;   // 🔥 persistent hover
+            activeSubMenuButton.ForeColor = Color.Black;
+            activeSubMenuButton.Font =
+                new Font(activeSubMenuButton.Font, FontStyle.Bold);
+        }
+        private void HookSubMenuEvents(Panel subMenuPanel)
+        {
+            foreach (Control c in subMenuPanel.Controls)
+            {
+                if (c is Button btn && btn.Visible)
+                {
+                    btn.MouseEnter += SubMenu_MouseEnter;
+                    btn.MouseLeave += SubMenu_MouseLeave;
+                    btn.Click += (s, e) =>
+                    {
+                        SetActiveSubMenu(btn);
+                    };
+                }
+            }
+        }
+        private void ResetSubMenuUI(Panel subMenuPanel)
+        {
+            foreach (Control c in subMenuPanel.Controls)
+            {
+                if (c is Button btn)
+                {
+                    btn.BackColor = Color.Transparent;
+                    btn.ForeColor = Color.Black;
+                    btn.Font = new Font(btn.Font, FontStyle.Regular);
+                }
+            }
+
+            activeSubMenuButton = null;
         }
 
     }
