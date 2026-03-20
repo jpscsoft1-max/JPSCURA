@@ -428,7 +428,7 @@ namespace JPSCURA
             });
 
 
-        }
+        
             StartSessionMonitor();
  }
 
