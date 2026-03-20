@@ -9,11 +9,7 @@ namespace JPSCURA
 {
     public partial class Material : Form
     {
-        //string conStr = @"Server=DESKTOP-7VC276D;
-        //                  Database=INVENTORY_MASTER;
-        //                  User Id=jpscube;
-        //                  Password=jpsc@1289;
-        //                  TrustServerCertificate=True;";
+    
         private bool _isLoadingCategory = false;
         private DataTable _mainTable;
 
@@ -43,27 +39,6 @@ namespace JPSCURA
 
 
 
-        //private void Material_Resize(object sender, EventArgs e)
-        //{
-        //    // ❌ Never allow width shrink → no horizontal scroll
-        //    if (this.Width < 1200)
-        //        this.Width = 1200;
-
-        //    // ✅ Enable vertical scroll only when height is small
-        //    if (this.Height < 700)
-        //    {
-        //        this.AutoScroll = true;
-        //        this.AutoScrollMinSize = new Size(0, 900); // content height
-        //    }
-        //    else
-        //    {
-        //        this.AutoScroll = false;
-        //    }
-
-        //    // ❌ Force hide horizontal scrollbar
-        //    this.HorizontalScroll.Enabled = false;
-        //    this.HorizontalScroll.Visible = false;
-        //}
 
         // ================= SAFE COMBO VALUE =================
         private int GetComboValueSafe(ComboBox cmb)
@@ -606,20 +581,6 @@ VALUES
         {
             ClearAllFields();
         }
-
-       
-
-        //private void ShowLoading()
-        //{
-        //    pnlLoading.Visible = true;
-        //    pnlLoading.BringToFront();
-        //    Application.DoEvents(); // force UI refresh
-        //}
-
-        //private void HideLoading()
-        //{
-        //    pnlLoading.Visible = false;
-        //}
 
     }
 

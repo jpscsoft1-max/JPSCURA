@@ -22,7 +22,7 @@ namespace JPSCURA
         private Button activeSubMenuButton = null;
         private bool isLogout = false;
 
-       
+
 
 
         // ================= COLORS =================
@@ -183,7 +183,7 @@ namespace JPSCURA
         {
             this.BeginInvoke(new Action(() =>
             {
-              
+
                 if (dbPopup != null && !dbPopup.IsDisposed)
                 {
                     dbPopup.BackColor = color;
@@ -365,7 +365,7 @@ namespace JPSCURA
         {
             HookTopMenuEvents();
             SetActiveTopMenu(btnHome);
-           
+
             panelSubMenu.Visible = false;
             onlsub.Visible = false;
             ShowHome();
@@ -384,6 +384,16 @@ namespace JPSCURA
             this.DoubleBuffered = true;
             this.FormBorderStyle = FormBorderStyle.None;
             this.MaximizedBounds = Screen.FromHandle(this.Handle).WorkingArea;
+            Task.Run(async () =>
+            {
+                try
+                {
+                    using HttpClient client = new HttpClient();
+                    await client.GetStringAsync("http://localhost:5001/api/v1/getCaptcha");
+                }
+                catch { }
+            });
+
 
         }
 
@@ -406,7 +416,7 @@ namespace JPSCURA
             {
                 btnHome, btnDepartment, btnWorkorder, btnPurchasing,
                 btnSales1, btnInventory, btnFinance,
-                btnEmployees, btnCompanyinfo
+                btnEmployees,btnLogindetails, btnCompanyinfo,btnUserInfo
             };
 
             foreach (Button btn in topButtons)
@@ -680,7 +690,7 @@ namespace JPSCURA
         private void btnHome_Click(object sender, EventArgs e)
         {
             SetActiveTopMenu(btnHome);
-          
+
             panelSubMenu.Controls.Clear();
             panelSubMenu.Visible = false;
             onlsub.Visible = false;
@@ -798,32 +808,35 @@ namespace JPSCURA
         // ================= SUB MENU FORMS =================
         private async void btnAddorder_Click(object sender, EventArgs e)
         {
-            
+
             await OpenFormInPanelAsync(new AddOrderForm());
         }
 
 
         private async void btnVendors_Click(object sender, EventArgs e)
         {
-           
+
             await RunWithLoadingAsync(async () =>
             {
                 await OpenFormInPanelAsync(new Vendors());
             });
         }
 
-  
+
 
         private async void btnCustomers_Click(object sender, EventArgs e)
         {
-           
-            await OpenFormInPanelAsync(new Customer());
+            await RunWithLoadingAsync(async () =>
+            {
+                await OpenFormInPanelAsync(new Customer());
+            });
         }
+
 
 
         private async void btnAddMaterial_Click(object sender, EventArgs e)
         {
-            
+
             await RunWithLoadingAsync(async () =>
             {
                 await OpenFormInPanelAsync(new Material());
@@ -838,7 +851,7 @@ namespace JPSCURA
             panelSubMenu.Visible = false;
             onlsub.Visible = false;
             SetActiveTopMenu(btnLogindetails);
-        
+
             ShowHome();
 
             await RunWithLoadingAsync(async () =>
@@ -853,13 +866,13 @@ namespace JPSCURA
             panelSubMenu.Visible = false;
             onlsub.Visible = false;
             SetActiveTopMenu(btnCompanyinfo);
-           
+
             ShowHome();
         }
 
         private async void btnAllMaterials_Click(object sender, EventArgs e)
         {
-            
+
             await RunWithLoadingAsync(async () =>
             {
                 await OpenFormInPanelAsync(new AllMaterial());
@@ -871,7 +884,7 @@ namespace JPSCURA
 
         private async void btnAddEmp_Click(object sender, EventArgs e)
         {
-           
+
 
             await RunWithLoadingAsync(async () =>
             {
@@ -898,7 +911,7 @@ namespace JPSCURA
 
         private async void btnAllEmp_Click(object sender, EventArgs e)
         {
-           
+
             await RunWithLoadingAsync(async () =>
             {
                 await OpenFormInPanelAsync(new AllEmployee());
@@ -921,7 +934,7 @@ namespace JPSCURA
 
         private async void btnEditInfo_Click(object sender, EventArgs e)
         {
-           
+
             await RunWithLoadingAsync(async () =>
             {
                 await OpenFormInPanelAsync(new EditInfo());
@@ -991,7 +1004,7 @@ namespace JPSCURA
 
         private async void btnFinishedGoods_Click(object sender, EventArgs e)
         {
-          
+
             await RunWithLoadingAsync(async () =>
             {
                 await OpenFormInPanelAsync(new FinishedGoods());
@@ -1001,7 +1014,7 @@ namespace JPSCURA
 
         private async void btnSemiFinishedGoods_Click(object sender, EventArgs e)
         {
-            
+
             await RunWithLoadingAsync(async () =>
             {
                 await OpenFormInPanelAsync(new SemiFinishedGoods());
@@ -1011,7 +1024,7 @@ namespace JPSCURA
 
         private async void btnRawMaterials_Click(object sender, EventArgs e)
         {
-           
+
             await RunWithLoadingAsync(async () =>
             {
                 await OpenFormInPanelAsync(new RawMaterial());
@@ -1094,5 +1107,13 @@ namespace JPSCURA
             activeSubMenuButton = null;
         }
 
+        private async void btnSalesQuotes_Click(object sender, EventArgs e)
+        {
+            await RunWithLoadingAsync(async () =>
+            {
+                await OpenFormInPanelAsync(new Salesquotes());
+            });
+            
+        }
     }
 }

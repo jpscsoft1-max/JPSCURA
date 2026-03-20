@@ -103,6 +103,16 @@ namespace JPSCURA.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap addition {
+            get {
+                object obj = ResourceManager.GetObject("addition", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap Admin {
             get {
                 object obj = ResourceManager.GetObject("Admin", resourceCulture);
@@ -236,6 +246,16 @@ namespace JPSCURA.Properties {
         internal static System.Drawing.Bitmap Customers {
             get {
                 object obj = ResourceManager.GetObject("Customers", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap development {
+            get {
+                object obj = ResourceManager.GetObject("development", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -613,6 +633,16 @@ namespace JPSCURA.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap sync {
+            get {
+                object obj = ResourceManager.GetObject("sync", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap TCS {
             get {
                 object obj = ResourceManager.GetObject("TCS", resourceCulture);
@@ -636,6 +666,16 @@ namespace JPSCURA.Properties {
         internal static System.Drawing.Bitmap Technical {
             get {
                 object obj = ResourceManager.GetObject("Technical", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap trash {
+            get {
+                object obj = ResourceManager.GetObject("trash", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
