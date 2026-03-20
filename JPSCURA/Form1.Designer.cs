@@ -671,6 +671,7 @@
             btnSalesQuotes.Text = "Sales Quotes";
             btnSalesQuotes.TextAlign = ContentAlignment.BottomCenter;
             btnSalesQuotes.UseVisualStyleBackColor = true;
+            btnSalesQuotes.Click += btnSalesQuotes_Click;
             // 
             // btnVendors
             // 

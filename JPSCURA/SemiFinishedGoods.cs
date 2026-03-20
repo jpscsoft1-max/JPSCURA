@@ -343,7 +343,7 @@ ORDER BY m.Material_Name
 
             cmd.Parameters.AddWithValue("@RoleId", Session.RoleId);
             cmd.Parameters.AddWithValue("@SubModuleId", 27);
-            // 👆 SemiFinishedGoods ka actual SubModuleId yahan rakhna
+
 
             con.Open();
             using SqlDataReader dr = cmd.ExecuteReader();
