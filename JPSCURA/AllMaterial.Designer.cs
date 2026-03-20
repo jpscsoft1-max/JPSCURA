@@ -32,6 +32,7 @@
             DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
             DataGridViewCellStyle dataGridViewCellStyle3 = new DataGridViewCellStyle();
             panel2ndtableTopContent = new Panel();
+            btn2ndtabledelete = new Button();
             lblSelectedMaterial = new Label();
             btnAddNew = new Button();
             btnBack = new Button();
@@ -74,6 +75,7 @@
             // panel2ndtableTopContent
             // 
             panel2ndtableTopContent.BackColor = Color.FromArgb(83, 144, 204);
+            panel2ndtableTopContent.Controls.Add(btn2ndtabledelete);
             panel2ndtableTopContent.Controls.Add(lblSelectedMaterial);
             panel2ndtableTopContent.Controls.Add(btnAddNew);
             panel2ndtableTopContent.Controls.Add(btnBack);
@@ -82,6 +84,20 @@
             panel2ndtableTopContent.Name = "panel2ndtableTopContent";
             panel2ndtableTopContent.Size = new Size(1354, 50);
             panel2ndtableTopContent.TabIndex = 2;
+            // 
+            // btn2ndtabledelete
+            // 
+            btn2ndtabledelete.Cursor = Cursors.Hand;
+            btn2ndtabledelete.FlatAppearance.BorderSize = 0;
+            btn2ndtabledelete.Font = new Font("Arial", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            btn2ndtabledelete.ForeColor = Color.Red;
+            btn2ndtabledelete.Location = new Point(1155, 11);
+            btn2ndtabledelete.Name = "btn2ndtabledelete";
+            btn2ndtabledelete.Size = new Size(97, 29);
+            btn2ndtabledelete.TabIndex = 9;
+            btn2ndtabledelete.Text = "Delete";
+            btn2ndtabledelete.UseVisualStyleBackColor = true;
+            btn2ndtabledelete.Click += btn2ndtabledelete_Click;
             // 
             // lblSelectedMaterial
             // 
@@ -114,14 +130,12 @@
             // btnBack
             // 
             btnBack.Cursor = Cursors.Hand;
-            btnBack.Dock = DockStyle.Right;
             btnBack.FlatAppearance.BorderSize = 0;
-            btnBack.FlatStyle = FlatStyle.Flat;
             btnBack.Font = new Font("Arial", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnBack.ForeColor = Color.White;
-            btnBack.Location = new Point(1279, 0);
+            btnBack.ForeColor = Color.FromArgb(83, 144, 204);
+            btnBack.Location = new Point(1263, 11);
             btnBack.Name = "btnBack";
-            btnBack.Size = new Size(75, 50);
+            btnBack.Size = new Size(75, 29);
             btnBack.TabIndex = 6;
             btnBack.Text = "Back";
             btnBack.UseVisualStyleBackColor = true;
@@ -517,5 +531,6 @@
         private Button btnExport;
         private Button btnImport;
         private Label lblSelectedMaterial;
+        private Button btn2ndtabledelete;
     }
 }

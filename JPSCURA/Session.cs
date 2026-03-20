@@ -8,6 +8,7 @@
         public static int RoleId;
         public static string Role;
         public static string Department;
+        public static int EmpId;
         //public static string Emp_Name;
     }
 }

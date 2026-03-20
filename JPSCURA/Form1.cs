@@ -21,6 +21,8 @@ namespace JPSCURA
         private Button activeTopButton = null;
         private Button activeSubMenuButton = null;
         private bool isLogout = false;
+        private System.Windows.Forms.Timer sessionTimer;
+
 
 
 
@@ -36,6 +38,7 @@ namespace JPSCURA
 
         private System.Windows.Forms.Timer dbHealthTimer;
         private ToolTip userToolTip = new ToolTip();
+
         // ================= IN-APP NOTIFICATION =================
         private System.Windows.Forms.Timer inAppNotifyTimer;
 
@@ -69,6 +72,35 @@ namespace JPSCURA
             }
         }
 
+        private bool IsCurrentUserActive()
+        {
+            try
+            {
+                using SqlConnection con =
+                    new SqlConnection(DBconection.GetConnectionString());
+
+                using SqlCommand cmd = new SqlCommand(@"
+            SELECT IsActive
+            FROM EMPLOYEE_MASTER..Users
+            WHERE UserId = @UserId
+        ", con);
+
+                cmd.Parameters.AddWithValue("@UserId", Session.UserId);
+
+                con.Open();
+                object result = cmd.ExecuteScalar();
+
+                if (result == null)
+                    return false;
+
+                return Convert.ToBoolean(result);
+            }
+            catch
+            {
+                // DB issue → DON'T logout
+                return true;
+            }
+        }
 
 
         // ================= RESIZE STATE =================
@@ -108,6 +140,7 @@ namespace JPSCURA
             btnhomeclose.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             btnminimax.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             btnhideminimize.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+           
 
             this.Load += Home_Load;
             this.Resize += Home_Resize;
@@ -396,6 +429,8 @@ namespace JPSCURA
 
 
         }
+            StartSessionMonitor();
+ }
 
 
         private void Home_Resize(object sender, EventArgs e)
@@ -421,6 +456,7 @@ namespace JPSCURA
 
             foreach (Button btn in topButtons)
             {
+               
                 btn.MouseEnter += TopMenu_MouseEnter;
                 btn.MouseLeave += TopMenu_MouseLeave;
             }
@@ -945,7 +981,10 @@ namespace JPSCURA
 
         private void btnLogout_Click(object sender, EventArgs e)
         {
+            
+
             isLogout = true;
+            sessionTimer?.Stop();
 
             Session.UserId = 0;
             Session.RealName = "";
@@ -1043,6 +1082,10 @@ namespace JPSCURA
         {
             Button btn = sender as Button;
 
+            // 🔴 LOGOUT BUTTON — NO HOVER EFFECT
+            if (btn == btnLogout)
+                return;
+
             if (btn != activeSubMenuButton)
             {
                 btn.BackColor = Color.LightGray;
@@ -1050,9 +1093,14 @@ namespace JPSCURA
             }
         }
 
+
         private void SubMenu_MouseLeave(object sender, EventArgs e)
         {
             Button btn = sender as Button;
+
+            // 🔴 LOGOUT BUTTON — KEEP RED
+            if (btn == btnLogout)
+                return;
 
             if (btn != activeSubMenuButton)
             {
@@ -1060,6 +1108,7 @@ namespace JPSCURA
                 btn.ForeColor = Color.Black;
             }
         }
+
         private void SetActiveSubMenu(Button btn)
         {
             if (activeSubMenuButton != null)
@@ -1081,7 +1130,7 @@ namespace JPSCURA
         {
             foreach (Control c in subMenuPanel.Controls)
             {
-                if (c is Button btn && btn.Visible)
+                if (c is Button btn && btn.Visible && btn != btnLogout)
                 {
                     btn.MouseEnter += SubMenu_MouseEnter;
                     btn.MouseLeave += SubMenu_MouseLeave;
@@ -1096,7 +1145,7 @@ namespace JPSCURA
         {
             foreach (Control c in subMenuPanel.Controls)
             {
-                if (c is Button btn)
+                if (c is Button btn && btn != btnLogout)
                 {
                     btn.BackColor = Color.Transparent;
                     btn.ForeColor = Color.Black;
@@ -1115,5 +1164,39 @@ namespace JPSCURA
             });
             
         }
+        private void StartSessionMonitor()
+        {
+            sessionTimer = new System.Windows.Forms.Timer();
+            sessionTimer.Interval = 15000; // ⏱️ 15 seconds
+            sessionTimer.Tick += SessionTimer_Tick;
+            sessionTimer.Start();
+        }
+        private void SessionTimer_Tick(object sender, EventArgs e)
+        {
+            // 🔒 USER NE KHUD LOGOUT KIYA → DO NOTHING
+            if (isLogout)
+                return;
+
+            // 🔒 SESSION ALREADY CLEARED
+            if (Session.UserId <= 0)
+                return;
+
+            if (!IsCurrentUserActive())
+            {
+                sessionTimer.Stop();
+
+                MessageBox.Show(
+                    "Your account has been deactivated by Admin.\nYou will be logged out now.",
+                    "Access Revoked",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning
+                );
+
+                isLogout = true;
+                Application.Restart();
+            }
+        }
+
+
     }
 }
