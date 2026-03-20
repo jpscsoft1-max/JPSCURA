@@ -1,6 +1,7 @@
 ﻿using Microsoft.Data.SqlClient;
 using Microsoft.VisualBasic.Logging;
 using System;
+using System.Data;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
@@ -203,6 +204,8 @@ WHERE U.Username = @u
                             Session.RoleId = Convert.ToInt32(dr["RoleId"]);
                             Session.RealName = dr["RealName"].ToString();
                             //Session.RealName = dr["Emp_Name"].ToString();
+                            Session.UserId = dr.GetInt32("UserId");
+                            Session.EmpId = dr.GetInt32("Emp_id");
 
                             Session.Username = dr["Username"].ToString();
                             Session.Role = dr["RoleName"].ToString().Trim().ToUpper();
