@@ -322,7 +322,18 @@ namespace JPSCURA
         }
 
         private void btnDelete_Click(object sender, EventArgs e)
-        {
+        {   // ❌ SELF DELETE BLOCK
+            if (_empId == Session.EmpId)
+
+            {
+                MessageBox.Show(
+                    "You cannot delete your own account.\nPlease contact another Admin.",
+                    "Action Not Allowed",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning
+                );
+                return;
+            }
             string empName = txtEmpName.Text.Trim();
 
             DialogResult confirm = MessageBox.Show(
