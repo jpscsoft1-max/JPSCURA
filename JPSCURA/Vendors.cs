@@ -1,314 +1,599 @@
 ﻿using Microsoft.Data.SqlClient;
 using System;
 using System.Drawing;
+using System.Linq;
+using System.Net.Http;
+using System.Text.Json;
+using System.Threading;
 using System.Windows.Forms;
-using System.Drawing.Drawing2D;
 
 namespace JPSCURA
 {
     public partial class Vendors : Form
     {
-        // ===== GLOBAL CONTROLS =====
-        TextBox txtVendorName, txtVendorEmail, txtMobile, txtAltMobile;
-        TextBox txtGST, txtPAN, txtAddress;
-        RadioButton rbGST, rbPAN;
+        private const int SEARCH_GAP = 4;
+        private CancellationTokenSource pincodeCTS;
 
         public Vendors()
         {
             InitializeComponent();
-
-            this.WindowState = FormWindowState.Maximized;
-            this.BackColor = Color.FromArgb(83, 144, 209);
-
-            BuildVendorUI();
         }
 
-        // ================= UI BUILD =================
-        private void BuildVendorUI()
+        // ================= FORM LOAD =================
+        private void Vendors_Load(object sender, EventArgs e)
         {
-            panelContent.Controls.Clear();
-            panelContent.Dock = DockStyle.Fill;
-            panelContent.Padding = new Padding(40);
-            panelContent.BackColor = Color.FromArgb(83, 144, 209);
+            // DEFAULT
+            rdoGST.Checked = true;
+            txtGSTNo.Visible = true;
+            txtPANNo.Visible = false;
 
-            Label lblTitle = new Label
-            {
-                Text = "ADD VENDOR",
-                Font = new Font("Arial", 18, FontStyle.Bold),
-                ForeColor = Color.White,
-                AutoSize = true
-            };
-            panelContent.Controls.Add(lblTitle);
+            // ===== BUTTON EVENTS =====
+            btnClear.Click += btnClear_Click;
 
-            TableLayoutPanel table = new TableLayoutPanel
-            {
-                ColumnCount = 2,
-                Location = new Point(0, 60),
-                Width = 900,
-                AutoSize = true
-            };
-            table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
-            table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
-            panelContent.Controls.Add(table);
+            // ===== RADIO =====
+            rdoGST.CheckedChanged += RadioChanged;
+            rdoPAN.CheckedChanged += RadioChanged;
 
-            table.Controls.Add(CreateField("Vendor Name", "Enter Vendor Name", out txtVendorName), 0, 0);
-            table.Controls.Add(CreateField("Vendor Email", "Enter Vendor Email", out txtVendorEmail), 1, 0);
+            // ===== CHECKBOX =====
+            chksameas.CheckedChanged += chksameas_CheckedChanged;
 
-            table.Controls.Add(CreateField("Mobile No", "Enter Mobile Number", out txtMobile), 0, 1);
-            table.Controls.Add(CreateField("Alt Contact No", "Enter Alternate Number", out txtAltMobile), 1, 1);
+            // ===== BILLING SYNC =====
+            txtAddressLine1.TextChanged += txtBillingAddress_TextChanged;
 
-            Panel gstPan = CreateGSTPANSection();
-            table.Controls.Add(gstPan, 0, 2);
-            table.SetColumnSpan(gstPan, 2);
 
-            Panel addr = CreateAddressField();
-            table.Controls.Add(addr, 0, 3);
-            table.SetColumnSpan(addr, 2);
+            // ===== BILLING COPY TO SHIPPING =====
+            txtAddressLine1.TextChanged += BillingChanged;
+            txtAddressLine2.TextChanged += BillingChanged;
+            txtPinCode.TextChanged += BillingChanged;
+            txtCity.TextChanged += BillingChanged;
+            txtState.TextChanged += BillingChanged;
 
-            Button btnAdd = new Button
-            {
-                Text = "+ ADD VENDOR",
-                Size = new Size(220, 44),
-                BackColor = Color.FromArgb(46, 204, 113),
-                ForeColor = Color.White,
-                Font = new Font("Arial", 12, FontStyle.Bold),
-                Cursor = Cursors.Hand,
-                FlatStyle = FlatStyle.Flat
-            };
-            btnAdd.FlatAppearance.BorderSize = 0;
-            btnAdd.Top = table.Bottom + 30;
-            btnAdd.Left = (table.Width - btnAdd.Width) / 2;
+            // ===== PINCODE =====
+            txtPinCode.TextChanged += TxtPinCode_TextChanged;
+            txtShipPinCode.TextChanged += TxtShipPinCode_TextChanged;
 
-            btnAdd.MouseEnter += (s, e) => btnAdd.BackColor = Color.FromArgb(39, 174, 96);
-            btnAdd.MouseLeave += (s, e) => btnAdd.BackColor = Color.FromArgb(46, 204, 113);
+            // ===== SEARCH =====
+            txtSearchVendors.TextChanged += ApplyVendorSearch;
+            txtSearchVendorNo.TextChanged += ApplyVendorSearch;
+            txtSearchVendorEmail.TextChanged += ApplyVendorSearch;
+            txtVendorSearchGST.TextChanged += ApplyVendorSearch;
+            txtVendorSearchPAN.TextChanged += ApplyVendorSearch;
+            txtSeachVendorBillingAddress.TextChanged += ApplyVendorSearch;
+            txtSearchVendorShippingAddress.TextChanged += ApplyVendorSearch;
 
-            ApplyRoundedButton(btnAdd, 12);
-            btnAdd.Click += BtnAdd_Click;
+            // ===== GRID EVENTS =====
+            dgvVendors.Scroll += dgvVendors_Scroll;
+            dgvVendors.ColumnWidthChanged += dgvVendors_ColumnWidthChanged;
+            this.Resize += Vendors_Resize;
 
-            panelContent.Controls.Add(btnAdd);
+            // ✅ FINAL FIX (NO SHOWN EVENT)
+            SetupVendorGrid();
+            EnableDoubleBuffering(this);
+            LoadVendorGrid();
+            SyncVendorSearchBoxes();
         }
 
-        // ================= FIELD =================
-        private Panel CreateField(string label, string placeholder, out TextBox txt)
+        private void EnableDoubleBuffering(System.Windows.Forms.Control control)
         {
-            Panel panel = new Panel { Padding = new Padding(5), Dock = DockStyle.Fill };
+            typeof(System.Windows.Forms.Control)
+                .GetProperty("DoubleBuffered",
+                    System.Reflection.BindingFlags.NonPublic |
+                    System.Reflection.BindingFlags.Instance)
+                ?.SetValue(control, true, null);
 
-            Label lbl = new Label
-            {
-                Text = label,
-                Font = new Font("Arial", 12, FontStyle.Bold),
-                ForeColor = Color.White,
-                Dock = DockStyle.Top
-            };
-
-            txt = new TextBox
-            {
-                Height = 32,
-                Dock = DockStyle.Top,
-                Font = new Font("Segoe UI", 10.5f)
-            };
-
-            SetPlaceholder(txt, placeholder);
-
-            panel.Controls.Add(txt);
-            panel.Controls.Add(lbl);
-            return panel;
+            foreach (System.Windows.Forms.Control child in control.Controls)
+                EnableDoubleBuffering(child);
         }
 
-        // ================= GST / PAN =================
-        private Panel CreateGSTPANSection()
+        // ================= GRID SETUP =================
+        private void SetupVendorGrid()
         {
-            Panel panel = new Panel { Padding = new Padding(5), Dock = DockStyle.Fill };
+            dgvVendors.DataSource = null;
+            dgvVendors.Columns.Clear();
 
-            Label lbl = new Label
-            {
-                Text = "GST No / PAN No",
-                Font = new Font("Arial", 12, FontStyle.Bold),
-                ForeColor = Color.White,
-                Dock = DockStyle.Top
-            };
+            dgvVendors.AllowUserToAddRows = false;
+            dgvVendors.ReadOnly = true;
+            dgvVendors.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            dgvVendors.MultiSelect = false;
+            dgvVendors.RowHeadersVisible = false;
+            dgvVendors.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dgvVendors.EnableHeadersVisualStyles = false;
 
-            FlowLayoutPanel radios = new FlowLayoutPanel { Height = 30, Dock = DockStyle.Top };
+            dgvVendors.BackgroundColor = Color.White;
+            dgvVendors.GridColor = Color.LightGray;
+            dgvVendors.BorderStyle = BorderStyle.FixedSingle;
+            dgvVendors.CellBorderStyle = DataGridViewCellBorderStyle.Single;
+            dgvVendors.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single;
 
-            rbGST = new RadioButton { Text = "GST No", Font = lbl.Font, ForeColor = Color.White };
-            rbPAN = new RadioButton { Text = "PAN No", Font = lbl.Font, ForeColor = Color.White };
+            dgvVendors.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 10, FontStyle.Bold);
+            dgvVendors.ColumnHeadersDefaultCellStyle.BackColor = Color.WhiteSmoke;
+            dgvVendors.ColumnHeadersDefaultCellStyle.ForeColor = Color.Black;
 
-            radios.Controls.Add(rbGST);
-            radios.Controls.Add(rbPAN);
+            dgvVendors.DefaultCellStyle.Font = new Font("Segoe UI", 9);
+            dgvVendors.DefaultCellStyle.BackColor = Color.White;
+            dgvVendors.DefaultCellStyle.ForeColor = Color.Black;
+            dgvVendors.DefaultCellStyle.SelectionBackColor = Color.White;
+            dgvVendors.DefaultCellStyle.SelectionForeColor = Color.Black;
 
-            txtGST = new TextBox
-            {
-                Visible = false,
-                Height = 32,
-                Dock = DockStyle.Top,
-                Font = new Font("Segoe UI", 10.5f),
-                CharacterCasing = CharacterCasing.Upper
-            };
+            dgvVendors.AllowUserToResizeColumns = false;
+            dgvVendors.AllowUserToResizeRows = false;
 
-            txtPAN = new TextBox
-            {
-                Visible = false,
-                Height = 32,
-                Dock = DockStyle.Top,
-                Font = new Font("Segoe UI", 10.5f),
-                CharacterCasing = CharacterCasing.Upper
-            };
+            // ⭐ ADD COLUMNS WITH EXACT KEYS USED BY SEARCH & SYNC
+            dgvVendors.Columns.Add("srno", "Sr No");
+            dgvVendors.Columns.Add("name", "Name");
+            dgvVendors.Columns.Add("contact", "Contact No");
+            dgvVendors.Columns.Add("altcontact", "Alt Contact No");
+            dgvVendors.Columns.Add("email", "Email");
+            dgvVendors.Columns.Add("gst", "GST No");
+            dgvVendors.Columns.Add("pan", "PAN No");
+            dgvVendors.Columns.Add("billing", "Billing Address");
+            dgvVendors.Columns.Add("shipping", "Shipping Address");
 
-            SetPlaceholder(txtGST, "Enter GST No");
-            SetPlaceholder(txtPAN, "Enter PAN No");
+            dgvVendors.Columns["srno"].FillWeight = 5;
+            dgvVendors.Columns["name"].FillWeight = 15;
+            dgvVendors.Columns["contact"].FillWeight = 10;
+            dgvVendors.Columns["altcontact"].FillWeight = 10;
+            dgvVendors.Columns["email"].FillWeight = 15;
+            dgvVendors.Columns["gst"].FillWeight = 10;
+            dgvVendors.Columns["pan"].FillWeight = 10;
+            dgvVendors.Columns["billing"].FillWeight = 18;
+            dgvVendors.Columns["shipping"].FillWeight = 18;
 
-            rbGST.CheckedChanged += (s, e) =>
-            {
-                if (rbGST.Checked)
-                {
-                    txtPAN.Visible = false;
-                    txtGST.Visible = true;
-                    ResetTextbox(txtGST, "Enter GST No");
-                }
-            };
-
-            rbPAN.CheckedChanged += (s, e) =>
-            {
-                if (rbPAN.Checked)
-                {
-                    txtGST.Visible = false;
-                    txtPAN.Visible = true;
-                    ResetTextbox(txtPAN, "Enter PAN No");
-                }
-            };
-
-            panel.Controls.Add(txtPAN);
-            panel.Controls.Add(txtGST);
-            panel.Controls.Add(radios);
-            panel.Controls.Add(lbl);
-
-            return panel;
+            dgvVendors.ColumnHeadersHeight = 35;
+            dgvVendors.RowPostPaint += dgvVendors_RowPostPaint;
         }
 
-        // ================= ADDRESS =================
-        private Panel CreateAddressField()
+        // ================= SR NO =================
+        private void dgvVendors_RowPostPaint(object sender, DataGridViewRowPostPaintEventArgs e)
         {
-            Panel panel = new Panel { Padding = new Padding(5, 10, 5, 10), Dock = DockStyle.Fill };
-
-            Label lbl = new Label
-            {
-                Text = "Address",
-                Font = new Font("Arial", 12, FontStyle.Bold),
-                ForeColor = Color.White,
-                Dock = DockStyle.Top
-            };
-
-            txtAddress = new TextBox
-            {
-                Multiline = true,
-                Height = 60,
-                Dock = DockStyle.Top,
-                ScrollBars = ScrollBars.None,
-                Font = new Font("Segoe UI", 10.5f)
-            };
-
-            SetPlaceholder(txtAddress, "Enter Address");
-
-            panel.Controls.Add(txtAddress);
-            panel.Controls.Add(lbl);
-            return panel;
+            dgvVendors.Rows[e.RowIndex].Cells["srno"].Value = e.RowIndex + 1;
         }
 
-        // ================= ADD CLICK =================
-        private void BtnAdd_Click(object sender, EventArgs e)
+        private void LoadVendorGrid()
         {
-            if (txtVendorName.ForeColor == Color.Gray)
+            if (dgvVendors.Columns.Count == 0)
             {
-                MessageBox.Show("Enter Vendor Name");
-                return;
+                SetupVendorGrid();
             }
 
-            if (txtMobile.ForeColor == Color.Gray || txtMobile.Text.Length < 10)
+            try
             {
-                MessageBox.Show("Enter valid Mobile Number");
-                return;
+                dgvVendors.Rows.Clear();
+
+                using SqlConnection con =
+                    new SqlConnection(DBconection.GetConnectionString());
+
+                using SqlCommand cmd = new SqlCommand(@"
+SELECT
+    Vendor_Name,
+    Contact_No,
+    Alt_Contact_No,
+    Vendor_Email,
+    Vendor_GST,
+    Vendor_PAN,
+    Billing_Address,
+    Shipping_Address
+FROM PURCHASE_MASTER.dbo.Vendors
+ORDER BY Vendor_Name
+", con);
+
+                con.Open();
+
+                using SqlDataReader dr = cmd.ExecuteReader();
+
+                int sr = 1;
+
+                while (dr.Read())
+                {
+                    dgvVendors.Rows.Add(
+                        sr++,
+                        dr["Vendor_Name"]?.ToString() ?? "",
+                        dr["Contact_No"]?.ToString() ?? "",
+                        dr["Alt_Contact_No"]?.ToString() ?? "",
+                        dr["Vendor_Email"]?.ToString() ?? "",
+                        dr["Vendor_GST"]?.ToString() ?? "",
+                        dr["Vendor_PAN"]?.ToString() ?? "",
+                        dr["Billing_Address"]?.ToString() ?? "",
+                        dr["Shipping_Address"]?.ToString() ?? ""
+                    );
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error loading vendors:\n" + ex.Message,
+                    "Load Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
 
-            using SqlConnection con = new SqlConnection(DBconection.GetConnectionString());
-            using SqlCommand cmd = new SqlCommand(@"
-INSERT INTO PURCHASE_MASTER..Vendors
-(VendorName, VendorEmail, MobileNo, AltMobileNo, GSTNo, PANNo, Address, AddedBy)
+            dgvVendors.Refresh();   // ✅ force UI refresh
+        }
+        // ================= RADIO GST / PAN =================
+        private void RadioChanged(object sender, EventArgs e)
+        {
+            if (rdoGST.Checked)
+            {
+                txtGSTNo.Visible = true;
+                txtPANNo.Visible = false;
+                txtPANNo.Clear();
+            }
+            else
+            {
+                txtPANNo.Visible = true;
+                txtGSTNo.Visible = false;
+                txtGSTNo.Clear();
+            }
+        }
+
+        // ================= SAME AS BILLING =================
+        private void chksameas_CheckedChanged(object sender, EventArgs e)
+        {
+            if (chksameas.Checked)
+            {
+                CopyBillingToShipping();
+                SetShippingReadOnly(true);
+            }
+            else
+            {
+                SetShippingReadOnly(false);
+            }
+        }
+
+        private void CopyBillingToShipping()
+        {
+            txtShipAddressLine1.Text = txtAddressLine1.Text;
+            txtShipAddressLine2.Text = txtAddressLine2.Text;
+            txtShipPinCode.Text = txtPinCode.Text;
+            txtShipCity.Text = txtCity.Text;
+            txtShipState.Text = txtState.Text;
+        }
+
+        private void SetShippingReadOnly(bool value)
+        {
+            txtShipAddressLine1.ReadOnly = value;
+            txtShipAddressLine2.ReadOnly = value;
+            txtShipPinCode.ReadOnly = value;
+            txtShipCity.ReadOnly = value;
+            txtShipState.ReadOnly = value;
+        }
+
+        private void txtBillingAddress_TextChanged(object sender, EventArgs e)
+        {
+            if (chksameas.Checked)
+                txtShipAddressLine1.Text = txtAddressLine1.Text;
+        }
+
+        // ================= ADD VENDOR =================
+        private void btnAddVendor_Click(object sender, EventArgs e)
+        {
+            if (!ValidateForm())
+                return;
+
+            try
+            {
+                using SqlConnection con =
+                    new SqlConnection(DBconection.GetConnectionString());
+
+                using SqlCommand cmd = new SqlCommand(@"
+INSERT INTO PURCHASE_MASTER.dbo.Vendors
+(
+    Vendor_Name,
+    Contact_No,
+    Alt_Contact_No,
+    Vendor_Email,
+    Vendor_GST,
+    Vendor_PAN,
+    Billing_Address,
+    Shipping_Address
+)
 VALUES
-(@VendorName, @VendorEmail, @MobileNo, @AltMobileNo, @GSTNo, @PANNo, @Address, @AddedBy)", con);
+(
+    @name,
+    @contact,
+    @altcontact,
+    @email,
+    @gst,
+    @pan,
+    @billing,
+    @shipping
+)", con);
 
-            cmd.Parameters.AddWithValue("@VendorName", txtVendorName.Text.Trim());
-            cmd.Parameters.AddWithValue("@VendorEmail", txtVendorEmail.ForeColor == Color.Gray ? "" : txtVendorEmail.Text.Trim());
-            cmd.Parameters.AddWithValue("@MobileNo", txtMobile.Text.Trim());
-            cmd.Parameters.AddWithValue("@AltMobileNo", txtAltMobile.ForeColor == Color.Gray ? "" : txtAltMobile.Text.Trim());
-            cmd.Parameters.AddWithValue("@GSTNo", rbGST.Checked ? txtGST.Text.Trim() : "");
-            cmd.Parameters.AddWithValue("@PANNo", rbPAN.Checked ? txtPAN.Text.Trim() : "");
-            cmd.Parameters.AddWithValue("@Address", txtAddress.ForeColor == Color.Gray ? "" : txtAddress.Text.Trim());
-            cmd.Parameters.AddWithValue("@AddedBy", Session.Username);
+                cmd.Parameters.AddWithValue("@name", txtVendorName.Text.Trim());
+                cmd.Parameters.AddWithValue("@contact", txtVendorMoNo.Text.Trim());
+                cmd.Parameters.AddWithValue("@altcontact", txtAltContact.Text.Trim());
+                cmd.Parameters.AddWithValue("@email", txtVendorEmail.Text.Trim());
+                cmd.Parameters.AddWithValue("@gst", rdoGST.Checked ? txtGSTNo.Text.Trim() : "");
+                cmd.Parameters.AddWithValue("@pan", rdoPAN.Checked ? txtPANNo.Text.Trim() : "");
+                cmd.Parameters.AddWithValue("@billing", GetBillingAddressCombined());
+                cmd.Parameters.AddWithValue("@shipping", GetShippingAddressCombined());
 
-            con.Open();
-            cmd.ExecuteNonQuery();
+                con.Open();
+                int rows = cmd.ExecuteNonQuery();
 
-            MessageBox.Show("Vendor added successfully");
+                if (rows > 0)
+                {
+                    MessageBox.Show("Vendor added successfully ✔",
+                        "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    ClearForm();
+                    LoadVendorGrid();
+                    SyncVendorSearchBoxes(); // ⭐ re-sync search boxes after reload
+                }
+                else
+                {
+                    MessageBox.Show("Insert failed. No rows affected.",
+                        "Failed", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error saving vendor:\n" + ex.Message,
+                    "Insert Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        // ================= VALIDATION =================
+        private bool ValidateForm()
+        {
+            if (string.IsNullOrWhiteSpace(txtVendorName.Text))
+            {
+                MessageBox.Show("Vendor name is required");
+                txtVendorName.Focus();
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(txtVendorMoNo.Text))
+            {
+                MessageBox.Show("Contact number is required");
+                txtVendorMoNo.Focus();
+                return false;
+            }
+
+            if (rdoGST.Checked && string.IsNullOrWhiteSpace(txtGSTNo.Text))
+            {
+                MessageBox.Show("GST number is required");
+                txtGSTNo.Focus();
+                return false;
+            }
+
+            if (rdoPAN.Checked && string.IsNullOrWhiteSpace(txtPANNo.Text))
+            {
+                MessageBox.Show("PAN number is required");
+                txtPANNo.Focus();
+                return false;
+            }
+
+            return true;
+        }
+
+        // ================= SEARCH =================
+        private void ApplyVendorSearch(object sender, EventArgs e)
+        {
+            if (dgvVendors.Rows.Count == 0) return;
+
+            string name = txtSearchVendors.Text.Trim();
+            string contact = txtSearchVendorNo.Text.Trim();
+            string email = txtSearchVendorEmail.Text.Trim();
+            string gst = txtVendorSearchGST.Text.Trim();
+            string pan = txtVendorSearchPAN.Text.Trim();
+            string billing = txtSeachVendorBillingAddress.Text.Trim();
+            string shipping = txtSearchVendorShippingAddress.Text.Trim();
+
+            foreach (DataGridViewRow row in dgvVendors.Rows)
+            {
+                if (row.IsNewRow) continue;
+
+                bool visible = true;
+
+                visible &= string.IsNullOrEmpty(name) || (row.Cells["name"].Value?.ToString() ?? "").ToLower().Contains(name.ToLower());
+                visible &= string.IsNullOrEmpty(contact) || (row.Cells["contact"].Value?.ToString() ?? "").StartsWith(contact);
+                visible &= string.IsNullOrEmpty(email) || (row.Cells["email"].Value?.ToString() ?? "").ToLower().Contains(email.ToLower());
+                visible &= string.IsNullOrEmpty(gst) || (row.Cells["gst"].Value?.ToString() ?? "").StartsWith(gst);
+                visible &= string.IsNullOrEmpty(pan) || (row.Cells["pan"].Value?.ToString() ?? "").StartsWith(pan);
+                visible &= string.IsNullOrEmpty(billing) || (row.Cells["billing"].Value?.ToString() ?? "").ToLower().Contains(billing.ToLower());
+                visible &= string.IsNullOrEmpty(shipping) || (row.Cells["shipping"].Value?.ToString() ?? "").ToLower().Contains(shipping.ToLower());
+
+                row.Visible = visible;
+            }
+        }
+
+        // ================= SEARCH BOX SYNC =================
+        private void SyncVendorSearchBoxes()
+        {
+            if (dgvVendors.Columns.Count == 0) return;
+
+            SetVendorSearchBox(txtSearchVendors, "name");
+            SetVendorSearchBox(txtSearchVendorNo, "contact");
+            SetVendorSearchBox(txtSearchVendorEmail, "email");
+            SetVendorSearchBox(txtVendorSearchGST, "gst");
+            SetVendorSearchBox(txtVendorSearchPAN, "pan");
+            SetVendorSearchBox(txtSeachVendorBillingAddress, "billing");
+            SetVendorSearchBox(txtSearchVendorShippingAddress, "shipping");
+        }
+
+        private void SetVendorSearchBox(TextBox txt, string columnName)
+        {
+            if (!dgvVendors.Columns.Contains(columnName)) return;
+
+            Rectangle rect = dgvVendors.GetColumnDisplayRectangle(
+                dgvVendors.Columns[columnName].Index, true);
+
+            txt.Left = rect.Left + dgvVendors.Left + (SEARCH_GAP / 2);
+            txt.Width = rect.Width - SEARCH_GAP;
+        }
+
+        private void dgvVendors_Scroll(object sender, ScrollEventArgs e)
+        {
+            if (e.ScrollOrientation == ScrollOrientation.HorizontalScroll)
+                SyncVendorSearchBoxes();
+        }
+
+        private void dgvVendors_ColumnWidthChanged(object sender, DataGridViewColumnEventArgs e)
+        {
+            SyncVendorSearchBoxes();
+        }
+
+        private void Vendors_Resize(object sender, EventArgs e)
+        {
+            SyncVendorSearchBoxes();
+        }
+
+        // ================= ADDRESS HELPERS =================
+        private string GetBillingAddressCombined()
+        {
+            return string.Join(", ",
+                new[]
+                {
+                    txtAddressLine1.Text.Trim(),
+                    txtAddressLine2.Text.Trim(),
+                    txtPinCode.Text.Trim(),
+                    txtCity.Text.Trim(),
+                    txtState.Text.Trim()
+                }.Where(x => !string.IsNullOrWhiteSpace(x)));
+        }
+
+        private string GetShippingAddressCombined()
+        {
+            return string.Join(", ",
+                new[]
+                {
+                    txtShipAddressLine1.Text.Trim(),
+                    txtShipAddressLine2.Text.Trim(),
+                    txtShipPinCode.Text.Trim(),
+                    txtShipCity.Text.Trim(),
+                    txtShipState.Text.Trim()
+                }.Where(x => !string.IsNullOrWhiteSpace(x)));
+        }
+
+
+
+        private void BillingChanged(object sender, EventArgs e)
+        {
+            if (chksameas.Checked)
+                CopyBillingToShipping();
+        }
+
+        // ================= PINCODE AUTO-FILL =================
+        private async Task FetchPincodeData(string pincode)
+        {
+            try
+            {
+                using HttpClient client = new HttpClient();
+                string url = $"https://api.postalpincode.in/pincode/{pincode}";
+                var response = await client.GetStringAsync(url);
+                var json = JsonDocument.Parse(response);
+                var root = json.RootElement[0];
+
+                if (root.GetProperty("Status").GetString() == "Success")
+                {
+                    var postOffice = root.GetProperty("PostOffice")[0];
+                    txtState.Text = postOffice.GetProperty("State").GetString();
+                    txtCity.Text = postOffice.GetProperty("District").GetString();
+
+                    if (chksameas.Checked)
+                        CopyBillingToShipping();
+                }
+            }
+            catch { }
+        }
+
+        private async Task FetchShippingPincode(string pin)
+        {
+            try
+            {
+                using HttpClient client = new HttpClient();
+                string url = $"https://api.postalpincode.in/pincode/{pin}";
+                var response = await client.GetStringAsync(url);
+                var json = JsonDocument.Parse(response);
+                var root = json.RootElement[0];
+
+                if (root.GetProperty("Status").GetString() == "Success")
+                {
+                    var po = root.GetProperty("PostOffice")[0];
+                    txtShipCity.Text = po.GetProperty("District").GetString();
+                    txtShipState.Text = po.GetProperty("State").GetString();
+                }
+                else
+                {
+                    txtShipCity.Clear();
+                    txtShipState.Clear();
+                }
+            }
+            catch { }
+        }
+
+        private async void TxtPinCode_TextChanged(object sender, EventArgs e)
+        {
+            pincodeCTS?.Cancel();
+            pincodeCTS = new CancellationTokenSource();
+
+            try
+            {
+                string pin = txtPinCode.Text.Trim();
+
+                if (pin.Length < 6)
+                {
+                    txtState.Clear();
+                    txtCity.Clear();
+
+                    if (chksameas.Checked)
+                        CopyBillingToShipping();
+
+                    return;
+                }
+
+                await Task.Delay(100, pincodeCTS.Token);
+
+                if (pin.Length == 6)
+                    await FetchPincodeData(pin);
+            }
+            catch (TaskCanceledException) { }
+        }
+
+        private async void TxtShipPinCode_TextChanged(object sender, EventArgs e)
+        {
+            if (txtShipPinCode.Text.Length < 6)
+            {
+                txtShipCity.Clear();
+                txtShipState.Clear();
+                return;
+            }
+
+            await FetchShippingPincode(txtShipPinCode.Text.Trim());
+        }
+
+        // ================= CLEAR FORM =================
+        private void ClearForm()
+        {
+            txtVendorName.Clear();
+            txtVendorMoNo.Clear();
+            txtAltContact.Clear();
+            txtVendorEmail.Clear();
+            txtGSTNo.Clear();
+            txtPANNo.Clear();
+
+            txtAddressLine1.Clear();
+            txtAddressLine2.Clear();
+            txtPinCode.Clear();
+            txtCity.Clear();
+            txtState.Clear();
+
+            txtShipAddressLine1.Clear();
+            txtShipAddressLine2.Clear();
+            txtShipPinCode.Clear();
+            txtShipCity.Clear();
+            txtShipState.Clear();
+
+            rdoGST.Checked = true;
+            chksameas.Checked = false;
+            SetShippingReadOnly(false);
+        }
+
+        private void btnClear_Click(object sender, EventArgs e)
+        {
             ClearForm();
         }
 
-        // ================= HELPERS =================
-        private void ResetTextbox(TextBox txt, string placeholder)
+        private void panelVendorsright_Paint(object sender, PaintEventArgs e)
         {
-            txt.Text = placeholder;
-            txt.ForeColor = Color.Gray;
-            txt.Focus();
-        }
 
-        private void ClearForm()
-        {
-            SetPlaceholder(txtVendorName, "Enter Vendor Name");
-            SetPlaceholder(txtVendorEmail, "Enter Vendor Email");
-            SetPlaceholder(txtMobile, "Enter Mobile Number");
-            SetPlaceholder(txtAltMobile, "Enter Alternate Number");
-            SetPlaceholder(txtAddress, "Enter Address");
-
-            txtGST.Visible = false;
-            txtPAN.Visible = false;
-            rbGST.Checked = rbPAN.Checked = false;
-        }
-
-        private void SetPlaceholder(TextBox txt, string text)
-        {
-            txt.Text = text;
-            txt.ForeColor = Color.Gray;
-
-            txt.GotFocus += (s, e) =>
-            {
-                if (txt.Text == text)
-                {
-                    txt.Text = "";
-                    txt.ForeColor = Color.Black;
-                }
-            };
-
-            txt.LostFocus += (s, e) =>
-            {
-                if (string.IsNullOrWhiteSpace(txt.Text))
-                {
-                    txt.Text = text;
-                    txt.ForeColor = Color.Gray;
-                }
-            };
-        }
-
-        private void ApplyRoundedButton(Button btn, int radius)
-        {
-            btn.Resize += (s, e) =>
-            {
-                var path = new System.Drawing.Drawing2D.GraphicsPath();
-                path.AddArc(0, 0, radius, radius, 180, 90);
-                path.AddArc(btn.Width - radius, 0, radius, radius, 270, 90);
-                path.AddArc(btn.Width - radius, btn.Height - radius, radius, radius, 0, 90);
-                path.AddArc(0, btn.Height - radius, radius, radius, 90, 90);
-                path.CloseFigure();
-                btn.Region = new Region(path);
-            };
         }
     }
 }

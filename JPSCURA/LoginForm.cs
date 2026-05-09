@@ -38,15 +38,7 @@ namespace JPSCURA
             if (picEye != null) SetDoubleBuffered(picEye);
         }
 
-        //protected override void OnHandleCreated(EventArgs e)
-        //{
-        //    base.OnHandleCreated(e);
-
-        //    this.MaximizedBounds = Screen.FromHandle(this.Handle).WorkingArea;
-        //    this.WindowState = FormWindowState.Maximized;
-        //}
-
-        // 🔥 Kisi bhi control ko double buffered banana
+       
         private void SetDoubleBuffered(Control control)
         {
             if (control == null) return;
@@ -114,10 +106,12 @@ namespace JPSCURA
         }
 
         // ================= LOGIN =================
-        private void btnLogin_Click(object sender, EventArgs e)
+        private async void btnLogin_Click(object sender, EventArgs e)
         {
-            Login();
-        }
+           
+                Login();
+            
+            }
 
         private void Login()
         {
@@ -172,12 +166,86 @@ WHERE U.Username = @u
                         {
                             if (!dr.Read())
                             {
-                                MessageBox.Show(
-                                    "Invalid username or password",
-                                    "Login Failed",
-                                    MessageBoxButtons.OK,
-                                    MessageBoxIcon.Error);
-                                return;
+                                using (SqlConnection con2 =
+                                    new SqlConnection(DBconection.GetConnectionString()))
+                                {
+                                    con2.Open();
+
+                                    SqlCommand userCheck = new SqlCommand(@"
+        SELECT UserId 
+        FROM EMPLOYEE_MASTER.dbo.Users
+        WHERE Username = @u
+        ", con2);
+
+                                    userCheck.Parameters.AddWithValue("@u", username);
+
+                                    var userIdObj = userCheck.ExecuteScalar();
+
+                                    if (userIdObj != null)
+                                    {
+                                        int uid = Convert.ToInt32(userIdObj);
+                                        SqlCommand reqCheck = new SqlCommand(@"
+SELECT TOP 1 Id, Status, OldPassword
+FROM EMPLOYEE_MASTER.dbo.PasswordChangeRequests
+WHERE UserId = @id
+  AND IsNotified = 0
+ORDER BY Id DESC
+", con2);
+                                        reqCheck.Parameters.AddWithValue("@id", uid);
+
+                                        using (SqlDataReader reader = reqCheck.ExecuteReader())
+                                        {
+                                            if (reader.Read())
+                                            {
+                                                int reqId = Convert.ToInt32(reader["Id"]);
+                                                string status = reader["Status"].ToString();
+                                                string oldPass = reader["OldPassword"].ToString();
+
+                                                reader.Close();
+
+                                                if (password.Trim() == oldPass.Trim())
+                                                {
+                                                    if (status == "Approved")
+                                                    {
+                                                        MessageBox.Show(
+                                                            "Your password has been approved.\nPlease login with your new password.",
+                                                            "Password Updated",
+                                                            MessageBoxButtons.OK,
+                                                            MessageBoxIcon.Information);
+                                                    }
+                                                    else if (status == "Rejected")
+                                                    {
+                                                        MessageBox.Show(
+                                                            "Your password request has been rejected.\nPlease continue with your old password.",
+                                                            "Request Rejected",
+                                                            MessageBoxButtons.OK,
+                                                            MessageBoxIcon.Warning);
+                                                    }
+
+                                                    SqlCommand updateNotify = new SqlCommand(@"
+        UPDATE EMPLOYEE_MASTER.dbo.PasswordChangeRequests
+        SET IsNotified = 1
+        WHERE Id = @rid
+        ", con2);
+
+                                                    updateNotify.Parameters.AddWithValue("@rid", reqId);
+                                                    updateNotify.ExecuteNonQuery();
+
+                                                    return;
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    // 🔴 FINAL fallback (IMPORTANT)
+                                    MessageBox.Show(
+                                        "Invalid username or password",
+                                        "Login Failed",
+                                        MessageBoxButtons.OK,
+                                        MessageBoxIcon.Error);
+
+                                    return;
+                                }
                             }
 
                             if (!Convert.ToBoolean(dr["IsActive"]))
@@ -210,6 +278,49 @@ WHERE U.Username = @u
                             Session.Username = dr["Username"].ToString();
                             Session.Role = dr["RoleName"].ToString().Trim().ToUpper();
                             Session.Department = dr["DepartmentName"].ToString().Trim();
+                            // 🔔 CHECK REJECTED NOTIFICATION AFTER SUCCESS LOGIN
+                            using (SqlConnection con3 =
+                                new SqlConnection(DBconection.GetConnectionString()))
+                            {
+                                con3.Open();
+
+                                SqlCommand reqCheck = new SqlCommand(@"
+    SELECT TOP 1 Id, Status
+    FROM EMPLOYEE_MASTER.dbo.PasswordChangeRequests
+    WHERE UserId = @id
+      AND Status = 'Rejected'
+      AND IsNotified = 0
+    ORDER BY Id DESC
+    ", con3);
+
+                                reqCheck.Parameters.AddWithValue("@id", Session.UserId);
+
+                                using (SqlDataReader reader = reqCheck.ExecuteReader())
+                                {
+                                    if (reader.Read())
+                                    {
+                                        int reqId = Convert.ToInt32(reader["Id"]);
+
+                                        reader.Close();
+
+                                        MessageBox.Show(
+                                            "Your password request has been rejected.\nPlease continue with your old password.",
+                                            "Request Rejected",
+                                            MessageBoxButtons.OK,
+                                            MessageBoxIcon.Warning);
+
+                                        // mark notified
+                                        SqlCommand updateNotify = new SqlCommand(@"
+            UPDATE EMPLOYEE_MASTER.dbo.PasswordChangeRequests
+            SET IsNotified = 1
+            WHERE Id = @rid
+            ", con3);
+
+                                        updateNotify.Parameters.AddWithValue("@rid", reqId);
+                                        updateNotify.ExecuteNonQuery();
+                                    }
+                                }
+                            }
                         }
                     }
                 }

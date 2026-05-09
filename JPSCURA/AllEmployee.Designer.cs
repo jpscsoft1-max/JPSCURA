@@ -96,7 +96,7 @@
             // 
             // txtSearchRole
             // 
-            txtSearchRole.Location = new Point(895, 12);
+            txtSearchRole.Location = new Point(895, 13);
             txtSearchRole.Name = "txtSearchRole";
             txtSearchRole.PlaceholderText = "   Search By Role";
             txtSearchRole.Size = new Size(100, 23);
@@ -104,7 +104,7 @@
             // 
             // txtSearchDepartment
             // 
-            txtSearchDepartment.Location = new Point(789, 12);
+            txtSearchDepartment.Location = new Point(789, 13);
             txtSearchDepartment.Name = "txtSearchDepartment";
             txtSearchDepartment.PlaceholderText = "   Search By Department";
             txtSearchDepartment.Size = new Size(100, 23);
@@ -112,7 +112,7 @@
             // 
             // txtSearchContact
             // 
-            txtSearchContact.Location = new Point(683, 12);
+            txtSearchContact.Location = new Point(683, 13);
             txtSearchContact.Name = "txtSearchContact";
             txtSearchContact.PlaceholderText = "   Search By Contact";
             txtSearchContact.Size = new Size(100, 23);
@@ -120,7 +120,7 @@
             // 
             // txtSearchEmpName
             // 
-            txtSearchEmpName.Location = new Point(577, 12);
+            txtSearchEmpName.Location = new Point(577, 13);
             txtSearchEmpName.Name = "txtSearchEmpName";
             txtSearchEmpName.PlaceholderText = "   Search By EMP Name";
             txtSearchEmpName.Size = new Size(100, 23);
@@ -128,7 +128,7 @@
             // 
             // txtSearchEmpCode
             // 
-            txtSearchEmpCode.Location = new Point(471, 12);
+            txtSearchEmpCode.Location = new Point(471, 13);
             txtSearchEmpCode.Name = "txtSearchEmpCode";
             txtSearchEmpCode.PlaceholderText = "   Search By EMP Code";
             txtSearchEmpCode.Size = new Size(100, 23);

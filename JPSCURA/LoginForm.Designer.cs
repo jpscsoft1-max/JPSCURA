@@ -97,9 +97,9 @@
             lblappname.ForeColor = Color.Black;
             lblappname.Location = new Point(26, 9);
             lblappname.Name = "lblappname";
-            lblappname.Size = new Size(340, 15);
+            lblappname.Size = new Size(338, 15);
             lblappname.TabIndex = 1;
-            lblappname.Text = "JPSCURA – An Indigenous Software Of JPSCUBE ENGINEERS";
+            lblappname.Text = "JPSCURA – An Indigenous Software of JPSCUBE ENGINEERS";
             // 
             // pctboxlogo
             // 

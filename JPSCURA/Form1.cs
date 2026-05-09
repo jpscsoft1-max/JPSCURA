@@ -22,6 +22,7 @@ namespace JPSCURA
         private Button activeSubMenuButton = null;
         private bool isLogout = false;
         private System.Windows.Forms.Timer sessionTimer;
+        private bool isRequestSeen = false;
 
 
 
@@ -140,7 +141,7 @@ namespace JPSCURA
             btnhomeclose.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             btnminimax.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             btnhideminimize.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-           
+
 
             this.Load += Home_Load;
             this.Resize += Home_Resize;
@@ -352,9 +353,11 @@ namespace JPSCURA
             {
                 if (c is Button btn)
                     btn.Enabled = false;
+                btnUserInfo.Enabled = false;
             }
 
             panelSubMenu.Enabled = false;
+
         }
 
         private void EnableAllButtons()
@@ -363,6 +366,7 @@ namespace JPSCURA
             {
                 if (c is Button btn)
                     btn.Enabled = true;
+                btnUserInfo.Enabled = true;
             }
 
             panelSubMenu.Enabled = true;
@@ -396,6 +400,13 @@ namespace JPSCURA
 
         private async void Home_Load(object sender, EventArgs e)
         {
+            if (Session.Role == "ADMIN")
+            {
+                pnlDotEmployee.Visible = HasPendingPasswordRequests();
+                MakeRound(pnlDotEmployee);
+                MakeRound(pnlDotSub);
+            }
+
             HookTopMenuEvents();
             SetActiveTopMenu(btnHome);
 
@@ -409,7 +420,7 @@ namespace JPSCURA
 
             StartDbHealthMonitor();
             btnClear.Visible = false;
-
+            btnSelectAll.Visible = false;
             await Task.Delay(50);
             this.Opacity = 1;
             this.MinimizeBox = true;
@@ -428,9 +439,9 @@ namespace JPSCURA
             });
 
 
-        
+
             StartSessionMonitor();
- }
+        }
 
 
         private void Home_Resize(object sender, EventArgs e)
@@ -456,7 +467,7 @@ namespace JPSCURA
 
             foreach (Button btn in topButtons)
             {
-               
+
                 btn.MouseEnter += TopMenu_MouseEnter;
                 btn.MouseLeave += TopMenu_MouseLeave;
             }
@@ -806,6 +817,8 @@ namespace JPSCURA
             HookSubMenuEvents(panelInventorySubMenu);   // 👈 ADD THIS
             activeSubMenuButton = null;
             btnClear.Visible = false;
+            btn2ndtabledelete.Visible = false;
+            btnSelectAll.Visible = false;
             ShowHome();
         }
 
@@ -827,16 +840,34 @@ namespace JPSCURA
 
         private void btnEmployees_Click(object sender, EventArgs e)
         {
+            // 🔴 top dot hatao
+            pnlDotEmployee.Visible = false;
+
+
             SetActiveTopMenu(btnEmployees);
+
             panelSubMenu.Controls.Clear();
             panelSubMenuUser.Visible = false;
             panelEMPSubMenu.Visible = true;
             panelSubMenu.Visible = true;
             onlsub.Visible = true;
+
             panelSubMenu.Controls.Add(panelEMPSubMenu);
+
             ResetSubMenuUI(panelEMPSubMenu);
             ApplySubModuleAccess("Employee", panelEMPSubMenu);
-            HookSubMenuEvents(panelEMPSubMenu);   // 👈 ADD THIS
+            HookSubMenuEvents(panelEMPSubMenu);
+
+            // 🔥 SUBMODULE DOT SHOW
+            if (!isRequestSeen)
+            {
+                pnlDotSub.Visible = HasPendingPasswordRequests();
+            }
+            else
+            {
+                pnlDotSub.Visible = false;
+            }
+
             activeSubMenuButton = null;
             ShowHome();
         }
@@ -877,6 +908,8 @@ namespace JPSCURA
             {
                 await OpenFormInPanelAsync(new Material());
                 btnClear.Visible = false;
+                btn2ndtabledelete.Visible = false;
+                btnSelectAll.Visible = false;
             });
         }
 
@@ -896,14 +929,18 @@ namespace JPSCURA
             });
         }
 
-        private void btnCompanyinfo_Click(object sender, EventArgs e)
+        private async void btnCompanyinfo_Click(object sender, EventArgs e)
         {
-            panelSubMenu.Controls.Clear();
-            panelSubMenu.Visible = false;
-            onlsub.Visible = false;
-            SetActiveTopMenu(btnCompanyinfo);
+            await RunWithLoadingAsync(async () =>
+            {
+                await OpenFormInPanelAsync(new CompanyDetails());
+                panelSubMenu.Controls.Clear();
+                panelSubMenu.Visible = false;
+                onlsub.Visible = false;
+                SetActiveTopMenu(btnCompanyinfo);
+            });
 
-            ShowHome();
+
         }
 
         private async void btnAllMaterials_Click(object sender, EventArgs e)
@@ -913,6 +950,8 @@ namespace JPSCURA
             {
                 await OpenFormInPanelAsync(new AllMaterial());
                 btnClear.Visible = true;
+                btn2ndtabledelete.Visible = true;
+                btnSelectAll.Visible = true;
             });
         }
 
@@ -981,7 +1020,7 @@ namespace JPSCURA
 
         private void btnLogout_Click(object sender, EventArgs e)
         {
-            
+
 
             isLogout = true;
             sessionTimer?.Stop();
@@ -1049,6 +1088,8 @@ namespace JPSCURA
                 await OpenFormInPanelAsync(new FinishedGoods());
             });
             btnClear.Visible = false;
+            btn2ndtabledelete.Visible = false;
+            btnSelectAll.Visible = false;
         }
 
         private async void btnSemiFinishedGoods_Click(object sender, EventArgs e)
@@ -1059,6 +1100,8 @@ namespace JPSCURA
                 await OpenFormInPanelAsync(new SemiFinishedGoods());
             });
             btnClear.Visible = false;
+            btn2ndtabledelete.Visible = false;
+            btnSelectAll.Visible = false;
         }
 
         private async void btnRawMaterials_Click(object sender, EventArgs e)
@@ -1069,6 +1112,8 @@ namespace JPSCURA
                 await OpenFormInPanelAsync(new RawMaterial());
             });
             btnClear.Visible = false;
+            btn2ndtabledelete.Visible = false;
+            btnSelectAll.Visible = false;
         }
 
         private void pnlhometitlebar_DoubleClick(object sender, EventArgs e)
@@ -1162,7 +1207,7 @@ namespace JPSCURA
             {
                 await OpenFormInPanelAsync(new Salesquotes());
             });
-            
+
         }
         private void StartSessionMonitor()
         {
@@ -1197,6 +1242,98 @@ namespace JPSCURA
             }
         }
 
+        private async void btn2ndtabledelete_Click(object sender, EventArgs e)
+        {
+            if (activeForm is AllMaterial allMaterial)
+            {
+                // 🔥 FIRST CHECK (no loader)
+                if (allMaterial.SelectedCount == 0) // expose count
+                {
+                    MessageBox.Show("No rows selected");
+                    return;
+                }
 
+                // 🔥 THEN run loader + delete
+                await RunWithLoadingAsync(async () =>
+                {
+                    await allMaterial.DeleteSelectedMaterialsAsync();
+                });
+            }
+        }
+
+        private async void btnRequests_Click(object sender, EventArgs e)
+        {
+
+            await RunWithLoadingAsync(async () =>
+            {
+                await OpenFormInPanelAsync(new Change_Password_Form());
+                isRequestSeen = true;
+                pnlDotSub.Visible = false;
+            });
+        }
+
+        private bool HasPendingPasswordRequests()
+        {
+            if (Session.Role == "ADMIN")
+            {
+                using (SqlConnection con =
+                new SqlConnection(DBconection.GetConnectionString()))
+                {
+                    con.Open();
+
+                    SqlCommand cmd = new SqlCommand(@"
+        SELECT COUNT(*)
+        FROM EMPLOYEE_MASTER.dbo.PasswordChangeRequests
+        WHERE Status = 'Pending'
+        ", con);
+
+                    int count = (int)cmd.ExecuteScalar();
+
+                    return count > 0;
+                }
+            }
+            else
+            {
+                return false;
+            }
+        }
+        private void MakeRound(Control ctrl)
+        {
+            System.Drawing.Drawing2D.GraphicsPath path =
+                new System.Drawing.Drawing2D.GraphicsPath();
+
+            path.AddEllipse(0, 0, ctrl.Width, ctrl.Height);
+            ctrl.Region = new Region(path);
+        }
+
+        private void btnSelectAll_Click(object sender, EventArgs e)
+        {
+            if (activeForm is AllMaterial allMaterial)
+            {
+                allMaterial.SelectAllMaterials();
+            }
+        }
+
+        private async void btnPurchaseQuotes_click(object sender, EventArgs e)
+        {
+            await RunWithLoadingAsync(async () =>
+            {
+                await OpenFormInPanelAsync(new purchasequotation());
+                isRequestSeen = true;
+                pnlDotSub.Visible = false;
+            });
+
+        }
+
+        private async void btnPurchaseOrder_click(object sender, EventArgs e)
+        {
+            await RunWithLoadingAsync(async () =>
+            {
+                await OpenFormInPanelAsync(new PurchaseOreder());
+                isRequestSeen = true;
+                pnlDotSub.Visible = false;
+            });
+
+        }
     }
 }

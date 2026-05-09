@@ -199,82 +199,105 @@ WHERE Emp_id = @EmpId
 
         private void btnSaveUSer_Click(object sender, EventArgs e)
         {
+            // ===== NO CHANGE VALIDATION =====
+            bool isChanged =
+                oldName != txtName.Text.Trim() ||
+                oldContact != txtContact.Text.Trim() ||
+                oldAltContact != txtAltContact.Text.Trim() ||
+                oldAddress != txtAddress.Text.Trim() ||
+                oldAccount != txtBankAcc.Text.Trim() ||
+                oldIFSC != txtIFSC.Text.Trim();
+
+            if (!isChanged)
             {
-                // ===== NO CHANGE VALIDATION =====
-                bool isChanged =
-                    oldName != txtName.Text.Trim() ||
-                    oldContact != txtContact.Text.Trim() ||
-                    oldAltContact != txtAltContact.Text.Trim() ||
-                    oldAddress != txtAddress.Text.Trim() ||
-                    oldAccount != txtBankAcc.Text.Trim() ||
-                    oldIFSC != txtIFSC.Text.Trim();
-
-                if (!isChanged)
-                {
-                    MessageBox.Show(
-                        "No changes detected.\nPlease edit something before saving.",
-                        "Info",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Information
-                    );
-                    return;
-                }
-
-                // ===== CONFIRMATION =====
-                DialogResult result = MessageBox.Show(
-                    "Are you sure you want to save the changes?",
-                    "Confirm Update",
-                    MessageBoxButtons.YesNo,
-                    MessageBoxIcon.Question
+                MessageBox.Show(
+                    "No changes detected.\nPlease edit something before saving.",
+                    "Info",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information
                 );
+                return;
+            }
 
-                if (result == DialogResult.No)
-                {
-                    RestoreOldValues(); // old data back
-                    EnableEditMode();   // still editable
-                    return;
-                }
+            // ===== CONFIRMATION =====
+            DialogResult confirm = MessageBox.Show(
+                "Are you sure you want to save the changes?",
+                "Confirm Update",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question
+            );
 
-                // ===== UPDATE DATABASE =====
-                using SqlConnection con = new SqlConnection(DBconection.GetConnectionString());
-                using SqlCommand cmd = new SqlCommand(@"
+            if (confirm == DialogResult.No)
+            {
+                RestoreOldValues();
+                EnableEditMode();
+                return;
+            }
+
+            // ===== UPDATE DATABASE =====
+            using SqlConnection con = new SqlConnection(DBconection.GetConnectionString());
+            using SqlCommand cmd = new SqlCommand(@"
 UPDATE e
-SET 
-    e.Emp_Name = @Name,
+SET
+    e.Emp_Name   = @Name,
     e.Contact_no = @Contact,
     e.Alt_Contact = @AltContact,
-    e.IFSC_Code = @IFSC,
+    e.IFSC_Code  = @IFSC,
     e.Account_No = @Account,
-    e.Address = @Address
+    e.Address    = @Address
 FROM EMPLOYEE_MASTER..Employees e
 INNER JOIN EMPLOYEE_MASTER..Users u ON u.Emp_id = e.Emp_id
 WHERE u.UserId = @UserId
 ", con);
 
-                cmd.Parameters.AddWithValue("@Name", txtName.Text.Trim());
-                cmd.Parameters.AddWithValue("@Contact", txtContact.Text.Trim());
-                cmd.Parameters.AddWithValue("@AltContact", txtAltContact.Text.Trim());
-                cmd.Parameters.AddWithValue("@Address", txtAddress.Text.Trim());
-                cmd.Parameters.AddWithValue("@Account", txtBankAcc.Text.Trim());
-                cmd.Parameters.AddWithValue("@IFSC", txtIFSC.Text.Trim());
-                cmd.Parameters.AddWithValue("@UserId", Session.UserId);
+            cmd.Parameters.AddWithValue("@Name", txtName.Text.Trim());
+            cmd.Parameters.AddWithValue("@Contact", txtContact.Text.Trim());
+            cmd.Parameters.AddWithValue("@AltContact", txtAltContact.Text.Trim());
+            cmd.Parameters.AddWithValue("@Address", txtAddress.Text.Trim());
+            cmd.Parameters.AddWithValue("@Account", txtBankAcc.Text.Trim());
+            cmd.Parameters.AddWithValue("@IFSC", txtIFSC.Text.Trim());
+            cmd.Parameters.AddWithValue("@UserId", Session.UserId);
 
-                con.Open();
-                cmd.ExecuteNonQuery();
+            con.Open();
+            cmd.ExecuteNonQuery();
 
-                // ===== SESSION + UI =====
-                Session.RealName = txtName.Text.Trim();
-                UserNameUpdated?.Invoke(Session.RealName);
+            // ===== SESSION UPDATE =====
+            Session.RealName = txtName.Text.Trim();
+            UserNameUpdated?.Invoke(Session.RealName);
 
+            // ===== SUCCESS + LOGOUT MESSAGE =====
+            DialogResult restart = MessageBox.Show(
+    "Profile updated successfully!\n\nTo reflect the changes, please log out and log in again.\nDo you want to logout now?",
+    "Success — Logout Required",
+    MessageBoxButtons.YesNo,
+    MessageBoxIcon.Information
+);
+
+            if (restart == DialogResult.Yes)
+            {
+                // ===== SESSION CLEAR =====
+                Session.UserId = 0;
+                Session.RealName = "";
+                Session.Role = "";
+
+                // ===== CLOSE ALL OPEN FORMS =====
+                foreach (Form f in Application.OpenForms)
+                {
+                    if (f != this)
+                        f.Hide();
+                }
+
+                // ===== SHOW LOGIN =====
+                LoginForm login = new LoginForm();
+                login.Show();
+
+                this.Close();
+            }
+            else
+            {
+                // User ne No choose kiya — view mode me raho
                 ApplyBaseUI();
                 LoadLoggedInUserData();
-
-                MessageBox.Show(
-                    "Profile updated successfully",
-                    "Success",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Information
-                );
             }
         }
 
@@ -294,5 +317,10 @@ WHERE u.UserId = @UserId
             txtIFSC.Text = oldIFSC;
         }
 
+        private void btnchangepassword_Click(object sender, EventArgs e)
+        {
+            ChangePassword frm = new ChangePassword();
+            frm.ShowDialog(); 
+        }
     }
 }

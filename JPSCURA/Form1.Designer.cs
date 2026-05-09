@@ -40,6 +40,8 @@
             panelSubMenuUser = new Panel();
             btnLogout = new Button();
             btnEditInfo = new Button();
+            pnlDotSub = new Panel();
+            btnRequests = new Button();
             btnAddEmp = new Button();
             btnAllEmp = new Button();
             btnBankPayVoucher = new Button();
@@ -50,6 +52,8 @@
             btnTDS = new Button();
             btnLedger = new Button();
             btnGST = new Button();
+            btnSelectAll = new Button();
+            btn2ndtabledelete = new Button();
             btnAddMaterial = new Button();
             btnAllMaterials = new Button();
             btnRawMaterials = new Button();
@@ -79,6 +83,7 @@
             btnStore = new Button();
             btnAdmin = new Button();
             panelTopMenu = new Panel();
+            pnlDotEmployee = new Panel();
             panelUserInfo = new Panel();
             btnUserInfo = new Button();
             btnSales1 = new Button();
@@ -202,6 +207,8 @@
             // 
             panelInventorySubMenu.BackColor = Color.Transparent;
             panelInventorySubMenu.Controls.Add(panelFinanceSubMenu);
+            panelInventorySubMenu.Controls.Add(btnSelectAll);
+            panelInventorySubMenu.Controls.Add(btn2ndtabledelete);
             panelInventorySubMenu.Controls.Add(btnAddMaterial);
             panelInventorySubMenu.Controls.Add(btnAllMaterials);
             panelInventorySubMenu.Controls.Add(btnRawMaterials);
@@ -229,13 +236,15 @@
             panelFinanceSubMenu.Dock = DockStyle.Top;
             panelFinanceSubMenu.Location = new Point(0, 0);
             panelFinanceSubMenu.Name = "panelFinanceSubMenu";
-            panelFinanceSubMenu.Size = new Size(1370, 80);
+            panelFinanceSubMenu.Size = new Size(1370, 55);
             panelFinanceSubMenu.TabIndex = 4;
             panelFinanceSubMenu.Visible = false;
             // 
             // panelEMPSubMenu
             // 
             panelEMPSubMenu.Controls.Add(panelSubMenuUser);
+            panelEMPSubMenu.Controls.Add(pnlDotSub);
+            panelEMPSubMenu.Controls.Add(btnRequests);
             panelEMPSubMenu.Controls.Add(btnAddEmp);
             panelEMPSubMenu.Controls.Add(btnAllEmp);
             panelEMPSubMenu.Dock = DockStyle.Top;
@@ -291,6 +300,34 @@
             btnEditInfo.UseVisualStyleBackColor = true;
             btnEditInfo.Click += btnEditInfo_Click;
             // 
+            // pnlDotSub
+            // 
+            pnlDotSub.BackColor = Color.Chartreuse;
+            pnlDotSub.Location = new Point(461, 7);
+            pnlDotSub.Name = "pnlDotSub";
+            pnlDotSub.Size = new Size(10, 10);
+            pnlDotSub.TabIndex = 5;
+            pnlDotSub.Visible = false;
+            // 
+            // btnRequests
+            // 
+            btnRequests.AutoSize = true;
+            btnRequests.Cursor = Cursors.Hand;
+            btnRequests.FlatAppearance.BorderSize = 0;
+            btnRequests.FlatStyle = FlatStyle.Flat;
+            btnRequests.Font = new Font("Arial", 11.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            btnRequests.Image = Properties.Resources.passwordchangerequest;
+            btnRequests.ImageAlign = ContentAlignment.TopCenter;
+            btnRequests.Location = new Point(349, 5);
+            btnRequests.Name = "btnRequests";
+            btnRequests.Size = new Size(198, 45);
+            btnRequests.TabIndex = 4;
+            btnRequests.Tag = "Password Change Request";
+            btnRequests.Text = "Password Change Request";
+            btnRequests.TextAlign = ContentAlignment.BottomCenter;
+            btnRequests.UseVisualStyleBackColor = true;
+            btnRequests.Click += btnRequests_Click;
+            // 
             // btnAddEmp
             // 
             btnAddEmp.AutoSize = true;
@@ -319,7 +356,7 @@
             btnAllEmp.Font = new Font("Arial", 11.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
             btnAllEmp.Image = Properties.Resources.Add_Employee;
             btnAllEmp.ImageAlign = ContentAlignment.TopCenter;
-            btnAllEmp.Location = new Point(176, 5);
+            btnAllEmp.Location = new Point(182, 5);
             btnAllEmp.Name = "btnAllEmp";
             btnAllEmp.Size = new Size(152, 45);
             btnAllEmp.TabIndex = 3;
@@ -458,6 +495,39 @@
             btnGST.TextAlign = ContentAlignment.BottomCenter;
             btnGST.UseVisualStyleBackColor = true;
             // 
+            // btnSelectAll
+            // 
+            btnSelectAll.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnSelectAll.AutoSize = true;
+            btnSelectAll.Cursor = Cursors.Hand;
+            btnSelectAll.FlatAppearance.BorderSize = 0;
+            btnSelectAll.Font = new Font("Arial", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            btnSelectAll.Image = Properties.Resources.selection;
+            btnSelectAll.ImageAlign = ContentAlignment.MiddleLeft;
+            btnSelectAll.Location = new Point(1004, 13);
+            btnSelectAll.Name = "btnSelectAll";
+            btnSelectAll.Size = new Size(96, 29);
+            btnSelectAll.TabIndex = 24;
+            btnSelectAll.Text = "Select All";
+            btnSelectAll.TextAlign = ContentAlignment.MiddleRight;
+            btnSelectAll.UseVisualStyleBackColor = true;
+            btnSelectAll.Click += btnSelectAll_Click;
+            // 
+            // btn2ndtabledelete
+            // 
+            btn2ndtabledelete.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btn2ndtabledelete.Cursor = Cursors.Hand;
+            btn2ndtabledelete.FlatAppearance.BorderSize = 0;
+            btn2ndtabledelete.Font = new Font("Arial", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            btn2ndtabledelete.ForeColor = Color.Red;
+            btn2ndtabledelete.Location = new Point(1251, 13);
+            btn2ndtabledelete.Name = "btn2ndtabledelete";
+            btn2ndtabledelete.Size = new Size(97, 29);
+            btn2ndtabledelete.TabIndex = 23;
+            btn2ndtabledelete.Text = "Delete";
+            btn2ndtabledelete.UseVisualStyleBackColor = true;
+            btn2ndtabledelete.Click += btn2ndtabledelete_Click;
+            // 
             // btnAddMaterial
             // 
             btnAddMaterial.AutoSize = true;
@@ -565,19 +635,19 @@
             // 
             // btnClear
             // 
+            btnClear.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             btnClear.AutoSize = true;
             btnClear.Cursor = Cursors.Hand;
             btnClear.FlatAppearance.BorderSize = 0;
-            btnClear.FlatStyle = FlatStyle.Flat;
             btnClear.Font = new Font("Arial", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
             btnClear.Image = Properties.Resources.clear_button;
-            btnClear.ImageAlign = ContentAlignment.TopCenter;
-            btnClear.Location = new Point(1035, 5);
+            btnClear.ImageAlign = ContentAlignment.MiddleLeft;
+            btnClear.Location = new Point(1106, 13);
             btnClear.Name = "btnClear";
-            btnClear.Size = new Size(134, 45);
+            btnClear.Size = new Size(139, 29);
             btnClear.TabIndex = 22;
             btnClear.Text = "Clear Selection";
-            btnClear.TextAlign = ContentAlignment.BottomCenter;
+            btnClear.TextAlign = ContentAlignment.MiddleRight;
             btnClear.UseVisualStyleBackColor = true;
             btnClear.Click += btnClear_Click;
             // 
@@ -748,6 +818,7 @@
             btnPurchaseQuotes.Text = "Purchase Quotes";
             btnPurchaseQuotes.TextAlign = ContentAlignment.BottomCenter;
             btnPurchaseQuotes.UseVisualStyleBackColor = true;
+            btnPurchaseQuotes.Click += btnPurchaseQuotes_click;
             // 
             // btnPurchaseOrder
             // 
@@ -767,6 +838,7 @@
             btnPurchaseOrder.Text = "Purchase Order";
             btnPurchaseOrder.TextAlign = ContentAlignment.BottomCenter;
             btnPurchaseOrder.UseVisualStyleBackColor = true;
+            btnPurchaseOrder.Click += btnPurchaseOrder_click;
             // 
             // btnFutureOrders
             // 
@@ -1000,6 +1072,7 @@
             // panelTopMenu
             // 
             panelTopMenu.BackColor = Color.FromArgb(83, 144, 204);
+            panelTopMenu.Controls.Add(pnlDotEmployee);
             panelTopMenu.Controls.Add(panelUserInfo);
             panelTopMenu.Controls.Add(btnSales1);
             panelTopMenu.Controls.Add(btnPurchasing);
@@ -1016,6 +1089,15 @@
             panelTopMenu.Name = "panelTopMenu";
             panelTopMenu.Size = new Size(1370, 30);
             panelTopMenu.TabIndex = 0;
+            // 
+            // pnlDotEmployee
+            // 
+            pnlDotEmployee.BackColor = Color.Chartreuse;
+            pnlDotEmployee.Location = new Point(866, 1);
+            pnlDotEmployee.Name = "pnlDotEmployee";
+            pnlDotEmployee.Size = new Size(10, 10);
+            pnlDotEmployee.TabIndex = 11;
+            pnlDotEmployee.Visible = false;
             // 
             // panelUserInfo
             // 
@@ -1529,5 +1611,10 @@
         private PictureBox picLoader;
         private Label lblLoading;
         private PictureBox picJPSCURA;
+        private Button btn2ndtabledelete;
+        private Button btnRequests;
+        private Panel pnlDotEmployee;
+        private Panel pnlDotSub;
+        private Button btnSelectAll;
     }
 }

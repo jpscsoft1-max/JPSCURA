@@ -43,6 +43,7 @@
             lblDepartment = new Label();
             txtEmpCode = new TextBox();
             panelHeader = new Panel();
+            btnchangepassword = new Button();
             btnEditProfile = new Button();
             btnSaveUSer = new Button();
             panelMainEditInfo.SuspendLayout();
@@ -403,6 +404,7 @@
             // panelHeader
             // 
             panelHeader.BackColor = Color.FromArgb(83, 144, 204);
+            panelHeader.Controls.Add(btnchangepassword);
             panelHeader.Controls.Add(btnEditProfile);
             panelHeader.Controls.Add(btnSaveUSer);
             panelHeader.Dock = DockStyle.Top;
@@ -410,6 +412,22 @@
             panelHeader.Name = "panelHeader";
             panelHeader.Size = new Size(1372, 55);
             panelHeader.TabIndex = 1;
+            // 
+            // btnchangepassword
+            // 
+            btnchangepassword.Cursor = Cursors.Hand;
+            btnchangepassword.Dock = DockStyle.Right;
+            btnchangepassword.FlatAppearance.BorderSize = 0;
+            btnchangepassword.FlatStyle = FlatStyle.Flat;
+            btnchangepassword.Font = new Font("Arial", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            btnchangepassword.ImageAlign = ContentAlignment.MiddleLeft;
+            btnchangepassword.Location = new Point(971, 0);
+            btnchangepassword.Name = "btnchangepassword";
+            btnchangepassword.Size = new Size(180, 55);
+            btnchangepassword.TabIndex = 3;
+            btnchangepassword.Text = "Change Password";
+            btnchangepassword.UseVisualStyleBackColor = true;
+            btnchangepassword.Click += btnchangepassword_Click;
             // 
             // btnEditProfile
             // 
@@ -498,5 +516,6 @@
         private TextBox txtIFSC;
         private Label lblIFSc;
         private Button btnEditProfile;
+        private Button btnchangepassword;
     }
 }

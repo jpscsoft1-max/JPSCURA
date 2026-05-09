@@ -1,33 +1,26 @@
 ﻿using Microsoft.Data.SqlClient;
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
-using System.Runtime.InteropServices;
+using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using ClosedXML.Excel;
-using System.IO;
-
-
 
 namespace JPSCURA
 {
     public partial class AllMaterial : Form
     {
-
-
         private int selectedMaterialId = 0;
-        private const int SEARCH_GAP = 4; // space between search boxes
+        private const int SEARCH_GAP = 4;
         private HashSet<int> selectedMaterialIds = new HashSet<int>();
         private Dictionary<int, int> materialOriginalIndex = new();
         private bool _isBulkClearing = false;
         private string selectedMaterialName = "";
+        public int SelectedCount => selectedMaterialIds.Count;
 
-
-        private int GetOrCreateId(
-        SqlConnection con,
-        string selectSql,
-        string insertSql,
-        string value)
+        private int GetOrCreateId(SqlConnection con, string selectSql, string insertSql, string value)
         {
             if (string.IsNullOrWhiteSpace(value))
                 throw new Exception("Master value cannot be empty");
@@ -44,6 +37,18 @@ namespace JPSCURA
             return Convert.ToInt32(ins.ExecuteScalar());
         }
 
+        private int GetId(SqlConnection con, string query, string value)
+        {
+            using SqlCommand cmd = new SqlCommand(query, con);
+            cmd.Parameters.AddWithValue("@name", value);
+
+            object res = cmd.ExecuteScalar();
+
+            if (res == null)
+                throw new Exception($"Value '{value}' not found in master table");
+
+            return Convert.ToInt32(res);
+        }
 
         private FormWindowState _lastState;
 
@@ -62,44 +67,35 @@ namespace JPSCURA
             }
         }
 
-
-
-
-
         public AllMaterial()
         {
             InitializeComponent();
         }
 
-        // ================= FORM LOAD =================
         private void AllMaterial_Load(object sender, EventArgs e)
         {
-            // 🔐 FETCH PERMISSION (ADDED)
-            var permission = GetPermission(); // ADDED
+            var permission = GetPermission();
             ApplyGridCursorPermission();
+
+            DgvMainTable.CellEndEdit -= DgvMainTable_CellEndEdit;
             DgvMainTable.CellEndEdit += DgvMainTable_CellEndEdit;
-            // ❌ BLOCK VIEW IF NOT ALLOWED (ADDED)
-            if (!permission.CanView) // ADDED
+
+            if (!permission.CanView)
             {
                 MessageBox.Show(
-                    "You are not authorized to view this module.", // ADDED
-                    "Access Denied",                               // ADDED
-                    MessageBoxButtons.OK,                          // ADDED
-                    MessageBoxIcon.Warning                         // ADDED
+                    "You are not authorized to view this module.",
+                    "Access Denied",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning
                 );
-                this.Close(); // ADDED
-                return;       // ADDED
-
+                this.Close();
+                return;
             }
 
-            // ===== MAIN TABLE SELECTION =====
-            DgvMainTable.MultiSelect = true;
-            DgvMainTable.SelectionMode = DataGridViewSelectionMode.CellSelect;
             DgvMainTable.MultiSelect = false;
-
+            DgvMainTable.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             DgvMainTable.ClearSelection();
 
-            // ===== 2nd TABLE SELECTION =====
             dgv2ndTable.MultiSelect = true;
             dgv2ndTable.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             dgv2ndTable.ClearSelection();
@@ -117,9 +113,7 @@ namespace JPSCURA
 
             LoadMainGrid();
             EnableDoubleBuffering(this);
-
-            // ✏️ APPLY EDIT PERMISSION AFTER UI LOAD (ADDED)
-            ApplyEditPermission(permission.CanEdit); // ADDED
+            ApplyEditPermission(permission.CanEdit);
         }
 
         private void EnableDoubleBuffering(Control control)
@@ -149,42 +143,36 @@ namespace JPSCURA
 
                 bool visible = true;
 
-                // ===== Material =====
                 if (!string.IsNullOrEmpty(material))
                 {
                     string cellValue = row.Cells["Material"].Value?.ToString() ?? "";
                     visible &= cellValue.IndexOf(material, StringComparison.OrdinalIgnoreCase) >= 0;
                 }
 
-                // ===== Type =====
                 if (!string.IsNullOrEmpty(type))
                 {
                     string cellValue = row.Cells["Type"].Value?.ToString() ?? "";
                     visible &= cellValue.StartsWith(type, StringComparison.OrdinalIgnoreCase);
                 }
 
-                // ===== Location =====
                 if (!string.IsNullOrEmpty(location))
                 {
                     string cellValue = row.Cells["Location"].Value?.ToString() ?? "";
                     visible &= cellValue.StartsWith(location, StringComparison.OrdinalIgnoreCase);
                 }
 
-                // ===== Category =====
                 if (!string.IsNullOrEmpty(category))
                 {
                     string cellValue = row.Cells["Category"].Value?.ToString() ?? "";
                     visible &= cellValue.StartsWith(category, StringComparison.OrdinalIgnoreCase);
                 }
 
-                // ===== Sub Category =====
                 if (!string.IsNullOrEmpty(subCategory))
                 {
                     string cellValue = row.Cells["SubCategory"].Value?.ToString() ?? "";
                     visible &= cellValue.StartsWith(subCategory, StringComparison.OrdinalIgnoreCase);
                 }
 
-                // ===== Package =====
                 if (!string.IsNullOrEmpty(package))
                 {
                     string cellValue = row.Cells["Package"].Value?.ToString() ?? "";
@@ -192,23 +180,20 @@ namespace JPSCURA
                 }
 
                 int materialId = Convert.ToInt32(row.Cells["Material_ID"].Value);
-
                 bool isSelected = selectedMaterialIds.Contains(materialId);
 
-                // Selected rows → ALWAYS visible
                 row.Visible = visible || isSelected;
-                MoveSelectedRowsToTop();
-
-
             }
+
+            MoveSelectedRowsToTop();
         }
+
         private void MoveSelectedRowsToTop()
         {
             var selectedRows = DgvMainTable.Rows
                 .Cast<DataGridViewRow>()
                 .Where(r => !r.IsNewRow &&
-                    selectedMaterialIds.Contains(
-                        Convert.ToInt32(r.Cells["Material_ID"].Value)))
+                    selectedMaterialIds.Contains(Convert.ToInt32(r.Cells["Material_ID"].Value)))
                 .ToList();
 
             foreach (var row in selectedRows)
@@ -218,7 +203,6 @@ namespace JPSCURA
                 row.Cells["SelectRow"].Value = true;
             }
         }
-
 
         private void SyncSearchBoxesWithGrid()
         {
@@ -237,27 +221,21 @@ namespace JPSCURA
             if (!DgvMainTable.Columns.Contains(columnName)) return;
 
             Rectangle rect = DgvMainTable.GetColumnDisplayRectangle(
-                DgvMainTable.Columns[columnName].Index,
-                true
-            );
+                DgvMainTable.Columns[columnName].Index, true);
 
             txt.Left = rect.Left + DgvMainTable.Left + (SEARCH_GAP / 2);
             txt.Width = rect.Width - SEARCH_GAP;
         }
 
-
-
-        // ================= MAIN GRID =================
         private void LoadMainGrid()
         {
             var permission = GetPermission();
 
-            // 🔥 FLICKER + LAG FIX
             this.SuspendLayout();
             DgvMainTable.SuspendLayout();
+
             try
             {
-                // ===== RESET GRID =====
                 DgvMainTable.Rows.Clear();
                 DgvMainTable.Columns.Clear();
                 DgvMainTable.AutoGenerateColumns = false;
@@ -266,7 +244,6 @@ namespace JPSCURA
                 panelSearch.Visible = true;
                 panel2ndtableTopContent.Visible = false;
 
-                // ===== BASIC STYLE =====
                 DgvMainTable.BackgroundColor = Color.White;
                 DgvMainTable.GridColor = Color.White;
                 DgvMainTable.RowHeadersVisible = false;
@@ -279,19 +256,17 @@ namespace JPSCURA
                 DgvMainTable.ColumnHeadersDefaultCellStyle.ForeColor = Color.Black;
 
                 DgvMainTable.DefaultCellStyle.Font =
-     new Font("Segoe UI", 9, FontStyle.Regular);
+                    new Font("Segoe UI", 9, FontStyle.Regular);
                 DgvMainTable.DefaultCellStyle.BackColor = Color.White;
                 DgvMainTable.DefaultCellStyle.ForeColor = Color.Black;
                 DgvMainTable.DefaultCellStyle.SelectionBackColor = Color.White;
                 DgvMainTable.DefaultCellStyle.SelectionForeColor = Color.Black;
 
-                // ===== DISABLE RESIZE =====
                 DgvMainTable.AllowUserToResizeColumns = false;
                 DgvMainTable.AllowUserToResizeRows = false;
                 DgvMainTable.RowHeadersWidthSizeMode =
                     DataGridViewRowHeadersWidthSizeMode.DisableResizing;
 
-                // ===== CHECKBOX COLUMN =====
                 DataGridViewCheckBoxColumn chk = new DataGridViewCheckBoxColumn
                 {
                     Name = "SelectRow",
@@ -303,7 +278,6 @@ namespace JPSCURA
                 };
                 DgvMainTable.Columns.Add(chk);
 
-                // ===== DATA COLUMNS =====
                 DgvMainTable.Columns.Add("Material_ID", "ID");
                 DgvMainTable.Columns["Material_ID"].Visible = false;
 
@@ -322,34 +296,25 @@ namespace JPSCURA
                 DgvMainTable.Columns["MinThreshold"].Visible = false;
                 DgvMainTable.Columns["MaxThreshold"].Visible = false;
 
-                // 🔐 VIEW-ONLY → HIDE TOTAL VALUE
                 if (!permission.CanEdit)
-                {
                     DgvMainTable.Columns["TotalValue"].Visible = false;
-                }
 
-                // 🔒 TEXT CELLS READ-ONLY (CHECKBOX CHALEGA)
                 foreach (DataGridViewColumn col in DgvMainTable.Columns)
                 {
                     if (col.Name != "SelectRow")
-                    {
                         col.ReadOnly = true;
-                    }
                 }
 
-                // 🔥 THIS IS THE MISSING PIECE
                 DgvMainTable.EditMode = DataGridViewEditMode.EditOnEnter;
                 DgvMainTable.AllowUserToAddRows = false;
                 DgvMainTable.Columns["Balance"].ReadOnly = true;
                 DgvMainTable.Columns["TotalValue"].ReadOnly = true;
 
-                // ✅ Selection behavior
                 DgvMainTable.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
                 DgvMainTable.MultiSelect = false;
 
                 ApplyGridLines(DgvMainTable);
 
-                // ===== COLUMN WIDTH =====
                 DgvMainTable.Columns["SrNo"].FillWeight = 2;
                 DgvMainTable.Columns["Material"].FillWeight = 15;
                 DgvMainTable.Columns["Type"].FillWeight = 5;
@@ -360,7 +325,6 @@ namespace JPSCURA
                 DgvMainTable.Columns["Balance"].FillWeight = 5;
                 DgvMainTable.Columns["TotalValue"].FillWeight = 5;
 
-                // ===== DB LOAD =====
                 using SqlConnection con = new SqlConnection(DBconection.GetConnectionString());
                 using SqlCommand cmd = new SqlCommand(@"
 SELECT 
@@ -373,27 +337,17 @@ SELECT
     ISNULL(p.Package_Name,'') AS Package_Name,
     ISNULL(m.MinThreshold,0) AS MinThreshold,
     ISNULL(m.MaxThreshold,0) AS MaxThreshold,
-
     CASE 
-        WHEN SUM(ISNULL(u.Receipt,0) - ISNULL(u.Issued,0)) < 0 
-        THEN 0
+        WHEN SUM(ISNULL(u.Receipt,0) - ISNULL(u.Issued,0)) < 0 THEN 0
         ELSE SUM(ISNULL(u.Receipt,0) - ISNULL(u.Issued,0))
     END AS Balance,
-
     SUM(ISNULL(u.Total_Value,0)) AS TotalValue
-
 FROM INVENTORY_MASTER..Material_Table m
-LEFT JOIN INVENTORY_MASTER..Category_Master c 
-    ON m.Category_ID = c.Category_ID
-LEFT JOIN INVENTORY_MASTER..Subcategory_Master s 
-    ON m.Subcategory_ID = s.Subcategory_ID
-LEFT JOIN INVENTORY_MASTER..Package_Master p 
-    ON m.Package_ID = p.Package_ID
-LEFT JOIN INVENTORY_MASTER..Type_Master t 
-    ON m.Type_ID = t.Type_ID
-LEFT JOIN INVENTORY_MASTER..Usage_Table u 
-    ON m.Material_ID = u.Material_ID
-
+LEFT JOIN INVENTORY_MASTER..Category_Master c ON m.Category_ID = c.Category_ID
+LEFT JOIN INVENTORY_MASTER..Subcategory_Master s ON m.Subcategory_ID = s.Subcategory_ID
+LEFT JOIN INVENTORY_MASTER..Package_Master p ON m.Package_ID = p.Package_ID
+LEFT JOIN INVENTORY_MASTER..Type_Master t ON m.Type_ID = t.Type_ID
+LEFT JOIN INVENTORY_MASTER..Usage_Table u ON m.Material_ID = u.Material_ID
 GROUP BY 
     m.Material_ID,
     m.Material_Name,
@@ -404,9 +358,7 @@ GROUP BY
     p.Package_Name,
     m.MinThreshold,
     m.MaxThreshold
-
-ORDER BY m.Material_Name
-", con);
+ORDER BY m.Material_Name", con);
 
                 con.Open();
                 using SqlDataReader dr = cmd.ExecuteReader();
@@ -431,15 +383,12 @@ ORDER BY m.Material_Name
                     );
                 }
 
-                // ===== STORE ORIGINAL ORDER =====
                 materialOriginalIndex.Clear();
                 for (int i = 0; i < DgvMainTable.Rows.Count; i++)
                 {
                     if (DgvMainTable.Rows[i].IsNewRow) continue;
 
-                    int materialId = Convert.ToInt32(
-                        DgvMainTable.Rows[i].Cells["Material_ID"].Value);
-
+                    int materialId = Convert.ToInt32(DgvMainTable.Rows[i].Cells["Material_ID"].Value);
                     materialOriginalIndex[materialId] = i;
                 }
 
@@ -447,39 +396,34 @@ ORDER BY m.Material_Name
             }
             finally
             {
-                // 🔥 RESUME UI
                 DgvMainTable.ResumeLayout(true);
                 this.ResumeLayout(true);
             }
+
             ApplyEditPermission(permission.CanEdit);
         }
 
-        // ================= DOUBLE CLICK =================
         private void DgvMainTable_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
-            // ❌ Invalid row
             if (e.RowIndex < 0)
                 return;
 
-            // 🔐 Permission check
             var permission = GetPermission();
 
-            // 🚫 View-only user → nothing opens
             if (!permission.CanEdit)
             {
                 DgvMainTable.Cursor = Cursors.Default;
                 return;
             }
 
-            // ❌ Null material id
             if (DgvMainTable.Rows[e.RowIndex].Cells["Material_ID"].Value == null)
                 return;
 
-            // 🔥 IMPORTANT: update CLASS-LEVEL variable
             selectedMaterialId = Convert.ToInt32(
                 DgvMainTable.Rows[e.RowIndex].Cells["Material_ID"].Value);
+
             selectedMaterialName = DgvMainTable.Rows[e.RowIndex]
-    .Cells["Material"].Value?.ToString() ?? "";
+                .Cells["Material"].Value?.ToString() ?? "";
 
             lblSelectedMaterial.Text = $"Material : {selectedMaterialName}";
             lblSelectedMaterial.Visible = true;
@@ -487,21 +431,16 @@ ORDER BY m.Material_Name
             if (selectedMaterialId <= 0)
                 return;
 
-            // ✅ Edit user UX
             DgvMainTable.Cursor = Cursors.Hand;
 
-            // ✅ Open second panel
             panelMainContent.Visible = false;
             panel2ndTable.Visible = true;
             btnAddNew.Visible = true;
             btnBack.Visible = true;
             panel2ndtableTopContent.Visible = true;
 
-            // 🔥 Now data will load correctly
             LoadUsageGrid();
         }
-
-
 
         private void ApplyGridLines(DataGridView dgv)
         {
@@ -517,16 +456,12 @@ ORDER BY m.Material_Name
 
             dgv.DefaultCellStyle.BackColor = Color.White;
             dgv.DefaultCellStyle.ForeColor = Color.Black;
-
             dgv.DefaultCellStyle.SelectionBackColor = Color.White;
             dgv.DefaultCellStyle.SelectionForeColor = Color.Black;
         }
 
-        // ================= USAGE GRID =================
-
         private void LoadUsageGrid()
         {
-            // Safety: material must be selected
             if (selectedMaterialId <= 0)
                 return;
 
@@ -536,7 +471,6 @@ ORDER BY m.Material_Name
             dgv2ndTable.Columns.Clear();
             dgv2ndTable.AutoGenerateColumns = false;
 
-            // ===== BASIC GRID SETUP =====
             dgv2ndTable.ReadOnly = false;
             dgv2ndTable.EditMode = DataGridViewEditMode.EditOnEnter;
 
@@ -553,17 +487,9 @@ ORDER BY m.Material_Name
             dgv2ndTable.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             dgv2ndTable.AllowUserToResizeColumns = false;
             dgv2ndTable.AllowUserToResizeRows = false;
-
             dgv2ndTable.RowHeadersWidthSizeMode =
                 DataGridViewRowHeadersWidthSizeMode.DisableResizing;
 
-            foreach (DataGridViewColumn col in dgv2ndTable.Columns)
-            {
-                col.Resizable = DataGridViewTriState.False;
-            }
-
-
-            // ===== COLUMNS =====
             dgv2ndTable.Columns.Add("Usage_ID", "ID");
             dgv2ndTable.Columns["Usage_ID"].Visible = false;
 
@@ -575,11 +501,9 @@ ORDER BY m.Material_Name
             dgv2ndTable.Columns.Add("Rate", "Rate");
             dgv2ndTable.Columns.Add("Balance", "Balance");
             dgv2ndTable.Columns.Add("TotalValue", "Total Value");
+
             ApplyGridLines(dgv2ndTable);
 
-
-
-            // ===== READONLY COLUMNS =====
             dgv2ndTable.Columns["Receipt"].ReadOnly = true;
             dgv2ndTable.Columns["Issued"].ReadOnly = true;
             dgv2ndTable.Columns["Balance"].ReadOnly = true;
@@ -588,13 +512,12 @@ ORDER BY m.Material_Name
             dgv2ndTable.Columns["Date"].ReadOnly = true;
             dgv2ndTable.Columns["Particular"].ReadOnly = true;
 
-            // ===== DB LOAD =====
             using (SqlConnection con = new SqlConnection(DBconection.GetConnectionString()))
             using (SqlCommand cmd = new SqlCommand(@"
-        SELECT *
-        FROM INVENTORY_MASTER..Usage_Table
-        WHERE Material_ID = @mid
-        ORDER BY Usage_ID", con))
+SELECT *
+FROM INVENTORY_MASTER..Usage_Table
+WHERE Material_ID = @mid
+ORDER BY Usage_ID", con))
             {
                 cmd.Parameters.AddWithValue("@mid", selectedMaterialId);
                 con.Open();
@@ -632,64 +555,22 @@ ORDER BY m.Material_Name
                 }
             }
 
-            // ===== RATE RULES =====
             foreach (DataGridViewRow row in dgv2ndTable.Rows)
             {
                 if (row.IsNewRow) continue;
 
-                decimal receipt = row.Cells["Receipt"].Value == null
-                    ? 0
-                    : Convert.ToDecimal(row.Cells["Receipt"].Value);
+                decimal receipt = row.Cells["Receipt"].Value == null ? 0 : Convert.ToDecimal(row.Cells["Receipt"].Value);
+                decimal issued = row.Cells["Issued"].Value == null ? 0 : Convert.ToDecimal(row.Cells["Issued"].Value);
 
-                decimal issued = row.Cells["Issued"].Value == null
-                    ? 0
-                    : Convert.ToDecimal(row.Cells["Issued"].Value);
-
-                string particular = row.Cells["Particular"].Value?.ToString() ?? "";
-
-                // Default: lock rate
-                row.Cells["Rate"].ReadOnly = true;
-                row.Cells["Rate"].Style.BackColor = Color.White;
-
-                // Only Opening receipt can edit rate
-                if (particular == "Opening" && receipt > 0 && issued == 0)
-                {
-                    row.Cells["Rate"].ReadOnly = false;
-                }
-
-                // Issued rows show --
-                if (issued > 0)
-                {
-                    row.Cells["Rate"].Value = "--";
-                }
-            }
-
-            foreach (DataGridViewRow row in dgv2ndTable.Rows)
-            {
-                if (row.IsNewRow) continue;
-
-                decimal receipt = row.Cells["Receipt"].Value == null
-                    ? 0
-                    : Convert.ToDecimal(row.Cells["Receipt"].Value);
-
-                decimal issued = row.Cells["Issued"].Value == null
-                    ? 0
-                    : Convert.ToDecimal(row.Cells["Issued"].Value);
-
-                // Default style
                 row.Cells["Rate"].Style.BackColor = Color.White;
                 row.Cells["Rate"].Style.ForeColor = Color.Black;
 
-                // 🔹 RECEIPT → Rate ENABLE
                 if (receipt > 0 && issued == 0)
                 {
                     row.Cells["Rate"].ReadOnly = false;
-
-                    // if rate was --
                     if (row.Cells["Rate"].Value?.ToString() == "--")
                         row.Cells["Rate"].Value = "0.00";
                 }
-                // 🔹 ISSUED → Rate DISABLE
                 else if (issued > 0)
                 {
                     row.Cells["Rate"].ReadOnly = true;
@@ -699,25 +580,14 @@ ORDER BY m.Material_Name
 
             dgv2ndTable.ResumeLayout();
 
-            // 🔐 RE-APPLY PERMISSION AFTER GRID LOAD (ADDED)
-            var permission = GetPermission();        // ADDED
-            ApplyEditPermission(permission.CanEdit); // ADDED
+            var permission = GetPermission();
+            ApplyEditPermission(permission.CanEdit);
         }
 
-
-
-
-
-
-
-
-
-
-        // ================= RATE CHANGE =================
         private void dgv2ndTable_CellValueChanged(object sender, DataGridViewCellEventArgs e)
         {
-            var permission = GetPermission();       // ✅ ADDED
-            if (!permission.CanEdit) return;        // ✅ ADDED
+            var permission = GetPermission();
+            if (!permission.CanEdit) return;
             if (e.RowIndex < 0) return;
             if (dgv2ndTable.Columns[e.ColumnIndex].Name != "Rate") return;
 
@@ -726,9 +596,7 @@ ORDER BY m.Material_Name
             if (!decimal.TryParse(row.Cells["Rate"].Value?.ToString(), out decimal rate))
                 return;
 
-            // store real value
             row.Cells["Rate"].Value = rate;
-
 
             decimal balance = Convert.ToDecimal(row.Cells["Balance"].Value);
             decimal totalValue = rate * balance;
@@ -736,7 +604,7 @@ ORDER BY m.Material_Name
             row.Cells["TotalValue"].Value = totalValue;
 
             using SqlConnection con = new SqlConnection(DBconection.GetConnectionString());
-            SqlCommand cmd = new SqlCommand(@"
+            using SqlCommand cmd = new SqlCommand(@"
 UPDATE INVENTORY_MASTER..Usage_Table
 SET Rate_Per_Qty=@rate,
     Total_Value=@total
@@ -756,17 +624,12 @@ WHERE Usage_ID=@id", con);
                 dgv2ndTable.CommitEdit(DataGridViewDataErrorContexts.Commit);
         }
 
-
-
-
-        // ================= FIFO =================
         private void ApplyFIFO(int materialId)
         {
             using SqlConnection con = new SqlConnection(DBconection.GetConnectionString());
             con.Open();
 
-            // 1️⃣ Read all usage rows
-            SqlCommand cmd = new SqlCommand(@"
+            using SqlCommand cmd = new SqlCommand(@"
 SELECT Usage_ID, Receipt, Issued, Rate_Per_Qty
 FROM INVENTORY_MASTER..Usage_Table
 WHERE Material_ID = @mid
@@ -776,9 +639,7 @@ ORDER BY Usage_Date, Usage_ID", con);
 
             SqlDataReader dr = cmd.ExecuteReader();
 
-            // FIFO layers (qty, rate)
             Queue<(decimal qty, decimal rate)> fifo = new();
-
             List<(int id, decimal balQty, decimal balVal)> updates = new();
 
             decimal runningQty = 0;
@@ -791,7 +652,6 @@ ORDER BY Usage_Date, Usage_ID", con);
                 decimal issued = Convert.ToDecimal(dr["Issued"]);
                 decimal rate = Convert.ToDecimal(dr["Rate_Per_Qty"]);
 
-                // ✅ Receipt → add new FIFO layer
                 if (receipt > 0 && rate > 0)
                 {
                     fifo.Enqueue((receipt, rate));
@@ -799,7 +659,6 @@ ORDER BY Usage_Date, Usage_ID", con);
                     runningValue += receipt * rate;
                 }
 
-                // ✅ Issued → consume FIFO layers
                 if (issued > 0)
                 {
                     decimal issueQty = issued;
@@ -822,14 +681,12 @@ ORDER BY Usage_Date, Usage_ID", con);
 
                         if (layer.qty <= issueQty)
                         {
-                            // consume full layer
                             issueQty -= layer.qty;
                             runningQty -= layer.qty;
                             runningValue -= layer.qty * layer.rate;
                         }
                         else
                         {
-                            // consume partial layer
                             fifo.Enqueue((layer.qty - issueQty, layer.rate));
                             runningQty -= issueQty;
                             runningValue -= issueQty * layer.rate;
@@ -838,7 +695,6 @@ ORDER BY Usage_Date, Usage_ID", con);
                     }
                 }
 
-                // safety
                 if (runningQty < 0) runningQty = 0;
                 if (runningValue < 0) runningValue = 0;
 
@@ -847,10 +703,9 @@ ORDER BY Usage_Date, Usage_ID", con);
 
             dr.Close();
 
-            // 2️⃣ Update balances
             foreach (var u in updates)
             {
-                SqlCommand upd = new SqlCommand(@"
+                using SqlCommand upd = new SqlCommand(@"
 UPDATE INVENTORY_MASTER..Usage_Table
 SET Balance = @bal,
     Total_Value = @val
@@ -859,15 +714,10 @@ WHERE Usage_ID = @id", con);
                 upd.Parameters.AddWithValue("@bal", u.balQty);
                 upd.Parameters.AddWithValue("@val", u.balVal);
                 upd.Parameters.AddWithValue("@id", u.id);
-
                 upd.ExecuteNonQuery();
             }
         }
 
-
-
-
-        // ================= ADD NEW =================
         private void btnAddNew_Click(object sender, EventArgs e)
         {
             InventoryTransaction frm = new InventoryTransaction(selectedMaterialId);
@@ -876,111 +726,42 @@ WHERE Usage_ID = @id", con);
             {
                 ApplyFIFO(selectedMaterialId);
                 LoadUsageGrid();
-                //LoadMainGrid();
                 panelMainContent.Visible = false;
                 panel2ndTable.Visible = true;
                 panel2ndtableTopContent.Visible = true;
-
                 btnAddNew.Visible = true;
                 btnBack.Visible = true;
             }
         }
 
-        // ================= BACK =================
         private async void btnBack_Click(object sender, EventArgs e)
         {
-            // 🔥 get Home form (parent)
             Home home = this.ParentForm as Home;
             if (home == null) return;
 
             await home.RunWithLoadingAsync(async () =>
             {
-                // 🔒 freeze UI changes inside loading
-
                 panel2ndTable.Visible = false;
                 panelMainContent.Visible = true;
                 btnAddNew.Visible = false;
-
                 panel2ndtableTopContent.Visible = false;
                 panelSearch.Visible = true;
                 lblSelectedMaterial.Text = "";
                 lblSelectedMaterial.Visible = false;
 
-
-                // 🔥 DB + GRID reload during loading
                 LoadMainGrid();
-
-                await Task.Yield(); // allow paint
-            }, 1000
-            );
+                await Task.Yield();
+            }, 1000);
         }
-
-
-        //private void txtSearch_TextChanged(object sender, EventArgs e)
-        //{
-
-        //    string searchText = txtSearch.Text.Trim();
-
-        //    if (string.IsNullOrWhiteSpace(searchText))
-        //    {
-        //        foreach (DataGridViewRow row in DgvMainTable.Rows)
-        //        {
-        //            if (!row.IsNewRow)
-        //                row.Visible = true;
-        //        }
-        //        return;
-        //    }
-
-        //    foreach (DataGridViewRow row in DgvMainTable.Rows)
-        //    {
-        //        if (row.IsNewRow) continue;
-
-        //        bool visible =
-        //            // 🔹 Material Name → flexible
-        //            row.Cells["Material"].Value.ToString()
-        //                .IndexOf(searchText, StringComparison.OrdinalIgnoreCase) >= 0
-
-        //            // 🔹 Prefix based (SMART SEARCH)
-        //            || row.Cells["Location"].Value.ToString()
-        //                .StartsWith(searchText, StringComparison.OrdinalIgnoreCase)
-
-        //            || row.Cells["Category"].Value.ToString()
-        //                .StartsWith(searchText, StringComparison.OrdinalIgnoreCase)
-
-        //            || row.Cells["SubCategory"].Value.ToString()
-        //                .StartsWith(searchText, StringComparison.OrdinalIgnoreCase)
-
-        //            || row.Cells["Types Of Material"].Value.ToString()
-        //                .StartsWith(searchText, StringComparison.OrdinalIgnoreCase)
-
-        //            || row.Cells["Package"].Value.ToString()
-        //                .StartsWith(searchText, StringComparison.OrdinalIgnoreCase);
-
-        //        row.Visible = visible;
-        //    }
-        //}
-
-
-
 
         private void dgv2ndTable_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
-            //if (e.Value != null && e.Value.ToString() == "0")
-            //{
-            //    e.Value = "--";
-            //    e.FormattingApplied = true;
-            //}
             if (e.Value != null && e.Value.ToString() == "0")
             {
                 e.Value = "--";
                 e.FormattingApplied = true;
             }
-
         }
-
-
-
-
 
         private void dgv2ndTable_CellEndEdit(object sender, DataGridViewCellEventArgs e)
         {
@@ -989,18 +770,17 @@ WHERE Usage_ID = @id", con);
 
         private void dgv2ndTable_CellBeginEdit(object sender, DataGridViewCellCancelEventArgs e)
         {
-            var permission = GetPermission();          // ✅ ADDED
-            if (!permission.CanEdit)                   // ✅ ADDED
+            var permission = GetPermission();
+            if (!permission.CanEdit)
             {
-                e.Cancel = true;                       // ✅ ADDED
-                return;                                // ✅ ADDED
+                e.Cancel = true;
+                return;
             }
+
             if (dgv2ndTable.Columns[e.ColumnIndex].Name == "Rate")
             {
                 if (dgv2ndTable.Rows[e.RowIndex].Cells["Rate"].ReadOnly)
-                {
                     e.Cancel = true;
-                }
             }
         }
 
@@ -1017,15 +797,14 @@ WHERE Usage_ID = @id", con);
 
             ExportToExcel_ClosedXML(sfd.FileName);
         }
+
         private void ExportToExcel_ClosedXML(string filePath)
         {
             using (var wb = new XLWorkbook())
             {
-                // ================= SHEET 1 : ALL MATERIALS =================
                 var wsMain = wb.Worksheets.Add("All Materials");
                 ExportGridViewToSheet(wsMain, DgvMainTable);
 
-                // ================= SHEET 2 : MATERIAL USAGE =================
                 if (panel2ndTable.Visible && dgv2ndTable.Rows.Count > 0)
                 {
                     var wsUsage = wb.Worksheets.Add("Material Usage");
@@ -1036,11 +815,11 @@ WHERE Usage_ID = @id", con);
             }
 
             var result = MessageBox.Show(
-       "Excel exported successfully ✔\n\nDo you want to open the file?",
-       "Export",
-       MessageBoxButtons.YesNo,
-       MessageBoxIcon.Information
-   );
+                "Excel exported successfully ✔\n\nDo you want to open the file?",
+                "Export",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Information
+            );
 
             if (result == DialogResult.Yes)
             {
@@ -1050,76 +829,12 @@ WHERE Usage_ID = @id", con);
                     UseShellExecute = true
                 });
             }
-
         }
 
-        //private void ExportGridViewToSheet(IXLWorksheet ws, DataGridView dgv)
-
-        //{
-        //    int colIndex = 1;
-
-        //    // ===== HEADERS =====
-        //    foreach (DataGridViewColumn col in dgv.Columns)
-        //    {
-        //        if (!col.Visible || col.Name == "SelectRow") continue;
-
-        //        ws.Cell(1, colIndex).Value = col.HeaderText;
-        //        ws.Cell(1, colIndex).Style.Font.Bold = true;
-        //        ws.Cell(1, colIndex).Style.Fill.BackgroundColor = XLColor.LightGray;
-        //        ws.Cell(1, colIndex).Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
-
-        //        colIndex++;
-        //    }
-
-        //    bool anyChecked = dgv.Rows
-        //        .Cast<DataGridViewRow>()
-        //        .Any(r => Convert.ToBoolean(r.Cells["SelectRow"].Value));
-
-        //    int rowIndex = 2;
-        //    int excelSrNo = 1;
-        //    foreach (DataGridViewRow row in dgv.Rows)
-        //    {
-        //        if (row.IsNewRow || !row.Visible)
-        //            continue;
-
-        //        bool isChecked = Convert.ToBoolean(row.Cells["SelectRow"].Value);
-
-        //        // 
-        //        if (anyChecked && !isChecked)
-        //            continue;
-
-        //        colIndex = 1;
-
-        //        foreach (DataGridViewColumn col in dgv.Columns)
-        //        {
-        //            if (!col.Visible || col.Name == "SelectRow")
-        //                continue;
-
-        //            // 
-        //            if (col.Name == "SrNo")
-        //            {
-        //                ws.Cell(rowIndex, colIndex).Value = excelSrNo;
-        //            }
-        //            else
-        //            {
-        //                ws.Cell(rowIndex, colIndex).Value =
-        //                    row.Cells[col.Name].Value?.ToString() ?? "";
-        //            }
-
-        //            colIndex++;
-        //        }
-
-        //        excelSrNo++;   // 👈 Sr No increase
-        //        rowIndex++;
-        //    }
-
-        //    ws.Columns().AdjustToContents();
-        //}
         private void ExportGridViewToSheet(IXLWorksheet ws, DataGridView dgv)
         {
             int colIndex = 1;
 
-            // ===== HEADERS =====
             foreach (DataGridViewColumn col in dgv.Columns)
             {
                 if (!col.Visible || col.Name == "SelectRow") continue;
@@ -1177,39 +892,26 @@ WHERE Usage_ID = @id", con);
                 rowIndex++;
             }
 
-            // ================= COLUMN WIDTHS (SPECIFIC) =================
-            // Column order same as Grid export order
+            ws.Column(1).Width = 8;
+            ws.Column(2).Width = 30;
+            ws.Column(3).Width = 18;
+            ws.Column(4).Width = 18;
+            ws.Column(5).Width = 22;
+            ws.Column(6).Width = 22;
+            ws.Column(7).Width = 18;
+            ws.Column(8).Width = 14;
+            ws.Column(9).Width = 18;
 
-            ws.Column(1).Width = 8;    // Sr No
-            ws.Column(2).Width = 30;   // Material Name
-            ws.Column(3).Width = 18;   // Type
-            ws.Column(4).Width = 18;   // Location
-            ws.Column(5).Width = 22;   // Category
-            ws.Column(6).Width = 22;   // Sub Category
-            ws.Column(7).Width = 18;   // Package
-            ws.Column(8).Width = 14;   // Balance
-            ws.Column(9).Width = 18;   // Total Value
-
-            // ================= EXCEL FILTER (EXCEPT SR NO) =================
             int lastCol = ws.LastColumnUsed().ColumnNumber();
 
             if (lastCol > 1)
             {
-                // filter from column 2 → last
                 ws.Range(1, 2, rowIndex - 1, lastCol)
                   .SetAutoFilter();
             }
 
-            // ================= HEADER FREEZE =================
             ws.SheetView.FreezeRows(1);
         }
-
-
-
-
-
-
-
 
         private void AllMaterial_Resize(object sender, EventArgs e)
         {
@@ -1234,28 +936,20 @@ WHERE Usage_ID = @id", con);
                 return;
 
             var cell = DgvMainTable.Rows[e.RowIndex].Cells["SelectRow"];
-
             bool current = cell.Value != null && (bool)cell.Value;
             cell.Value = !current;
-
         }
 
         private void dgv2ndTable_CellClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex < 0) return;
-
             dgv2ndTable.Rows[e.RowIndex].Selected = true;
-            if (e.RowIndex < 0) return;
-
-
         }
 
         private void DgvMainTable_CurrentCellDirtyStateChanged(object sender, EventArgs e)
         {
             if (DgvMainTable.IsCurrentCellDirty)
-            {
                 DgvMainTable.CommitEdit(DataGridViewDataErrorContexts.Commit);
-            }
         }
 
         private void DgvMainTable_CellValueChanged(object sender, DataGridViewCellEventArgs e)
@@ -1276,8 +970,8 @@ WHERE Usage_ID = @id", con);
                 selectedMaterialIds.Remove(materialId);
 
             ReorderRows();
-
         }
+
         private void ReorderRows()
         {
             var checkedRows = new List<DataGridViewRow>();
@@ -1295,18 +989,12 @@ WHERE Usage_ID = @id", con);
                     uncheckedRows.Add(row);
             }
 
-            // 🔹 Checked rows → original order preserved
             checkedRows = checkedRows
-                .OrderBy(r =>
-                    materialOriginalIndex[
-                        Convert.ToInt32(r.Cells["Material_ID"].Value)])
+                .OrderBy(r => materialOriginalIndex[Convert.ToInt32(r.Cells["Material_ID"].Value)])
                 .ToList();
 
-            // 🔹 Unchecked rows → original order preserved
             uncheckedRows = uncheckedRows
-                .OrderBy(r =>
-                    materialOriginalIndex[
-                        Convert.ToInt32(r.Cells["Material_ID"].Value)])
+                .OrderBy(r => materialOriginalIndex[Convert.ToInt32(r.Cells["Material_ID"].Value)])
                 .ToList();
 
             DgvMainTable.SuspendLayout();
@@ -1334,19 +1022,16 @@ WHERE Usage_ID = @id", con);
 
             Color bg;
 
-            // 🟢 ENOUGH STOCK
             if (balance > max)
             {
                 bg = Color.LightGreen;
                 row.Cells["Balance"].ToolTipText = "Enough stock, no need to order";
             }
-            // 🔴 LOW STOCK
             else if (balance < min)
             {
                 bg = Color.LightCoral;
                 row.Cells["Balance"].ToolTipText = "Low stock, need to order";
             }
-            // 🟡 WARNING
             else
             {
                 int warningLevel = min + (int)((max - min) * 0.3);
@@ -1363,22 +1048,17 @@ WHERE Usage_ID = @id", con);
                 }
             }
 
-            // ✅ APPLY COLOR
             row.Cells["Balance"].Style.BackColor = bg;
-
-            // 🔥 MOST IMPORTANT LINE
             row.Cells["Balance"].Style.SelectionBackColor = bg;
             row.Cells["Balance"].Style.SelectionForeColor = Color.Black;
-
         }
+
         private void RestoreOriginalOrder()
         {
             var rows = DgvMainTable.Rows
                 .Cast<DataGridViewRow>()
                 .Where(r => !r.IsNewRow)
-                .OrderBy(r =>
-                    materialOriginalIndex[
-                        Convert.ToInt32(r.Cells["Material_ID"].Value)])
+                .OrderBy(r => materialOriginalIndex[Convert.ToInt32(r.Cells["Material_ID"].Value)])
                 .ToList();
 
             DgvMainTable.SuspendLayout();
@@ -1389,6 +1069,7 @@ WHERE Usage_ID = @id", con);
 
             DgvMainTable.ResumeLayout();
         }
+
         public void ClearAllMaterialSelection()
         {
             _isBulkClearing = true;
@@ -1401,7 +1082,6 @@ WHERE Usage_ID = @id", con);
             }
 
             RestoreOriginalOrder();
-            DgvMainTable.ResumeLayout();
             _isBulkClearing = false;
         }
 
@@ -1409,7 +1089,6 @@ WHERE Usage_ID = @id", con);
         {
             if (e.RowIndex < 0) return;
 
-            // agar checkbox column nahi hai → selection block
             if (DgvMainTable.Columns[e.ColumnIndex].Name != "SelectRow")
             {
                 DgvMainTable.ClearSelection();
@@ -1418,12 +1097,13 @@ WHERE Usage_ID = @id", con);
 
         private void btnImport_Click(object sender, EventArgs e)
         {
-            var permission = GetPermission();       // ✅ ADDED
-            if (!permission.CanEdit)                // ✅ ADDED
+            var permission = GetPermission();
+            if (!permission.CanEdit)
             {
                 MessageBox.Show("Import permission denied");
                 return;
             }
+
             OpenFileDialog ofd = new OpenFileDialog
             {
                 Filter = "Excel Files (*.xlsx)|*.xlsx"
@@ -1432,6 +1112,7 @@ WHERE Usage_ID = @id", con);
             if (ofd.ShowDialog() == DialogResult.OK)
                 ImportFromExcel_AllInOne(ofd.FileName);
         }
+
         private void ImportFromExcel_AllInOne(string filePath)
         {
             try
@@ -1446,7 +1127,6 @@ WHERE Usage_ID = @id", con);
 
                 while (!ws.Cell(row, 1).IsEmpty())
                 {
-                    // ================= READ EXCEL =================
                     string materialName = ws.Cell(row, 1).GetString().Trim();
                     string type = ws.Cell(row, 2).GetString().Trim();
                     string location = ws.Cell(row, 3).GetString().Trim();
@@ -1470,7 +1150,6 @@ WHERE Usage_ID = @id", con);
                     int.TryParse(ws.Cell(row, 13).GetString(), out min);
                     int.TryParse(ws.Cell(row, 14).GetString(), out max);
 
-                    // ================= MASTER AUTO CREATE =================
                     int typeId = GetOrCreateId(
                         con,
                         "SELECT Type_ID FROM INVENTORY_MASTER..Type_Master WHERE Type_Name=@val",
@@ -1483,12 +1162,11 @@ WHERE Usage_ID = @id", con);
                         "INSERT INTO INVENTORY_MASTER..Category_Master (Category_Name) OUTPUT INSERTED.Category_ID VALUES (@val)",
                         category);
 
-                    // 🔥 SUBCATEGORY WITH CATEGORY_ID (IMPORTANT)
                     int subId;
                     using (SqlCommand chk = new SqlCommand(
                         @"SELECT Subcategory_ID 
-                  FROM INVENTORY_MASTER..Subcategory_Master
-                  WHERE Subcategory_Name=@name AND Category_ID=@catId", con))
+                          FROM INVENTORY_MASTER..Subcategory_Master
+                          WHERE Subcategory_Name=@name AND Category_ID=@catId", con))
                     {
                         chk.Parameters.AddWithValue("@name", subCategory);
                         chk.Parameters.AddWithValue("@catId", catId);
@@ -1502,9 +1180,9 @@ WHERE Usage_ID = @id", con);
                         {
                             using SqlCommand ins = new SqlCommand(
                                 @"INSERT INTO INVENTORY_MASTER..Subcategory_Master
-                          (Subcategory_Name, Category_ID)
-                          OUTPUT INSERTED.Subcategory_ID
-                          VALUES (@name, @catId)", con);
+                                  (Subcategory_Name, Category_ID)
+                                  OUTPUT INSERTED.Subcategory_ID
+                                  VALUES (@name, @catId)", con);
 
                             ins.Parameters.AddWithValue("@name", subCategory);
                             ins.Parameters.AddWithValue("@catId", catId);
@@ -1514,12 +1192,10 @@ WHERE Usage_ID = @id", con);
                     }
 
                     int pkgId;
-
-                    // 🔍 check package under same subcategory
                     using (SqlCommand chkPkg = new SqlCommand(
                         @"SELECT Package_ID
-      FROM INVENTORY_MASTER..Package_Master
-      WHERE Package_Name=@name AND Subcategory_ID=@subId", con))
+                          FROM INVENTORY_MASTER..Package_Master
+                          WHERE Package_Name=@name AND Subcategory_ID=@subId", con))
                     {
                         chkPkg.Parameters.AddWithValue("@name", package);
                         chkPkg.Parameters.AddWithValue("@subId", subId);
@@ -1534,9 +1210,9 @@ WHERE Usage_ID = @id", con);
                         {
                             using SqlCommand insPkg = new SqlCommand(
                                 @"INSERT INTO INVENTORY_MASTER..Package_Master
-              (Package_Name, Subcategory_ID)
-              OUTPUT INSERTED.Package_ID
-              VALUES (@name, @subId)", con);
+                                  (Package_Name, Subcategory_ID)
+                                  OUTPUT INSERTED.Package_ID
+                                  VALUES (@name, @subId)", con);
 
                             insPkg.Parameters.AddWithValue("@name", package);
                             insPkg.Parameters.AddWithValue("@subId", subId);
@@ -1545,8 +1221,6 @@ WHERE Usage_ID = @id", con);
                         }
                     }
 
-
-                    // ================= MATERIAL INSERT =================
                     int materialId;
                     using (SqlCommand chkMat = new SqlCommand(
                         "SELECT Material_ID FROM INVENTORY_MASTER..Material_Table WHERE Material_Name=@name", con))
@@ -1580,7 +1254,6 @@ VALUES
                         }
                     }
 
-                    // ================= USAGE INSERT =================
                     decimal balance = receipt - issued;
                     if (balance < 0) balance = 0;
 
@@ -1606,10 +1279,7 @@ VALUES
 
                     insUsage.ExecuteNonQuery();
 
-
-                    // ================= FIFO =================
                     ApplyFIFO(materialId);
-
                     row++;
                 }
 
@@ -1623,11 +1293,8 @@ VALUES
             }
         }
 
-        //EDIE/ VIEW Permission
-
         private (bool CanView, bool CanEdit) GetPermission()
         {
-            // 🔑 ADMIN BYPASS (VERY IMPORTANT)
             if (Session.RoleId == 1)
                 return (true, true);
 
@@ -1635,13 +1302,13 @@ VALUES
                 new SqlConnection(DBconection.GetConnectionString());
 
             using SqlCommand cmd = new SqlCommand(@"
-        SELECT CanView, CanEdit
-        FROM EMPLOYEE_MASTER.dbo.RoleSubModulePermissions
-        WHERE RoleId = @RoleId
-          AND SubModuleId = @SubModuleId", con);
+SELECT CanView, CanEdit
+FROM EMPLOYEE_MASTER.dbo.RoleSubModulePermissions
+WHERE RoleId = @RoleId
+  AND SubModuleId = @SubModuleId", con);
 
             cmd.Parameters.AddWithValue("@RoleId", Session.RoleId);
-            cmd.Parameters.AddWithValue("@SubModuleId", 28); // 👈 AllMaterial SubModuleId
+            cmd.Parameters.AddWithValue("@SubModuleId", 28);
 
             con.Open();
             using SqlDataReader dr = cmd.ExecuteReader();
@@ -1654,13 +1321,11 @@ VALUES
                 );
             }
 
-            // default deny
             return (false, false);
         }
 
         private void ApplyEditPermission(bool canEdit)
         {
-            // 🔒 Main grid level
             if (DgvMainTable != null)
             {
                 DgvMainTable.ReadOnly = !canEdit;
@@ -1668,7 +1333,6 @@ VALUES
                 if (DgvMainTable.Columns.Contains("SelectRow"))
                     DgvMainTable.Columns["SelectRow"].ReadOnly = !canEdit;
 
-                // ✅ FIX: canEdit=true ho toh editable columns unlock karo
                 if (canEdit && DgvMainTable.Columns.Count > 0)
                 {
                     string[] editableCols = { "Material", "Type", "Location", "Category", "SubCategory", "Package" };
@@ -1678,7 +1342,6 @@ VALUES
                             DgvMainTable.Columns[colName].ReadOnly = false;
                     }
 
-                    // Balance aur TotalValue hamesha readonly
                     if (DgvMainTable.Columns.Contains("Balance"))
                         DgvMainTable.Columns["Balance"].ReadOnly = true;
                     if (DgvMainTable.Columns.Contains("TotalValue"))
@@ -1686,11 +1349,9 @@ VALUES
                 }
             }
 
-            // 🔒 Buttons
             if (btnAddNew != null) btnAddNew.Enabled = canEdit;
             if (btnImport != null) btnImport.Enabled = canEdit;
 
-            // 🔒 Usage grid
             if (dgv2ndTable != null &&
                 dgv2ndTable.Columns.Count > 0 &&
                 dgv2ndTable.Columns.Contains("Rate"))
@@ -1704,6 +1365,7 @@ VALUES
             if (dgv2ndTable != null)
                 dgv2ndTable.DefaultCellStyle.BackColor = Color.White;
         }
+
         private void ApplyGridCursorPermission()
         {
             var permission = GetPermission();
@@ -1716,7 +1378,6 @@ VALUES
         {
             var permission = GetPermission();
             if (!permission.CanEdit) return;
-
             if (e.RowIndex < 0) return;
 
             var row = DgvMainTable.Rows[e.RowIndex];
@@ -1733,28 +1394,23 @@ VALUES
             using SqlConnection con = new SqlConnection(DBconection.GetConnectionString());
             con.Open();
 
-            // ===== TYPE =====
             int typeId = GetId(con,
                 "SELECT Type_ID FROM INVENTORY_MASTER..Type_Master WHERE Type_Name=@name",
                 typeName);
 
-            // ===== CATEGORY =====
             int categoryId = GetId(con,
                 "SELECT Category_ID FROM INVENTORY_MASTER..Category_Master WHERE Category_Name=@name",
                 categoryName);
 
-            // ===== SUBCATEGORY =====
             int subId = GetId(con,
                 "SELECT Subcategory_ID FROM INVENTORY_MASTER..Subcategory_Master WHERE Subcategory_Name=@name",
                 subCategoryName);
 
-            // ===== PACKAGE =====
             int pkgId = GetId(con,
                 "SELECT Package_ID FROM INVENTORY_MASTER..Package_Master WHERE Package_Name=@name",
                 packageName);
 
-            // ===== UPDATE =====
-            SqlCommand cmd = new SqlCommand(@"
+            using SqlCommand cmd = new SqlCommand(@"
 UPDATE INVENTORY_MASTER..Material_Table
 SET 
     Material_Name = @name,
@@ -1775,77 +1431,95 @@ WHERE Material_ID = @id", con);
 
             cmd.ExecuteNonQuery();
         }
-        private int GetId(SqlConnection con, string query, string value)
+
+        //private async void btn2ndtabledelete_Click(object sender, EventArgs e)
+        //{
+        //    var permission = GetPermission();
+        //    if (!permission.CanEdit)
+        //    {
+        //        MessageBox.Show("Delete permission denied");
+        //        return;
+        //    }
+
+        //    if (selectedMaterialId <= 0)
+        //    {
+        //        MessageBox.Show("No material selected");
+        //        return;
+        //    }
+
+        //    var confirm = MessageBox.Show(
+        //        "Are you sure you want to delete this material and all its records?",
+        //        "Confirm Delete",
+        //        MessageBoxButtons.YesNo,
+        //        MessageBoxIcon.Warning);
+
+        //    if (confirm != DialogResult.Yes)
+        //        return;
+
+        //    using SqlConnection con = new SqlConnection(DBconection.GetConnectionString());
+        //    con.Open();
+
+        //    SqlCommand cmd1 = new SqlCommand(
+        //        "DELETE FROM INVENTORY_MASTER..Usage_Table WHERE Material_ID=@id", con);
+        //    cmd1.Parameters.AddWithValue("@id", selectedMaterialId);
+        //    cmd1.ExecuteNonQuery();
+
+        //    SqlCommand cmd2 = new SqlCommand(
+        //        "DELETE FROM INVENTORY_MASTER..Material_Table WHERE Material_ID=@id", con);
+        //    cmd2.Parameters.AddWithValue("@id", selectedMaterialId);
+        //    cmd2.ExecuteNonQuery();
+
+        //    MessageBox.Show("Material deleted successfully ");
+        //    Home home = this.ParentForm as Home;
+        //    if (home == null) return;
+
+        //    await home.RunWithLoadingAsync(async () =>
+        //    {
+        //        panel2ndTable.Visible = false;
+        //        panelMainContent.Visible = true;
+        //        LoadMainGrid();
+        //        await Task.Yield();
+        //    }, 500);
+        //}
+        public async Task DeleteSelectedMaterialsAsync()
         {
-            using SqlCommand cmd = new SqlCommand(query, con);
-            cmd.Parameters.AddWithValue("@name", value);
-
-            object res = cmd.ExecuteScalar();
-
-            if (res == null)
-                throw new Exception($"Value '{value}' not found in master table");
-
-            return Convert.ToInt32(res);
-        }
-
-
-        private async void btn2ndtabledelete_Click(object sender, EventArgs e)
-        {
-
-            var permission = GetPermission();
-            if (!permission.CanEdit)
-            {
-                MessageBox.Show("Delete permission denied");
-                return;
-            }
-
-            if (selectedMaterialId <= 0)
-            {
-                MessageBox.Show("No material selected");
-                return;
-            }
-
-            var confirm = MessageBox.Show(
-                "Are you sure you want to delete this material and all its records?",
-                "Confirm Delete",
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Warning);
-
-            if (confirm != DialogResult.Yes)
-                return;
-
             using SqlConnection con = new SqlConnection(DBconection.GetConnectionString());
-            con.Open();
+            await con.OpenAsync();
 
-            // 🔥 STEP 1: Delete Usage
-            SqlCommand cmd1 = new SqlCommand(
-                "DELETE FROM INVENTORY_MASTER..Usage_Table WHERE Material_ID=@id", con);
-
-            cmd1.Parameters.AddWithValue("@id", selectedMaterialId);
-            cmd1.ExecuteNonQuery();
-
-            // 🔥 STEP 2: Delete Material
-            SqlCommand cmd2 = new SqlCommand(
-                "DELETE FROM INVENTORY_MASTER..Material_Table WHERE Material_ID=@id", con);
-
-            cmd2.Parameters.AddWithValue("@id", selectedMaterialId);
-            cmd2.ExecuteNonQuery();
-
-            MessageBox.Show("Material deleted successfully ");
-            Home home = this.ParentForm as Home;
-            if (home == null) return;
-
-            await home.RunWithLoadingAsync(async () =>
+            foreach (int matId in selectedMaterialIds)
             {
-                panel2ndTable.Visible = false;
-                panelMainContent.Visible = true;
-                MessageBox.Show("\u03A9");
+                using SqlCommand delUsage = new SqlCommand(
+                    "DELETE FROM INVENTORY_MASTER..Usage_Table WHERE Material_ID=@id", con);
+                delUsage.Parameters.AddWithValue("@id", matId);
+                await delUsage.ExecuteNonQueryAsync();
 
-                LoadMainGrid();
+                using SqlCommand delMat = new SqlCommand(
+                    "DELETE FROM INVENTORY_MASTER..Material_Table WHERE Material_ID=@id", con);
+                delMat.Parameters.AddWithValue("@id", matId);
+                await delMat.ExecuteNonQueryAsync();
+            }
 
-                await Task.Yield();
-            }, 500);
+            selectedMaterialIds.Clear();
 
+            // ⚠️ UI thread pe wapas aana zaroori hai
+            this.Invoke(() => LoadMainGrid());
+        }
+        public void SelectAllMaterials()
+        {
+            _isBulkClearing = true;
+
+            foreach (DataGridViewRow row in DgvMainTable.Rows)
+            {
+                if (row.IsNewRow || !row.Visible) continue;
+
+                int materialId = Convert.ToInt32(row.Cells["Material_ID"].Value);
+                row.Cells["SelectRow"].Value = true;
+                selectedMaterialIds.Add(materialId);
+            }
+
+            _isBulkClearing = false;
+
+            ReorderRows();
         }
     }
 }
