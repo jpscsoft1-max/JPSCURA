@@ -17,8 +17,8 @@ namespace JPSCURA
         private CancellationTokenSource pincodeCTS;
         private string gstSessionId = "";
         private CancellationTokenSource gstCTS;
-        //private const string GST_SERVER = "http://localhost:5001";
-        private const string GST_SERVER = "https://gstapi-production.up.railway.app";
+        private const string GST_SERVER = "http://localhost:5001";
+        //private const string GST_SERVER = "https://gstapi-production.up.railway.app";
 
         //private const string GST_SERVER = "https://gst-api-1258.onrender.com";
 

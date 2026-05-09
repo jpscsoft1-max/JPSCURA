@@ -29,7 +29,19 @@
         private void InitializeComponent()
         {
             panelMain = new Panel();
+            panelTerms = new Panel();
+            txtPaymentTerms = new TextBox();
+            lblPayment = new Label();
+            txtDeliveryPeriod = new TextBox();
+            lblDelivery = new Label();
+            cmbValidity = new ComboBox();
+            lblValidity = new Label();
+            dgvItems = new DataGridView();
             panelTOP = new Panel();
+            btnGenerate = new Button();
+            btnSave = new Button();
+            btnDelete = new Button();
+            btnAddRow = new Button();
             btnClear = new Button();
             tblpanelmain = new TableLayoutPanel();
             panelleft = new Panel();
@@ -63,6 +75,8 @@
             txtQuotationNo = new TextBox();
             lblQuotationNo = new Label();
             panelMain.SuspendLayout();
+            panelTerms.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)dgvItems).BeginInit();
             panelTOP.SuspendLayout();
             tblpanelmain.SuspendLayout();
             panelleft.SuspendLayout();
@@ -72,6 +86,8 @@
             // panelMain
             // 
             panelMain.BackColor = Color.FromArgb(83, 144, 204);
+            panelMain.Controls.Add(panelTerms);
+            panelMain.Controls.Add(dgvItems);
             panelMain.Controls.Add(panelTOP);
             panelMain.Controls.Add(tblpanelmain);
             panelMain.Dock = DockStyle.Fill;
@@ -80,14 +96,181 @@
             panelMain.Size = new Size(1370, 806);
             panelMain.TabIndex = 0;
             // 
+            // panelTerms
+            // 
+            panelTerms.BackColor = Color.FromArgb(83, 144, 204);
+            panelTerms.Controls.Add(txtPaymentTerms);
+            panelTerms.Controls.Add(lblPayment);
+            panelTerms.Controls.Add(txtDeliveryPeriod);
+            panelTerms.Controls.Add(lblDelivery);
+            panelTerms.Controls.Add(cmbValidity);
+            panelTerms.Controls.Add(lblValidity);
+            panelTerms.Location = new Point(3, 686);
+            panelTerms.Name = "panelTerms";
+            panelTerms.Size = new Size(400, 120);
+            panelTerms.TabIndex = 3;
+            // 
+            // txtPaymentTerms
+            // 
+            txtPaymentTerms.Location = new Point(156, 75);
+            txtPaymentTerms.Name = "txtPaymentTerms";
+            txtPaymentTerms.Size = new Size(241, 23);
+            txtPaymentTerms.TabIndex = 5;
+            // 
+            // lblPayment
+            // 
+            lblPayment.AutoSize = true;
+            lblPayment.Font = new Font("Arial", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            lblPayment.ForeColor = Color.White;
+            lblPayment.Location = new Point(9, 75);
+            lblPayment.Name = "lblPayment";
+            lblPayment.Size = new Size(86, 19);
+            lblPayment.TabIndex = 4;
+            lblPayment.Text = "Payment :";
+            // 
+            // txtDeliveryPeriod
+            // 
+            txtDeliveryPeriod.Location = new Point(156, 41);
+            txtDeliveryPeriod.Name = "txtDeliveryPeriod";
+            txtDeliveryPeriod.Size = new Size(241, 23);
+            txtDeliveryPeriod.TabIndex = 3;
+            // 
+            // lblDelivery
+            // 
+            lblDelivery.AutoSize = true;
+            lblDelivery.Font = new Font("Arial", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            lblDelivery.ForeColor = Color.White;
+            lblDelivery.Location = new Point(9, 45);
+            lblDelivery.Name = "lblDelivery";
+            lblDelivery.Size = new Size(134, 19);
+            lblDelivery.TabIndex = 2;
+            lblDelivery.Text = "Delivery period :";
+            // 
+            // cmbValidity
+            // 
+            cmbValidity.BackColor = Color.White;
+            cmbValidity.DropDownStyle = ComboBoxStyle.DropDownList;
+            cmbValidity.FormattingEnabled = true;
+            cmbValidity.Location = new Point(156, 8);
+            cmbValidity.Name = "cmbValidity";
+            cmbValidity.Size = new Size(241, 23);
+            cmbValidity.TabIndex = 1;
+            // 
+            // lblValidity
+            // 
+            lblValidity.AutoSize = true;
+            lblValidity.Font = new Font("Arial", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            lblValidity.ForeColor = Color.White;
+            lblValidity.Location = new Point(9, 12);
+            lblValidity.Name = "lblValidity";
+            lblValidity.Size = new Size(74, 19);
+            lblValidity.TabIndex = 0;
+            lblValidity.Text = "Validity :";
+            // 
+            // dgvItems
+            // 
+            dgvItems.AllowUserToAddRows = false;
+            dgvItems.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dgvItems.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dgvItems.Location = new Point(9, 371);
+            dgvItems.Name = "dgvItems";
+            dgvItems.RowHeadersVisible = false;
+            dgvItems.Size = new Size(1358, 150);
+            dgvItems.TabIndex = 2;
+            // 
             // panelTOP
             // 
+            panelTOP.Controls.Add(btnGenerate);
+            panelTOP.Controls.Add(btnSave);
+            panelTOP.Controls.Add(btnDelete);
+            panelTOP.Controls.Add(btnAddRow);
             panelTOP.Controls.Add(btnClear);
             panelTOP.Dock = DockStyle.Top;
-            panelTOP.Location = new Point(0, 350);
+            panelTOP.Location = new Point(0, 315);
             panelTOP.Name = "panelTOP";
             panelTOP.Size = new Size(1370, 50);
             panelTOP.TabIndex = 1;
+            // 
+            // btnGenerate
+            // 
+            btnGenerate.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnGenerate.BackColor = Color.White;
+            btnGenerate.Cursor = Cursors.Hand;
+            btnGenerate.FlatAppearance.BorderSize = 0;
+            btnGenerate.FlatAppearance.MouseDownBackColor = Color.Red;
+            btnGenerate.FlatAppearance.MouseOverBackColor = Color.Red;
+            btnGenerate.Font = new Font("Arial", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            btnGenerate.ForeColor = Color.SandyBrown;
+            btnGenerate.Location = new Point(931, 10);
+            btnGenerate.Margin = new Padding(3, 2, 3, 2);
+            btnGenerate.Name = "btnGenerate";
+            btnGenerate.Size = new Size(141, 29);
+            btnGenerate.TabIndex = 35;
+            btnGenerate.Text = "Generate";
+            btnGenerate.UseVisualStyleBackColor = false;
+            btnGenerate.Click += btnGenerate_Click;
+            // 
+            // btnSave
+            // 
+            btnSave.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnSave.AutoSize = true;
+            btnSave.BackColor = Color.White;
+            btnSave.Cursor = Cursors.Hand;
+            btnSave.FlatAppearance.BorderSize = 0;
+            btnSave.FlatAppearance.MouseDownBackColor = Color.Honeydew;
+            btnSave.FlatAppearance.MouseOverBackColor = Color.Lime;
+            btnSave.FlatStyle = FlatStyle.Flat;
+            btnSave.Font = new Font("Arial", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            btnSave.ForeColor = Color.FromArgb(64, 64, 64);
+            btnSave.Image = Properties.Resources.save;
+            btnSave.ImageAlign = ContentAlignment.MiddleLeft;
+            btnSave.Location = new Point(843, 10);
+            btnSave.Margin = new Padding(3, 2, 3, 2);
+            btnSave.Name = "btnSave";
+            btnSave.Size = new Size(72, 29);
+            btnSave.TabIndex = 34;
+            btnSave.Text = "Save";
+            btnSave.TextAlign = ContentAlignment.MiddleRight;
+            btnSave.UseVisualStyleBackColor = false;
+            btnSave.Click += btnSave_Click;
+            // 
+            // btnDelete
+            // 
+            btnDelete.Anchor = AnchorStyles.Right;
+            btnDelete.BackColor = Color.White;
+            btnDelete.Cursor = Cursors.Hand;
+            btnDelete.FlatAppearance.BorderSize = 0;
+            btnDelete.FlatAppearance.MouseDownBackColor = Color.Red;
+            btnDelete.FlatAppearance.MouseOverBackColor = Color.Red;
+            btnDelete.Font = new Font("Arial", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            btnDelete.ForeColor = Color.Red;
+            btnDelete.Location = new Point(1079, 10);
+            btnDelete.Margin = new Padding(3, 2, 3, 2);
+            btnDelete.Name = "btnDelete";
+            btnDelete.Size = new Size(141, 29);
+            btnDelete.TabIndex = 33;
+            btnDelete.Text = "Delete";
+            btnDelete.UseVisualStyleBackColor = false;
+            btnDelete.Click += btnDelete_Click;
+            // 
+            // btnAddRow
+            // 
+            btnAddRow.Anchor = AnchorStyles.Right;
+            btnAddRow.BackColor = Color.White;
+            btnAddRow.Cursor = Cursors.Hand;
+            btnAddRow.FlatAppearance.BorderSize = 0;
+            btnAddRow.FlatAppearance.MouseDownBackColor = Color.Red;
+            btnAddRow.FlatAppearance.MouseOverBackColor = Color.Red;
+            btnAddRow.Font = new Font("Arial", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            btnAddRow.ForeColor = Color.SeaGreen;
+            btnAddRow.Location = new Point(1226, 10);
+            btnAddRow.Margin = new Padding(3, 2, 3, 2);
+            btnAddRow.Name = "btnAddRow";
+            btnAddRow.Size = new Size(141, 29);
+            btnAddRow.TabIndex = 32;
+            btnAddRow.Text = "Add New Row";
+            btnAddRow.UseVisualStyleBackColor = false;
+            btnAddRow.Click += btnAddRow_Click;
             // 
             // btnClear
             // 
@@ -100,7 +283,7 @@
             btnClear.FlatStyle = FlatStyle.Flat;
             btnClear.Font = new Font("Arial", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
             btnClear.ForeColor = Color.SeaShell;
-            btnClear.Location = new Point(615, 10);
+            btnClear.Location = new Point(531, 10);
             btnClear.Margin = new Padding(3, 2, 3, 2);
             btnClear.Name = "btnClear";
             btnClear.Size = new Size(141, 29);
@@ -122,7 +305,7 @@
             tblpanelmain.RowCount = 1;
             tblpanelmain.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
             tblpanelmain.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
-            tblpanelmain.Size = new Size(1370, 350);
+            tblpanelmain.Size = new Size(1370, 315);
             tblpanelmain.TabIndex = 0;
             // 
             // panelleft
@@ -144,7 +327,7 @@
             panelleft.Dock = DockStyle.Top;
             panelleft.Location = new Point(3, 3);
             panelleft.Name = "panelleft";
-            panelleft.Size = new Size(679, 344);
+            panelleft.Size = new Size(679, 309);
             panelleft.TabIndex = 0;
             // 
             // txtCity
@@ -319,7 +502,7 @@
             panelright.Dock = DockStyle.Top;
             panelright.Location = new Point(688, 3);
             panelright.Name = "panelright";
-            panelright.Size = new Size(679, 344);
+            panelright.Size = new Size(679, 309);
             panelright.TabIndex = 1;
             // 
             // txtShipCity
@@ -409,7 +592,6 @@
             rdoPAN.TabStop = true;
             rdoPAN.Text = "PAN No";
             rdoPAN.UseVisualStyleBackColor = true;
-            rdoPAN.CheckedChanged += rdoPAN_CheckedChanged;
             // 
             // txtShipAddressLine1
             // 
@@ -438,7 +620,6 @@
             rdoGST.TabStop = true;
             rdoGST.Text = "GST No";
             rdoGST.UseVisualStyleBackColor = true;
-            rdoGST.CheckedChanged += rdoGST_CheckedChanged;
             // 
             // lblCustShippingaddress
             // 
@@ -468,7 +649,7 @@
             lblGST.AutoSize = true;
             lblGST.Font = new Font("Arial", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
             lblGST.ForeColor = Color.White;
-            lblGST.Location = new Point(3, 65);
+            lblGST.Location = new Point(7, 65);
             lblGST.Name = "lblGST";
             lblGST.Size = new Size(52, 19);
             lblGST.TabIndex = 3;
@@ -489,11 +670,11 @@
             lblQuotationNo.AutoSize = true;
             lblQuotationNo.Font = new Font("Arial", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
             lblQuotationNo.ForeColor = Color.White;
-            lblQuotationNo.Location = new Point(3, 22);
+            lblQuotationNo.Location = new Point(4, 22);
             lblQuotationNo.Name = "lblQuotationNo";
-            lblQuotationNo.Size = new Size(129, 19);
+            lblQuotationNo.Size = new Size(120, 19);
             lblQuotationNo.TabIndex = 1;
-            lblQuotationNo.Text = "Quoatation No :";
+            lblQuotationNo.Text = "Quotation No :";
             // 
             // SalesQuote2ndpage
             // 
@@ -507,7 +688,11 @@
             Text = "SalesQuote2ndpage";
             Load += SalesQuote2ndpage_Load;
             panelMain.ResumeLayout(false);
+            panelTerms.ResumeLayout(false);
+            panelTerms.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)dgvItems).EndInit();
             panelTOP.ResumeLayout(false);
+            panelTOP.PerformLayout();
             tblpanelmain.ResumeLayout(false);
             panelleft.ResumeLayout(false);
             panelleft.PerformLayout();
@@ -552,5 +737,17 @@
         private TextBox txtShipAddressLine1;
         private Label lblCustShippingaddress;
         private Button btnClear;
+        private DataGridView dgvItems;
+        private Button btnAddRow;
+        private Button btnDelete;
+        private Panel panelTerms;
+        private TextBox txtPaymentTerms;
+        private Label lblPayment;
+        private TextBox txtDeliveryPeriod;
+        private Label lblDelivery;
+        private ComboBox cmbValidity;
+        private Label lblValidity;
+        private Button btnGenerate;
+        private Button btnSave;
     }
 }
